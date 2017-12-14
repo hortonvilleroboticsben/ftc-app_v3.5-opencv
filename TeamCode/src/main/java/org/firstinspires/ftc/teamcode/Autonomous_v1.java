@@ -54,11 +54,10 @@ public class Autonomous_v1 extends StateMachine_v5 {
 
     @Override
     public void init() {
+        initializeVision();
         super.init();
         mtrLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         mtrRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-
     }
 
     public void init_loop() {
@@ -101,7 +100,6 @@ public class Autonomous_v1 extends StateMachine_v5 {
 
     @Override
     public void loop() {
-        RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
         initializeMachine(dt);
         initializeMachine(glyph);
         initializeMachine(arm);
@@ -364,5 +362,7 @@ public class Autonomous_v1 extends StateMachine_v5 {
 //        telemetry.addData("dt", dt.toString());
 //        telemetry.addData("arm", arm.toString());
 //        telemetry.addData("glyph", glyph.toString());
+        telemetry.addData("pattern", vuMark.toString());
+        telemetry.addData("ballPattern", Arrays.toString(ballArray));
     }
 }

@@ -75,7 +75,7 @@ public class OpenCV extends OpMode {
 
         vuforia.setFrameQueueCapacity(1);
 
-        Looper.prepare();
+        if(Looper.myLooper() == null) Looper.prepare();
 
         Context c = hardwareMap.appContext;
 
