@@ -1,0 +1,17 @@
+Executable : C:\Android\sdk\ndk-bundle\ndk-build.cmd
+arguments : 
+NDK_PROJECT_PATH=null
+APP_BUILD_SCRIPT=C:\Users\Hortonville\AndroidStudioProjects\ftc_app-try2\TeamCode\jni\Android.mk
+NDK_APPLICATION_MK=C:\Users\Hortonville\AndroidStudioProjects\ftc_app-try2\TeamCode\jni\Application.mk
+APP_ABI=x86
+NDK_ALL_ABIS=x86
+NDK_DEBUG=1
+APP_PLATFORM=android-19
+NDK_OUT=C:/Users/Hortonville/AndroidStudioProjects/ftc_app-try2/openCVLibrary330/build/intermediates/ndkBuild/debug/obj
+NDK_LIBS_OUT=C:\Users\Hortonville\AndroidStudioProjects\ftc_app-try2\openCVLibrary330\build\intermediates\ndkBuild\debug\lib
+APP_SHORT_COMMANDS=false
+LOCAL_SHORT_COMMANDS=false
+-B
+-n
+jvmArgs : 
+
