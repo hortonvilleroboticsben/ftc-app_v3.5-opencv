@@ -141,6 +141,7 @@ public class OpenCV extends OpMode {
 
             try {
                 tmp = new Mat(rgb.getWidth(), rgb.getHeight(), CvType.CV_8UC4);
+
             }catch (Exception e){
                 e.printStackTrace();
             }
