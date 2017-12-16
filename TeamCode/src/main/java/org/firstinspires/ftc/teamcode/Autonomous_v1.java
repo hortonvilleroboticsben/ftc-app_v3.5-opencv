@@ -193,10 +193,10 @@ public class Autonomous_v1 extends StateMachine_v5 {
                     Drive(dt,-3,0.2);//Decreased it from -4.5;
                     SetFlag(dt,vision,"canrun");
 
+                    ProcessRelic(vision);
                     WaitForFlag(vision,"canrun");
                     Pause(vision,100);
-                    //ProcessJewels(vision, vuforiaFrameToMat());
-                    ProcessRelic(vision);
+                    ProcessJewels(vision, vuforiaFrameToMat());
 
 //                    Pause(dt, 1600);
 //                    SetFlag(dt, arm, "off platform");
@@ -370,10 +370,11 @@ public class Autonomous_v1 extends StateMachine_v5 {
                     Drive(dt,-3.5,0.2);//Decreased it from -4.5;
                     SetFlag(dt,vision,"canrun");
 
+                    ProcessRelic(vision);
                     WaitForFlag(vision,"canrun");
                     Pause(vision,100);
-                    //ProcessJewels(vision, vuforiaFrameToMat());
-                    ProcessRelic(vision);
+                    ProcessJewels(vision, vuforiaFrameToMat());
+
 
 //                    Pause(dt, 1600);
 //                    SetFlag(dt, arm, "off platform");
