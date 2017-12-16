@@ -37,6 +37,7 @@ import org.opencv.imgproc.Imgproc;
 import org.opencv.imgproc.Moments;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -407,19 +408,15 @@ class StateMachine_v5 extends Subroutines_v13 {
         return Integer.parseInt(brokenString);
     }
 
-    void processRelic(StateMachine_v5 o) {
+    void ProcessRelic(StateMachine_v5 o) {
         if (next_state_to_execute(o)) {
-            try {
-                vuMark = RelicRecoveryVuMark.from(relicTemplate);
-                //telemetry.addData("vuMark", vuMark);
-                incrementState(o);
-            } catch (Exception e) {
-                System.out.println(e);
-            }
+            vuMark = RelicRecoveryVuMark.from(relicTemplate);
+            telemetry.addData("vuMark", vuMark);
+            if(vuMark != RelicRecoveryVuMark.UNKNOWN) incrementState(o);
         }
     }
 
-    void processJewels(StateMachine_v5 o, Mat m) {
+    void ProcessJewels(StateMachine_v5 o, Mat m) {
         if (next_state_to_execute(o)) {
             int height = m.height();
             int width = m.width();
@@ -430,14 +427,11 @@ class StateMachine_v5 extends Subroutines_v13 {
             Point centerROI;
 
             Scalar mBlobColorRgba;
-            Scalar mBlobColorHsv;
 
             ColorBlobDetector mDetectorRed;
             ColorBlobDetector mDetectorBlue;
 
             Mat mSpectrumRed;
-            Mat mSpectrumBlue;
-            Size SPECTRUM_SIZE;
 
             Scalar CONTOUR_COLOR_RED;
             Scalar CONTOUR_COLOR_BLUE;
@@ -446,7 +440,7 @@ class StateMachine_v5 extends Subroutines_v13 {
 
             mRgba = new Mat(height, width, CvType.CV_8UC4);
 
-            rROI = new Rect((int) width / 3, (int) height / 3, (int) width / 3, (int) height / 3);
+            rROI = new Rect((int) width / 3, (int)height / 3, (int) width / 3, (int) height / 3);
             centerROI = new Point(rROI.width / 2, rROI.height / 2);
             mROI = new Mat(mRgba, rROI);
 
@@ -456,11 +450,8 @@ class StateMachine_v5 extends Subroutines_v13 {
             mDetectorBlue = new ColorBlobDetector();
 
             mSpectrumRed = new Mat();
-            mSpectrumBlue = new Mat();
 
             mBlobColorRgba = new Scalar(255);
-
-            SPECTRUM_SIZE = new Size(200, 64);
 
             CONTOUR_COLOR_RED = new Scalar(255, 0, 0, 255);
             CONTOUR_COLOR_BLUE = new Scalar(0, 0, 255, 255);
@@ -502,8 +493,7 @@ class StateMachine_v5 extends Subroutines_v13 {
 
             float[] radiusRed = new float[contoursRed.size()];
 //TODO
-            //for (int i = 0; i < contoursRed.size(); i++) {
-            int i = 0;
+            for (int i = 0; i < contoursRed.size(); i++) {
             Point centerRed = new Point();
             muRed.add(i, Imgproc.moments(contoursRed.get(i), false));
 
@@ -529,7 +519,7 @@ class StateMachine_v5 extends Subroutines_v13 {
                 }
             }
 
-            //}
+            }
             if (centerRedBest != null) {
                 Imgproc.circle(mRgba, new Point(centerRedBest.x + rROI.x, centerRedBest.y + rROI.y), (int) radiusRedBest, CONTOUR_COLOR_RED, 16);
             }
@@ -543,8 +533,8 @@ class StateMachine_v5 extends Subroutines_v13 {
 
             float[] radiusBlue = new float[contoursBlue.size()];
 
-            //for (int i = 0; i < contoursBlue.size(); i++) {
-            i = 0;
+            for (int i = 0; i < contoursBlue.size(); i++) {
+
             Point centerBlue = new Point();
             muBlue.add(i, Imgproc.moments(contoursBlue.get(i), false));
 
@@ -569,7 +559,7 @@ class StateMachine_v5 extends Subroutines_v13 {
                     radiusBlueBest = radiusBlue[0];
                 }
             }
-            //}
+            }
             if (centerBlueBest != null) {
                 Imgproc.circle(mRgba, new Point(centerBlueBest.x + rROI.x, centerBlueBest.y + rROI.y), (int) radiusBlueBest, CONTOUR_COLOR_BLUE, 16);
             }
@@ -580,20 +570,21 @@ class StateMachine_v5 extends Subroutines_v13 {
 
             if (centerRedBest != null && centerBlueBest != null) {
                 message = "";
-                if (centerBlueBest.x < centerRedBest.x) {
+                if (centerBlueBest.y < centerRedBest.y) {
                     ballArray[0] = BallColor.BLUE;
                     ballArray[1] = BallColor.RED;
                 } else {
                     ballArray[0] = BallColor.RED;
                     ballArray[1] = BallColor.BLUE;
                 }
-                //telemetry.addData("balls", message);
+                telemetry.addData("balls", Arrays.toString(ballArray));
                 Log.e(ConceptVuMarkIdentification.TAG, message);
+                incrementState(o);
             }
 
 
             Imgproc.rectangle(mRgba, new Point(rROI.x, rROI.y), new Point(rROI.x + rROI.width, rROI.y + rROI.height), ROI_COLOR, 16);
-
+            //writeImage(mRgba);
 
         }
     }

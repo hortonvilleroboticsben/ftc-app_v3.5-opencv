@@ -35,6 +35,7 @@ import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.Core;
+import org.opencv.core.CvException;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
@@ -72,11 +73,11 @@ class Subroutines_v13 extends OpMode {
 
     final double GR1CLOSED = 0.143;
     final double GR1OPEN = 0.45;
-    final double GR2CLOSED = .383;
+    final double GR2CLOSED = .418;
     final double GR2OPEN = 0.7;
 
-    VuforiaLocalizer vuforia;
-    VuforiaTrackable relicTemplate;
+    static VuforiaLocalizer vuforia;
+    static VuforiaTrackable relicTemplate;
 
     Image rgb = null;
     VuforiaLocalizer.CloseableFrame frame = null;
@@ -550,6 +551,34 @@ class Subroutines_v13 extends OpMode {
         return fileName[locationY][locationX];
     }
 
+//    public void writeImage(Mat mt) {
+//        Bitmap bmp = null;
+//        try {
+//            bmp = Bitmap.createBitmap(mt.cols(),mt.rows(),Bitmap.Config.ARGB_8888);
+//            Utils.matToBitmap(mt,bmp);
+//        } catch(CvException e) {
+//            Log.d(TAG,e.getMessage());
+//        }
+//        FileOutputStream fo = null;
+//        String fileName = "test.png";
+//
+//        File folder = new File(Environment.getExternalStorageDirectory() + "/testWrite");
+//
+//        File dest = new File(folder,fileName);
+//        try {
+//            fo = new FileOutputStream(dest);
+//            bmp.compress(Bitmap.CompressFormat.PNG, 100, fo);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        } finally {
+//            try {
+//                if(fo != null) fo.close();
+//            } catch(IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//    }
+
     public void writeToFile(String data) {
 
         File folder = new File(Environment.getExternalStorageDirectory() + "/testWrite");
@@ -657,6 +686,8 @@ class Subroutines_v13 extends OpMode {
         vuforia.setFrameQueueCapacity(1);
     }
 
+
+
     void initializeOpenCV() {
         if (Looper.myLooper() == null) Looper.prepare();
 
@@ -697,12 +728,11 @@ class Subroutines_v13 extends OpMode {
     Mat vuforiaFrameToMat() {
         VuforiaLocalizer.CloseableFrame frame = null;
         try {
-            if (vuforia.getFrameQueue().size() >= 1)
+            long totalFrame = 0;
+            if (vuforia.getFrameQueue().size() >= 1){
                 frame = vuforia.getFrameQueue().take();
-
-
-            RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
-            long totalFrame = frame.getNumImages();
+                totalFrame = frame.getNumImages();
+            }
 
             Image rgb = null;
 
@@ -713,21 +743,28 @@ class Subroutines_v13 extends OpMode {
                 counter++;
             }
 
-            Bitmap bm = Bitmap.createBitmap(rgb.getWidth(), rgb.getHeight(), Bitmap.Config.RGB_565);
+            Bitmap bm = null;
+
+            if(rgb != null) bm = Bitmap.createBitmap(rgb.getWidth(), rgb.getHeight(), Bitmap.Config.RGB_565);
+            else return new Mat(700,1280,CvType.CV_8UC4);
             bm.copyPixelsFromBuffer(rgb.getPixels());
 
 
-            Mat tmp = new Mat();
+            Mat tmp;
 
             tmp = new Mat(rgb.getWidth(), rgb.getHeight(), CvType.CV_8UC4);
 
             Utils.bitmapToMat(bm, tmp);
 
             return tmp;
+
+
+
+
         } catch (Exception e) {
             e.printStackTrace();
+            return new Mat(700, 1200, CvType.CV_8UC4);
         }
-        return null;
     }
 
     double distance(Point center, Point check) {

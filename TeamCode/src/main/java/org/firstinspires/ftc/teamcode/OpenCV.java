@@ -253,7 +253,7 @@ public class OpenCV extends OpMode {
             float[] radiusRed = new float[contoursRed.size()];
 //TODO
             //for (int i = 0; i < contoursRed.size(); i++) {
-            int i = 0;
+int i = 0;
             Point centerRed = new Point();
             muRed.add(i, Imgproc.moments(contoursRed.get(i), false));
 
@@ -279,7 +279,7 @@ public class OpenCV extends OpMode {
                 }
             }
 
-            //}
+           // }
             if (centerRedBest != null) {
                 Imgproc.circle(mRgba, new Point(centerRedBest.x + rROI.x, centerRedBest.y + rROI.y), (int) radiusRedBest, CONTOUR_COLOR_RED, 16);
             }
@@ -330,7 +330,7 @@ public class OpenCV extends OpMode {
 
             if (centerRedBest != null && centerBlueBest != null) {
                 message = "";
-                if (centerBlueBest.x < centerRedBest.x) {
+                if (centerBlueBest.y < centerRedBest.y) {
                     message = "Blue, Red";
                 } else {
                     message = "Red ,Blue";
