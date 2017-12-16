@@ -41,7 +41,7 @@ public class TeleOp_V1 extends StateMachine_v5 {
     boolean flipOS = true;
 
     boolean balanceOS = false;
-    boolean isBalancing = true;
+    boolean isBalancing = false;
 
     boolean gr1OS = false;
 
@@ -55,7 +55,7 @@ public class TeleOp_V1 extends StateMachine_v5 {
     @Override
     public void init() {
         super.init();
-        telemetry.addData("mtrLeft", mtrLeftDrive.getMode());
+        if(mtrLeftDrive != null)telemetry.addData("mtrLeft", mtrLeftDrive.getMode());
         srvP = addServo(0, "srvP");
         srvC = addCRServo("srvC");
         run_using_encoder(mtrArmFlip);
@@ -69,7 +69,7 @@ public class TeleOp_V1 extends StateMachine_v5 {
 
     @Override
     public void loop() {
-        axes = IMUnav.getAngularOrientation(AxesReference.EXTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES);
+        axes = (IMUnav != null) ? IMUnav.getAngularOrientation(AxesReference.EXTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES) : null;
 
         double pos = Math.abs(((get_encoder_count(mtrArmFlip) * 360 / 1700.)) / 360.);
         pos += adjustment;
@@ -102,8 +102,7 @@ public class TeleOp_V1 extends StateMachine_v5 {
 
         set_position(srvExtend, gamepad2.dpad_up ? 1 : gamepad2.dpad_down ? -1 : 0);
 
-        snsColorLeft.enableLed(!gamepad1.guide);
-        snsColorRight.enableLed(!gamepad1.guide);
+
 
         set_position(srvGr1, (gamepad2.right_trigger >= .5) ? GR1OPEN : GR1CLOSED);
 //        if(gamepad2.right_bumper && !gr1OS) {
@@ -237,11 +236,11 @@ public class TeleOp_V1 extends StateMachine_v5 {
 //        telemetry.addData("LiftTarget", mtrLift.getTargetPosition());
 //        telemetry.addData("FlipEnc", get_encoder_count(mtrArmFlip));
 //        telemetry.addData("SrvLevel", get_servo_position(srvLevel));
-        telemetry.addData("rightblue", snsColorRight.blue());
-        telemetry.addData("rightargb",snsColorRight.argb());
-        telemetry.addData("rightred", snsColorRight.red());
-        telemetry.addData("leftblue",snsColorLeft.blue());
-        telemetry.addData("leftargb",snsColorLeft.argb());
-        telemetry.addData("leftred",snsColorLeft.red());
+//        telemetry.addData("rightblue", snsColorRight.blue());
+//        telemetry.addData("rightargb",snsColorRight.argb());
+//        telemetry.addData("rightred", snsColorRight.red());
+//        telemetry.addData("leftblue",snsColorLeft.blue());
+//        telemetry.addData("leftargb",snsColorLeft.argb());
+//        telemetry.addData("leftred",snsColorLeft.red());
     }
 }

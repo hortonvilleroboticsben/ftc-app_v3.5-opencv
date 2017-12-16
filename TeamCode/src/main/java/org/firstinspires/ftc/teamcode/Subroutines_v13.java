@@ -743,17 +743,18 @@ class Subroutines_v13 extends OpMode {
                 counter++;
             }
 
-            Bitmap bm = Bitmap.createBitmap(rgb.getWidth(), rgb.getHeight(), Bitmap.Config.RGB_565);
+            Bitmap bm = null;
+
+            if(rgb != null) bm = Bitmap.createBitmap(rgb.getWidth(), rgb.getHeight(), Bitmap.Config.RGB_565);
+            else return new Mat(700,1280,CvType.CV_8UC4);
             bm.copyPixelsFromBuffer(rgb.getPixels());
 
 
-            Mat tmp = new Mat();
+            Mat tmp;
 
             tmp = new Mat(rgb.getWidth(), rgb.getHeight(), CvType.CV_8UC4);
 
             Utils.bitmapToMat(bm, tmp);
-
-            frame.close();
 
             return tmp;
 
@@ -762,9 +763,7 @@ class Subroutines_v13 extends OpMode {
 
         } catch (Exception e) {
             e.printStackTrace();
-        }
-        finally {
-            return new Mat(3, 3, CvType.CV_8UC4);
+            return new Mat(700, 1200, CvType.CV_8UC4);
         }
     }
 

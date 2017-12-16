@@ -440,7 +440,7 @@ class StateMachine_v5 extends Subroutines_v13 {
 
             mRgba = new Mat(height, width, CvType.CV_8UC4);
 
-            rROI = new Rect((int) width / 3, (int) height / 3, (int) width / 3, (int) height / 3);
+            rROI = new Rect((int) width / 3, (int)height / 3, (int) width / 3, (int) height / 3);
             centerROI = new Point(rROI.width / 2, rROI.height / 2);
             mROI = new Mat(mRgba, rROI);
 
@@ -570,7 +570,7 @@ class StateMachine_v5 extends Subroutines_v13 {
 
             if (centerRedBest != null && centerBlueBest != null) {
                 message = "";
-                if (centerBlueBest.x < centerRedBest.x) {
+                if (centerBlueBest.y < centerRedBest.y) {
                     ballArray[0] = BallColor.BLUE;
                     ballArray[1] = BallColor.RED;
                 } else {

@@ -51,6 +51,7 @@ public class Autonomous_v1 extends StateMachine_v5 {
     final double CLAW_OPEN = 1;
     final double CLAW_HALF = .4;
     final double CLAW_CLOSE = .1;
+    final double GR2END = .6;
 
 
     byte Alliance = 0;
@@ -137,20 +138,20 @@ public class Autonomous_v1 extends StateMachine_v5 {
         switch (question_number) {
             case 1:
                 telemetry.addData("Alliance: a=blue b=red", "");
-                if ((gamepad1.a || gamepad1.b) && btnOS == false) {
+                if ((gamepad1.a || gamepad1.b) && !gamepad1.start && btnOS == false) {
                     Alliance = (gamepad1.a) ? BLUE : RED;
                     btnOS = true;
-                } else if (!gamepad1.a && !gamepad1.b && btnOS == true) {
+                } else if (!gamepad1.a && !gamepad1.b && !gamepad1.start && btnOS == true) {
                     btnOS = false;
                     question_number++;
                 }
                 break;
             case 2:
                 telemetry.addData("StartPos: a=1 b=2", "");
-                if ((gamepad1.a || gamepad1.b) && btnOS == false) {
+                if ((gamepad1.a || gamepad1.b) && !gamepad1.start && btnOS == false) {
                     StartPos = (gamepad1.a) ? 1 : 2;
                     btnOS = true;
-                } else if (!gamepad1.a && !gamepad1.b && btnOS == true) {
+                } else if (!gamepad1.a && !gamepad1.b && !gamepad1.start && btnOS == true) {
                     btnOS = false;
                     question_number++;
                 }
@@ -177,162 +178,179 @@ public class Autonomous_v1 extends StateMachine_v5 {
         pos = pos >= 1 ? 1 : pos;
         pos = pos <= 0 ? 0 : pos;
         set_position(srvLevel, pos);
-        set_position(srvGr2,GR2CLOSED);
+        set_position(srvGr2,gr2Pos);
 
         //TODO:Scan pictograph and ball colors
         if (Alliance == BLUE) {
             if (StartPos == 1) {
                 try {
 
-                    Pause(glyph, 150);
                     MotorMove(glyph, mtrLift, 1400, 0.3);
 
                     Pause(dt, 600);
                     Drive(dt, 24, 0.2);
                     Pause(dt,250);
-                    Drive(dt,-4.5,0.2);
+                    Drive(dt,-3,0.2);//Decreased it from -4.5;
                     SetFlag(dt,vision,"canrun");
 
                     WaitForFlag(vision,"canrun");
                     Pause(vision,100);
-                    ProcessJewels(vision, vuforiaFrameToMat());
+                    //ProcessJewels(vision, vuforiaFrameToMat());
                     ProcessRelic(vision);
 
-                    Pause(dt, 1600);
-                    SetFlag(dt, arm, "off platform");
-                    SetFlag(dt, glyph, "off platform");
-                    Drive(dt,6,0.2);
-                    Turn(dt, -160, 0.2);
-                    GyroTurn(dt,175, 0.06);
-                    //GyroTurn(dt,5,0.1);
-                    Drive(dt, 3.5, 0.2);
-                    if(next_state_to_execute(dt)) {
-                        adjustment = -1;
-                        incrementState(dt);
-                    }
-                    FlipArm(dt, -1300, 0.21);
-                    if(next_state_to_execute(dt)) {
-                        adjustment = 0;
-                        incrementState(dt);
-                    }
-                    FlipArm(dt,-1600,0.21);
-                    SetFlag(dt, arm, "extended");
-                    //Drive(dt, 3, 0.2);
-
-                    WaitForFlag(arm, "off platform");
-                    MotorMove(arm, mtrArmSpin, (int) (1680 * 4.75 * .3905), 0.2);
-                    ServoMove(arm, srvExtend, .95);
-                    Pause(arm, 4010);
-                    SetFlag(arm, glyph, "extended");
-                    WaitForFlag(arm, "extended");
-                    if (ballArray != null) {
-                        if (ballArray[0].equals(BallColor.RED)) {
-                            MotorMove(arm, mtrArmSpin, (int) (1680 * 4.75 * .05), 0.5);
-                            Pause(arm, 500);
-                            if(next_state_to_execute(arm)) {
-                                set_position(srvClaw,CLAW_CLOSE);
-                                adjustment = -1;
-                                incrementState(arm);
-                            }
-                            MotorMove(arm, mtrArmSpin, (int) (1680 * 4.75 * -.04), 0.2);
-                        } else {
-                            MotorMove(arm, mtrArmSpin, (int) (1680 * 4.75 * -.05), 0.5);
-                            Pause(arm, 500);
-                            if(next_state_to_execute(arm)) {
-                                set_position(srvClaw,CLAW_CLOSE);
-                                adjustment = -1;
-                                incrementState(arm);
-                            }
-                            MotorMove(arm, mtrArmSpin, (int) (1680 * 4.75 * .04), 0.2);
-                        }
-                        Pause(arm, 1000);
-                        //SetFlag(arm,glyph,"start moving");
-                        FlipArm(arm, 0, -.2);
-                        ServoMove(arm, srvExtend, 0);
-
-                        WaitForFlag(glyph, "off platform");
-                        Pause(glyph, 600);
-                        ServoMove(glyph, srvExtend, 0.25);
-                        WaitForFlag(glyph, "extended");
-                        if (next_state_to_execute(glyph)) {
-                            adjustment += .5;
-                            incrementState(glyph);
-                        }
-                    }
-                    //WaitForFlag(glyph,"start moving");
-                    ServoMove(glyph, srvClaw, CLAW_HALF);
-
-                    //TODO:Add hitting logic
-                    //TODO:Remove this (just testing)
-
-                    //Pause(arm, 5000);
-                    if (next_state_to_execute(arm)) {
-                        SetFlag(new StateMachine_v5(), dt, "hit");
-                        SetFlag(new StateMachine_v5(), arm, "hit");
-                        SetFlag(new StateMachine_v5(), glyph, "hit");
-                        incrementState(arm);
-                    }
-
-                    WaitForFlag(arm, "hit");
-                    WaitForFlag(dt, "hit");
-                    WaitForFlag(glyph, "hit");
-
-
-                    SetFlag(arm, dt, "continue");
-
-                    WaitForFlag(dt, "continue");
-                    Drive(dt, -3, -0.2);
-
-                    if (next_state_to_execute(arm)) {
-                        adjustment = 0;
-                        incrementState(arm);
-                    }
-
-                    ServoMove(arm, srvClaw, CLAW_CLOSE);
-                    ServoMove(arm, srvExtend, -1);
-                    Pause(arm, 2100);
-                    SetFlag(arm, dt, "retracting");
-                    Pause(arm, 3500);
-                    ServoMove(arm, srvExtend, 0);
-                    MotorMove(arm, mtrArmSpin, (int) (1680 * 4.75 * -0.3), 0.4);
-
-                    WaitForFlag(dt, "retracting");
-                    Turn(dt, 90, .2);
-                    SetFlag(dt, glyph, "lower lift");
-                    WaitForFlag(glyph, "lower lift");
-                    //MotorMove(glyph, mtrLift, -900, 0.3);
+//                    Pause(dt, 1600);
+//                    SetFlag(dt, arm, "off platform");
+//                    SetFlag(dt, glyph, "off platform");
+                    Pause(dt, 1000);
+                    //Drive(dt,5,0.2);
+                    //Turn(dt, -160, 0.2);
+                    //GyroTurn(dt,175, 0.06);
+//                    //GyroTurn(dt,5,0.1);
+//                    Drive(dt, 4, 0.2);
+//                    if(next_state_to_execute(dt)) {
+//                        adjustment = -1;
+//                        incrementState(dt);
+//                    }
+//                    FlipArm(dt, -1300, 0.21);
+//                    if(next_state_to_execute(dt)) {
+//                        adjustment = 0;
+//                        incrementState(dt);
+//                    }
+//                    FlipArm(dt,-1600,0.21);
+//                    SetFlag(dt, arm, "extended");
+                    //Drive(dt, 2, 0.2);
+//
+//                    WaitForFlag(arm, "off platform");
+//                    MotorMove(arm, mtrArmSpin, (int) (1680 * 4.75 * .3905), 0.2);
+//                    ServoMove(arm, srvExtend, .95);
+//                    Pause(arm, 4010);
+//                    SetFlag(arm, glyph, "extended");
+//                    WaitForFlag(arm, "extended");
+//                    if (ballArray != null) {
+//                        if (ballArray[0].equals(BallColor.RED)) {
+//                            MotorMove(arm, mtrArmSpin, (int) (1680 * 4.75 * .05), 0.5);
+//                            Pause(arm, 500);
+//                            if(next_state_to_execute(arm)) {
+//                                set_position(srvClaw,CLAW_CLOSE);
+//                                incrementState(arm);
+//                            }
+//                            Pause(arm,200);
+//                            if(next_state_to_execute(arm)) {
+//                                adjustment = -1;
+//                                incrementState(arm);
+//                            }
+//                            MotorMove(arm, mtrArmSpin, (int) (1680 * 4.75 * -.04), 0.2);
+//                        } else {
+//                            MotorMove(arm, mtrArmSpin, (int) (1680 * 4.75 * -.05), 0.5);
+//                            Pause(arm, 500);
+//                            if(next_state_to_execute(arm)) {
+//                                set_position(srvClaw,CLAW_CLOSE);
+//                                incrementState(arm);
+//                            }
+//                            Pause(arm,200);
+//                            if(next_state_to_execute(arm)) {
+//                                adjustment = -1;
+//                                incrementState(arm);
+//                            }
+//                            MotorMove(arm, mtrArmSpin, (int) (1680 * 4.75 * .04), 0.2);
+//                        }
+//                        Pause(arm, 1000);
+//                        //SetFlag(arm,glyph,"start moving");
+//                        FlipArm(arm, 0, -.5);
+//                        ServoMove(arm, srvExtend, 0);
+//
+//                        WaitForFlag(glyph, "off platform");
+//                        Pause(glyph, 600);
+//                        ServoMove(glyph, srvExtend, 0.25);
+//                        WaitForFlag(glyph, "extended");
+//                        if (next_state_to_execute(glyph)) {
+//                            adjustment += .5;
+//                            incrementState(glyph);
+//                        }
+//                    }
+//                    //WaitForFlag(glyph,"start moving");
+//                    ServoMove(glyph, srvClaw, CLAW_HALF);
+//
+//                    //TODO:Add hitting logic
+//                    //TODO:Remove this (just testing)
+//
+//                    //Pause(arm, 5000);
+//                    if (next_state_to_execute(arm)) {
+//                        SetFlag(new StateMachine_v5(), dt, "hit");
+//                        SetFlag(new StateMachine_v5(), arm, "hit");
+//                        SetFlag(new StateMachine_v5(), glyph, "hit");
+//                        incrementState(arm);
+//                    }
+//
+//                    WaitForFlag(arm, "hit");
+//                    WaitForFlag(dt, "hit");
+//                    WaitForFlag(glyph, "hit");
+//
+//
+//                    SetFlag(arm, dt, "continue");
+//
+//                    WaitForFlag(dt, "continue");
+                    Drive(dt, 4, 0.2); // changed from -3 distance
+//
+//                    if (next_state_to_execute(arm)) {
+//                        adjustment = 0;
+//                        incrementState(arm);
+//                    }
+//
+//                    ServoMove(arm, srvClaw, CLAW_CLOSE);
+//                    ServoMove(arm, srvExtend, -1);
+//                    SetFlag(arm,glyph,"spinArm");
+//                    Pause(arm, 2100);
+//                    SetFlag(arm, dt, "retracting");
+//                    Pause(arm, 3500);
+//                    ServoMove(arm, srvExtend, 0);
+//
+//                    WaitForFlag(glyph,"spinArm");
+//                    MotorMove(glyph, mtrArmSpin, (int) (1680 * 4.75 * -0.3), 0.4);
+//
+//                    WaitForFlag(dt, "retracting");
+                    Turn(dt, -90, .2);
+//                    SetFlag(dt, glyph, "lower lift");
+//                    WaitForFlag(glyph, "lower lift");
+//                    //MotorMove(glyph, mtrLift, -900, 0.3);
                     OWTurn(dt, 28, -.2);
-                    Drive(dt, -32, -.4);
-                    Turn(dt, 61, .2);
-                    if (next_state_to_execute(dt)) {
-
-                        if (snsColorLeft.blue() < 10) {
-                            mtrLeftDrive.setPower(0.15);
-                        } else {
-                            mtrLeftDrive.setPower(0.0);
-                            readyL = true;
-                        }
-                        if (snsColorRight.blue() < 10) {
-                            mtrRightDrive.setPower(0.15);
-                        } else {
-                            mtrRightDrive.setPower(0.0);
-                            readyR = true;
-                        }
-                        if (readyR && readyL) {
-                            incrementState(dt);
-                        }
-                    }
-
-                    if (vuMark.equals(RelicRecoveryVuMark.LEFT)) {
-                        OWTurn(dt, 40, 0.3);
-                    } else if (vuMark.equals(RelicRecoveryVuMark.RIGHT)) {
-                        OWTurn(dt, -40, 0.3);
-                    } else Drive(dt, 4, 0.3);
+                    Drive(dt, -31, -.4);
+                    Turn(dt, 63, .15);
+                    //GyroTurn(dt, 0.01, -0.06);
+//                    if (next_state_to_execute(dt)) {
+//
+//                        if (snsColorLeft.blue() < 10) {
+//                            mtrLeftDrive.setPower(0.15);
+//                        } else {
+//                            mtrLeftDrive.setPower(0.0);
+//                            readyL = true;
+//                        }
+//                        if (snsColorRight.blue() < 10) {
+//                            mtrRightDrive.setPower(0.15);
+//                        } else {
+//                            mtrRightDrive.setPower(0.0);
+//                            readyR = true;
+//                        }
+//                        if (readyR && readyL) {
+//                            incrementState(dt);
+//                        }
+//                    }
+                    Drive(dt,-11,0.2);
+//TODO
+                    if (vuMark.equals(RelicRecoveryVuMark.RIGHT)) {
+                        OWTurn(dt, 20, 0.3);
+                        Drive(dt, -12, 0.2);
+                    } else if (vuMark.equals(RelicRecoveryVuMark.LEFT)) {
+                        OWTurn(dt, -20, 0.3);
+                        Drive(dt, -12, 0.2);
+                    } else Drive(dt, -8, 0.2);
+                    Pause(dt, 750);
                     if(next_state_to_execute(dt)) {
-                        gr2Pos = GR2OPEN;
+                        gr2Pos = GR2END;
                         incrementState(dt);
                     }
-                    Drive(dt, -3, 0.3);
+                    Pause(dt, 750);
+                    Drive(dt, 1.5, 0.2);
                     MotorMove(dt,mtrLift,-1400,0.2);
                 } catch(Exception e) {
                     e.getStackTrace();
@@ -342,124 +360,178 @@ public class Autonomous_v1 extends StateMachine_v5 {
         //MotorMove(glyph,mtrLift,-300,0.3);
         if (Alliance == RED) {
             if (StartPos == 1) {
+                try {
 
-                srvGr2.setPosition(GR2CLOSED);
-                Pause(glyph, 150);
-                MotorMove(glyph, mtrLift, 1200, 0.3);
+                    MotorMove(glyph, mtrLift, 1400, 0.3);
 
-                Pause(dt, 350);
-                Drive(dt, 27, 0.2);
-                SetFlag(dt, arm, "off platform");
-                SetFlag(dt, glyph, "off platform");
-                ProcessRelic(dt);
-                ProcessJewels(dt, vuforiaFrameToMat());
-                Turn(dt, -174.6, 0.2);
-                Drive(dt, 3.7, 0.2);
-                FlipArm(dt, -1600, 0.21);
-                SetFlag(dt, arm, "extended");
-                Drive(dt, 1.5, 0.2);
+                    Pause(dt, 600);
+                    Drive(dt, 24, 0.2);
+                    Pause(dt,250);
+                    Drive(dt,-3.5,0.2);//Decreased it from -4.5;
+                    SetFlag(dt,vision,"canrun");
 
-                WaitForFlag(arm, "off platform");
-                MotorMove(arm, mtrArmSpin, (int) (1680 * 4.75 * .4105), 0.5);
-                ServoMove(arm, srvExtend, .95);
-                Pause(arm, 4010);
-                SetFlag(arm, glyph, "extended");
-                WaitForFlag(arm, "extended");
-                if (ballArray[0].equals(BallColor.RED)) {
-                    MotorMove(arm, mtrArmSpin, (int) (1680 * 4.75 * .05), 0.5);
-                    Pause(arm, 500);
-                    MotorMove(arm, mtrArmSpin, (int) (1680 * 4.75 * -.04), 0.5);
-                } else {
-                    MotorMove(arm, mtrArmSpin, (int) (1680 * 4.75 * -.05), 0.5);
-                    Pause(arm, 500);
-                    MotorMove(arm, mtrArmSpin, (int) (1680 * 4.75 * .04), 0.5);
-                }
-                Pause(arm, 1555);
-                //SetFlag(arm,glyph,"start moving");
-                ServoMove(arm, srvExtend, 0);
+                    WaitForFlag(vision,"canrun");
+                    Pause(vision,100);
+                    //ProcessJewels(vision, vuforiaFrameToMat());
+                    ProcessRelic(vision);
 
-                WaitForFlag(glyph, "off platform");
-                Pause(glyph, 600);
-                ServoMove(glyph, srvExtend, 0.25);
-                WaitForFlag(glyph, "extended");
-                if (next_state_to_execute(glyph)) {
-                    adjustment += .5;
-                    incrementState(glyph);
-                }
-                //WaitForFlag(glyph,"start moving");
-                ServoMove(glyph, srvClaw, CLAW_HALF);
+//                    Pause(dt, 1600);
+//                    SetFlag(dt, arm, "off platform");
+//                    SetFlag(dt, glyph, "off platform");
+                    Pause(dt, 2000);
+                    //Drive(dt,5,0.2);
+                    //Turn(dt, -160, 0.2);
+                    //GyroTurn(dt,175, 0.06);
+//                    //GyroTurn(dt,5,0.1);
+//                    Drive(dt, 4, 0.2);
+//                    if(next_state_to_execute(dt)) {
+//                        adjustment = -1;
+//                        incrementState(dt);
+//                    }
+//                    FlipArm(dt, -1300, 0.21);
+//                    if(next_state_to_execute(dt)) {
+//                        adjustment = 0;
+//                        incrementState(dt);
+//                    }
+//                    FlipArm(dt,-1600,0.21);
+//                    SetFlag(dt, arm, "extended");
+                    //Drive(dt, 2, 0.2);
+//
+//                    WaitForFlag(arm, "off platform");
+//                    MotorMove(arm, mtrArmSpin, (int) (1680 * 4.75 * .3905), 0.2);
+//                    ServoMove(arm, srvExtend, .95);
+//                    Pause(arm, 4010);
+//                    SetFlag(arm, glyph, "extended");
+//                    WaitForFlag(arm, "extended");
+//                    if (ballArray != null) {
+//                        if (ballArray[0].equals(BallColor.RED)) {
+//                            MotorMove(arm, mtrArmSpin, (int) (1680 * 4.75 * .05), 0.5);
+//                            Pause(arm, 500);
+//                            if(next_state_to_execute(arm)) {
+//                                set_position(srvClaw,CLAW_CLOSE);
+//                                incrementState(arm);
+//                            }
+//                            Pause(arm,200);
+//                            if(next_state_to_execute(arm)) {
+//                                adjustment = -1;
+//                                incrementState(arm);
+//                            }
+//                            MotorMove(arm, mtrArmSpin, (int) (1680 * 4.75 * -.04), 0.2);
+//                        } else {
+//                            MotorMove(arm, mtrArmSpin, (int) (1680 * 4.75 * -.05), 0.5);
+//                            Pause(arm, 500);
+//                            if(next_state_to_execute(arm)) {
+//                                set_position(srvClaw,CLAW_CLOSE);
+//                                incrementState(arm);
+//                            }
+//                            Pause(arm,200);
+//                            if(next_state_to_execute(arm)) {
+//                                adjustment = -1;
+//                                incrementState(arm);
+//                            }
+//                            MotorMove(arm, mtrArmSpin, (int) (1680 * 4.75 * .04), 0.2);
+//                        }
+//                        Pause(arm, 1000);
+//                        //SetFlag(arm,glyph,"start moving");
+//                        FlipArm(arm, 0, -.5);
+//                        ServoMove(arm, srvExtend, 0);
+//
+//                        WaitForFlag(glyph, "off platform");
+//                        Pause(glyph, 600);
+//                        ServoMove(glyph, srvExtend, 0.25);
+//                        WaitForFlag(glyph, "extended");
+//                        if (next_state_to_execute(glyph)) {
+//                            adjustment += .5;
+//                            incrementState(glyph);
+//                        }
+//                    }
+//                    //WaitForFlag(glyph,"start moving");
+//                    ServoMove(glyph, srvClaw, CLAW_HALF);
+//
+//                    //TODO:Add hitting logic
+//                    //TODO:Remove this (just testing)
+//
+//                    //Pause(arm, 5000);
+//                    if (next_state_to_execute(arm)) {
+//                        SetFlag(new StateMachine_v5(), dt, "hit");
+//                        SetFlag(new StateMachine_v5(), arm, "hit");
+//                        SetFlag(new StateMachine_v5(), glyph, "hit");
+//                        incrementState(arm);
+//                    }
+//
+//                    WaitForFlag(arm, "hit");
+//                    WaitForFlag(dt, "hit");
+//                    WaitForFlag(glyph, "hit");
+//
+//
+//                    SetFlag(arm, dt, "continue");
+//
+//                    WaitForFlag(dt, "continue");
+                    Drive(dt, 4, 0.2); // changed from -3 distance
+//
+//                    if (next_state_to_execute(arm)) {
+//                        adjustment = 0;
+//                        incrementState(arm);
+//                    }
+//
+//                    ServoMove(arm, srvClaw, CLAW_CLOSE);
+//                    ServoMove(arm, srvExtend, -1);
+//                    SetFlag(arm,glyph,"spinArm");
+//                    Pause(arm, 2100);
+//                    SetFlag(arm, dt, "retracting");
+//                    Pause(arm, 3500);
+//                    ServoMove(arm, srvExtend, 0);
+//
+//                    WaitForFlag(glyph,"spinArm");
+//                    MotorMove(glyph, mtrArmSpin, (int) (1680 * 4.75 * -0.3), 0.4);
+//
+//                    WaitForFlag(dt, "retracting");
+                    Turn(dt, 90, .2);
+//                    SetFlag(dt, glyph, "lower lift");
+//                    WaitForFlag(glyph, "lower lift");
+//                    //MotorMove(glyph, mtrLift, -900, 0.3);
+                    OWTurn(dt, -28, -.2);
+                    Drive(dt, -31, -.4);
+                    Turn(dt, -63, .15);
+                    //GyroTurn(dt, 0.01, -0.06);
+//                    if (next_state_to_execute(dt)) {
+//
+//                        if (snsColorLeft.blue() < 10) {
+//                            mtrLeftDrive.setPower(0.15);
+//                        } else {
+//                            mtrLeftDrive.setPower(0.0);
+//                            readyL = true;
+//                        }
+//                        if (snsColorRight.blue() < 10) {
+//                            mtrRightDrive.setPower(0.15);
+//                        } else {
+//                            mtrRightDrive.setPower(0.0);
+//                            readyR = true;
+//                        }
+//                        if (readyR && readyL) {
+//                            incrementState(dt);
+//                        }
+//                    }
+                    Drive(dt,-11,0.2);
 
-                //TODO:Add hitting logic
-                //TODO:Remove this (just testing)
-
-                //Pause(arm, 5000);
-                if (next_state_to_execute(arm)) {
-                    SetFlag(new StateMachine_v5(), dt, "hit");
-                    SetFlag(new StateMachine_v5(), arm, "hit");
-                    SetFlag(new StateMachine_v5(), glyph, "hit");
-                    incrementState(arm);
-                }
-
-                WaitForFlag(arm, "hit");
-                WaitForFlag(dt, "hit");
-                WaitForFlag(glyph, "hit");
-
-
-                SetFlag(arm, dt, "continue");
-
-                WaitForFlag(dt, "continue");
-                Drive(dt, -3, -0.2);
-                //FlipArm(dt, 0, -.2);
-
-                if (next_state_to_execute(arm)) {
-                    adjustment = 0;
-                    incrementState(arm);
-                }
-
-                ServoMove(arm, srvClaw, CLAW_CLOSE);
-                ServoMove(arm, srvExtend, -1);
-                Pause(arm, 2100);
-                SetFlag(arm, dt, "retracting");
-                Pause(arm, 3500);
-                ServoMove(arm, srvExtend, 0);
-                MotorMove(arm, mtrArmSpin, (int) (1680 * 4.75 * -0.4), 0.4);
-
-                WaitForFlag(dt, "retracting");
-                Turn(dt, -90, .2);
-                SetFlag(dt, glyph, "lower lift");
-                WaitForFlag(glyph, "lower lift");
-                MotorMove(glyph, mtrLift, -900, 0.3);
-                OWTurn(dt, -34, -.2);
-                Drive(dt, -32, -.4);
-                Turn(dt, -61, .2);
-                if (next_state_to_execute(dt)) {
-
-                    if (snsColorLeft.blue() < 10) {
-                        mtrLeftDrive.setPower(0.15);
-                    } else {
-                        mtrLeftDrive.setPower(0.0);
-                        readyL = true;
-                    }
-                    if (snsColorRight.blue() < 10) {
-                        mtrRightDrive.setPower(0.15);
-                    } else {
-                        mtrRightDrive.setPower(0.0);
-                        readyR = true;
-                    }
-                    if (readyR && readyL) {
+                    if (vuMark.equals(RelicRecoveryVuMark.LEFT)) {
+                        OWTurn(dt, -20, 0.3);
+                        Drive(dt, -12, 0.2);
+                    } else if (vuMark.equals(RelicRecoveryVuMark.RIGHT)) {
+                        OWTurn(dt, 20, 0.3);
+                        Drive(dt, -12, 0.2);
+                    } else Drive(dt, -8, 0.2);
+                    Pause(dt, 750);
+                    if(next_state_to_execute(dt)) {
+                        gr2Pos = GR2END;
                         incrementState(dt);
                     }
+                    Pause(dt, 750);
+                    Drive(dt, 1.5, 0.2);
+                    MotorMove(dt,mtrLift,-1400,0.2);
+                } catch(Exception e) {
+                    e.getStackTrace();
                 }
-
-                if (vuMark.equals(RelicRecoveryVuMark.LEFT)) {
-                    OWTurn(dt, 40, 0.3);
-                } else if (vuMark.equals(RelicRecoveryVuMark.RIGHT)) {
-                    OWTurn(dt, -40, 0.3);
-                } else Drive(dt, 4, 0.3);
-                //ServoMove(dt, srvGr2, GR2OPEN);
-
-                Drive(dt, -3, 0.3);
-
             }
         }
 
@@ -472,6 +544,10 @@ public class Autonomous_v1 extends StateMachine_v5 {
 //        telemetry.addData("dt", dt.toString());
 //        telemetry.addData("arm", arm.toString());
 //        telemetry.addData("glyph", glyph.toString());
+        axes = IMUnav.getAngularOrientation(AxesReference.EXTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES);
+
+        telemetry.addData("Setup", Arrays.toString(new double[]{axes.firstAngle, axes.secondAngle, axes.thirdAngle}));
+
         if(vuMark != null)telemetry.addData("pattern", vuMark);
         if(ballArray[0] != null && ballArray[1] != null )telemetry.addData("ballPattern", Arrays.toString(ballArray));
     }
