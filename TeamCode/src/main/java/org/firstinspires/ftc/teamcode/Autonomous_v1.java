@@ -34,7 +34,7 @@ import static org.firstinspires.ftc.robotcontroller.external.samples.ConceptVuMa
 /**
  * Created by sam on 11/30/2017.
  */
-@Autonomous(name = "Autonomous", group = "Competition")
+//@Autonomous(name = "Autonomous", group = "Competition")
 public class Autonomous_v1 extends StateMachine_v5 {
 
     StateMachine_v5 dt = new StateMachine_v5();

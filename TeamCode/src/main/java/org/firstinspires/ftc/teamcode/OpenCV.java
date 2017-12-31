@@ -45,7 +45,7 @@ import java.util.concurrent.BlockingQueue;
 import static org.firstinspires.ftc.robotcontroller.external.samples.ConceptVuMarkIdentification.TAG;
 import static org.opencv.imgproc.Imgproc.minEnclosingCircle;
 
-@TeleOp(name = "OPENCV")
+//@TeleOp(name = "OPENCV")
 public class OpenCV extends OpMode {
 
     VuforiaLocalizer vuforia;
@@ -330,7 +330,7 @@ int i = 0;
 
             if (centerRedBest != null && centerBlueBest != null) {
                 message = "";
-                if (centerBlueBest.y < centerRedBest.y) {
+                if (centerBlueBest.x < centerRedBest.x) {
                     message = "Blue, Red";
                 } else {
                     message = "Red ,Blue";

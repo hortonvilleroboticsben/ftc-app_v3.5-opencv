@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
-import android.annotation.SuppressLint;
-import android.test.suitebuilder.annotation.Suppress;
+import android.util.Log;
 
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -10,10 +9,28 @@ import com.qualcomm.robotcore.hardware.I2cAddr;
 import com.qualcomm.robotcore.hardware.I2cDevice;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcontroller.external.samples.ConceptVuMarkIdentification;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
+import org.opencv.core.MatOfPoint2f;
+import org.opencv.core.Point;
+import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
+import org.opencv.core.Size;
+import org.opencv.imgproc.Imgproc;
+import org.opencv.imgproc.Moments;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.opencv.imgproc.Imgproc.minEnclosingCircle;
 
 class StateMachine_v6 extends Subroutines_v13 {
 
@@ -26,6 +43,9 @@ class StateMachine_v6 extends Subroutines_v13 {
     private final double countsPerRev = 560;
     private final double wheelDiameter = 4.166666666666667;                      //double wheelDiameter = 4.19;
     private final double turnDiameter = 15.45;        // private final double turnDiameter = 13.95;
+
+    static BallColor[] ballArray = {null, null};
+    static RelicRecoveryVuMark vuMark = null;
 
     @Override
     public String toString(){
@@ -82,6 +102,8 @@ class StateMachine_v6 extends Subroutines_v13 {
             incrementState();
         }
     }
+
+
 
     //manages current state number and compares it to state in progress
     boolean next_state_to_execute() {
@@ -304,6 +326,7 @@ class StateMachine_v6 extends Subroutines_v13 {
 
     }
 
+
     public void WriteColorValues(ColorSensor colorSensor){
         if(next_state_to_execute()){
             String colorVal = getColorVal(colorSensor, "red") + ", " + getColorVal(colorSensor, "blue")
@@ -313,7 +336,7 @@ class StateMachine_v6 extends Subroutines_v13 {
         }
     }
 
-    public void MotorMove(DcMotor motor, long encCount, double power){
+    public void RelativeMotorMove(DcMotor motor, long encCount, double power){
         if(next_state_to_execute()) {
             DcMotor.RunMode r = motor.getMode();
             run_to_position(motor);
@@ -328,7 +351,7 @@ class StateMachine_v6 extends Subroutines_v13 {
         }
     }
 
-    public void FlipArm(long encCount, double power){
+    public void AbsoluteMotorMove(long encCount, double power){
         if(next_state_to_execute()) {
             run_to_position(mtrArmFlip);
             set_encoder_target(mtrArmFlip, (int) encCount);
@@ -339,25 +362,6 @@ class StateMachine_v6 extends Subroutines_v13 {
             }
         }
     }
-
-//    // TODO: 9/19/2017
-//    public void Shift(StateMachine_v5 object, double positionX, double positionY){
-//
-//        if(next_state_to_execute(object)){
-//
-//
-//            double targetXCounts = positionX * 1120;
-//            double targetYCounts = positionY * 1120;
-//
-//            if( targetXCounts > get_encoder_count(mtrShiftX)){
-//
-//            }
-//
-//
-//
-//        }
-//
-//    }
 
     private int x = 0;
     private int y = 0;
@@ -389,7 +393,189 @@ class StateMachine_v6 extends Subroutines_v13 {
         return Integer.parseInt(brokenString);
     }
 
+    void ProcessRelic() {
+        if (next_state_to_execute()) {
+            vuMark = RelicRecoveryVuMark.from(relicTemplate);
+            telemetry.addData("vuMark", vuMark);
+            if(vuMark != RelicRecoveryVuMark.UNKNOWN) incrementState();
+        }
+    }
+
+    void ProcessJewels(Mat m) {
+        if (next_state_to_execute()) {
+            int height = m.height();
+            int width = m.width();
+
+            Mat mRgba;
+            Mat mROI;
+            Rect rROI;
+            Point centerROI;
+
+            Scalar mBlobColorRgba;
+
+            ColorBlobDetector mDetectorRed;
+            ColorBlobDetector mDetectorBlue;
+
+            Mat mSpectrumRed;
+
+            Scalar CONTOUR_COLOR_RED;
+            Scalar CONTOUR_COLOR_BLUE;
+
+            Scalar ROI_COLOR;
+
+            mRgba = new Mat(height, width, CvType.CV_8UC4);
+
+            rROI = new Rect((int) width / 3, (int)height / 3, (int) width / 3, (int) height / 3);
+            centerROI = new Point(rROI.width / 2, rROI.height / 2);
+            mROI = new Mat(mRgba, rROI);
+
+            Log.d(ConceptVuMarkIdentification.TAG, "onCamerViewStarted Width: " + width + " Height: " + height);
+
+            mDetectorRed = new ColorBlobDetector();
+            mDetectorBlue = new ColorBlobDetector();
+
+            mSpectrumRed = new Mat();
+
+            mBlobColorRgba = new Scalar(255);
+
+            CONTOUR_COLOR_RED = new Scalar(255, 0, 0, 255);
+            CONTOUR_COLOR_BLUE = new Scalar(0, 0, 255, 255);
+
+            ROI_COLOR = new Scalar(255, 255, 255, 255);
+
+            mDetectorRed.setColorRange(new Scalar(237, 120, 130, 0), new Scalar(20, 255, 255, 255));
+            mDetectorBlue.setColorRange(new Scalar(125, 120, 130, 0), new Scalar(187, 255, 255, 255));
+
+            mRgba = m;
+            mROI = new Mat(mRgba, rROI);
+
+            double radiusRedBest = 0.0;
+            double radiusBlueBest = 0.0;
+
+            String message = "";
 
 
+            Imgproc.blur(mROI, mROI, new Size(20, 20));
+
+            mDetectorRed.process(mROI);
+            mDetectorBlue.process(mROI);
+
+            List<MatOfPoint> contoursRed = mDetectorRed.getContours();
+            Log.e(ConceptVuMarkIdentification.TAG, "Red Contours count: " + contoursRed.size());
+            //Imgproc.drawContours(mRgba, contoursRed, -1, CONTOUR_COLOR_RED);
+
+            List<MatOfPoint> contoursBlue = mDetectorBlue.getContours();
+            Log.e(ConceptVuMarkIdentification.TAG, "Blue Contours count: " + contoursBlue.size());
+            //Imgproc.drawContours(mRgba, contoursBlue, -1, CONTOUR_COLOR_BLUE);
+
+            List<Moments> muRed = new ArrayList<Moments>(contoursRed.size());
+
+            Point centerRedBest = null;
+
+            List<MatOfPoint2f> contours2fRed = new ArrayList<MatOfPoint2f>();
+            List<MatOfPoint2f> polyMOP2fRed = new ArrayList<MatOfPoint2f>();
+            List<MatOfPoint> polyMOPRed = new ArrayList<MatOfPoint>();
+
+            float[] radiusRed = new float[contoursRed.size()];
+//TODO
+            for (int i = 0; i < contoursRed.size(); i++) {
+                Point centerRed = new Point();
+                muRed.add(i, Imgproc.moments(contoursRed.get(i), false));
+
+                contours2fRed.add(new MatOfPoint2f());
+                polyMOP2fRed.add(new MatOfPoint2f());
+                polyMOPRed.add(new MatOfPoint());
+
+                contoursRed.get(i).convertTo(contours2fRed.get(i), CvType.CV_32FC2);
+                Imgproc.approxPolyDP(contours2fRed.get(i), polyMOP2fRed.get(i), 3, true);
+                polyMOP2fRed.get(i).convertTo(polyMOPRed.get(i), CvType.CV_32S);
+
+                minEnclosingCircle(polyMOP2fRed.get(i), centerRed, radiusRed);
+                Imgproc.circle(mRgba, new Point(centerRed.x + rROI.x, centerRed.y + rROI.y), 16, CONTOUR_COLOR_RED, 16);
+                Log.e(ConceptVuMarkIdentification.TAG, "Red Center: (" + (int) centerRed.x + "," + (int) centerRed.y + ") with radius: " + (int) radiusRed[i]);
+
+                if (centerRedBest == null) {
+                    centerRedBest = centerRed;
+                    radiusRedBest = radiusRed[0];
+                } else {
+                    if (distance(centerROI, centerRed) < distance(centerROI, centerRedBest)) {
+                        centerRedBest = centerRed;
+                        radiusRedBest = radiusRed[0];
+                    }
+                }
+
+            }
+            if (centerRedBest != null) {
+                Imgproc.circle(mRgba, new Point(centerRedBest.x + rROI.x, centerRedBest.y + rROI.y), (int) radiusRedBest, CONTOUR_COLOR_RED, 16);
+            }
+
+            List<Moments> muBlue = new ArrayList<Moments>(contoursBlue.size());
+            Point centerBlueBest = null;
+
+            List<MatOfPoint2f> contours2fBlue = new ArrayList<MatOfPoint2f>();
+            List<MatOfPoint2f> polyMOP2fBlue = new ArrayList<MatOfPoint2f>();
+            List<MatOfPoint> polyMOPBlue = new ArrayList<MatOfPoint>();
+
+            float[] radiusBlue = new float[contoursBlue.size()];
+
+            for (int i = 0; i < contoursBlue.size(); i++) {
+
+                Point centerBlue = new Point();
+                muBlue.add(i, Imgproc.moments(contoursBlue.get(i), false));
+
+                contours2fBlue.add(new MatOfPoint2f());
+                polyMOP2fBlue.add(new MatOfPoint2f());
+                polyMOPBlue.add(new MatOfPoint());
+
+                contoursBlue.get(i).convertTo(contours2fBlue.get(i), CvType.CV_32FC2);
+                Imgproc.approxPolyDP(contours2fBlue.get(i), polyMOP2fBlue.get(i), 3, true);
+                polyMOP2fBlue.get(i).convertTo(polyMOPBlue.get(i), CvType.CV_32S);
+
+                minEnclosingCircle(polyMOP2fBlue.get(i), centerBlue, radiusBlue);
+                Imgproc.circle(mRgba, new Point(centerBlue.x + rROI.x, centerBlue.y + rROI.y), 16, CONTOUR_COLOR_BLUE, 16);
+                Log.e(ConceptVuMarkIdentification.TAG, "Blue Center: (" + (int) centerBlue.x + "," + (int) centerBlue.y + ") with radius: " + (int) radiusBlue[i]);
+
+                if (centerBlueBest == null) {
+                    centerBlueBest = centerBlue;
+                    radiusBlueBest = radiusBlue[0];
+                } else {
+                    if (distance(centerROI, centerBlue) < distance(centerROI, centerBlueBest)) {
+                        centerBlueBest = centerBlue;
+                        radiusBlueBest = radiusBlue[0];
+                    }
+                }
+            }
+            if (centerBlueBest != null) {
+                Imgproc.circle(mRgba, new Point(centerBlueBest.x + rROI.x, centerBlueBest.y + rROI.y), (int) radiusBlueBest, CONTOUR_COLOR_BLUE, 16);
+            }
+
+            Mat colorLabel = mRgba.submat(4, 68, 4, 68);
+            colorLabel.setTo(mBlobColorRgba);
+
+
+            if (centerRedBest != null && centerBlueBest != null) {
+                message = "";
+                if (centerBlueBest.x < centerRedBest.x) {
+                    ballArray[0] = BallColor.BLUE;
+                    ballArray[1] = BallColor.RED;
+                } else {
+                    ballArray[0] = BallColor.RED;
+                    ballArray[1] = BallColor.BLUE;
+                }
+                telemetry.addData("balls", Arrays.toString(ballArray));
+                Log.e(ConceptVuMarkIdentification.TAG, message);
+                incrementState();
+            }
+
+
+            Imgproc.rectangle(mRgba, new Point(rROI.x, rROI.y), new Point(rROI.x + rROI.width, rROI.y + rROI.height), ROI_COLOR, 16);
+            //writeImage(mRgba);
+
+        }
+    }
+
+    enum BallColor {
+        BLUE, RED
+    }
 
 }

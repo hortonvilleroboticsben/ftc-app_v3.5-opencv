@@ -76,6 +76,19 @@ class Subroutines_v13 extends OpMode {
     final double GR2CLOSED = .418;
     final double GR2OPEN = 0.7;
 
+    final double UD_DOWN = .285;
+    final double UD_UP = .745;
+
+    final double LR_CENTER = .52;
+    final double LR_LEFT = .415;
+    final double LR_RIGHT = .63;
+    final double LR_HOME = .49;
+
+    final double CAM_SIDE = .565;
+    final double CAM_VUMARK = .54;
+    final double CAM_JEWELS = .65;
+    final double CAM_FRONT = .06;
+
     static VuforiaLocalizer vuforia;
     static VuforiaTrackable relicTemplate;
 
@@ -124,7 +137,9 @@ class Subroutines_v13 extends OpMode {
         srvGr2 = addServo(GR2OPEN, "srvGr2");
         srvExtend = addCRServo("srvExtend");
         srvClaw = addServo(0.1, "srvClaw");
-        srvShift = addCRServo("srvShift");
+        srvLR = addServo(LR_HOME, "srvLR");
+        srvUD = addServo(UD_UP, "srvUD");
+        srvPhone = addServo(CAM_SIDE, "srvPhone");
         srvLevel = addServo(0.0, "srvLevel");
 
         try {
@@ -915,23 +930,24 @@ class Subroutines_v13 extends OpMode {
         }
     }
 
-    DcMotor mtrRightDrive;
-    DcMotor mtrLeftDrive;
-    DcMotor mtrLift;
-    DcMotor mtrFlip;
-    DcMotor mtrArmSpin;
-    DcMotor mtrArmFlip;
+    static DcMotor mtrRightDrive;
+    static DcMotor mtrLeftDrive;
+    static DcMotor mtrLift;
+    static DcMotor mtrFlip;
+    static DcMotor mtrArmSpin;
+    static DcMotor mtrArmFlip;
 
-    Servo srvGr1;
-    Servo srvGr2;
-    CRServo srvExtend;
-    Servo srvClaw;
-    CRServo srvShift;
-    Servo srvLevel;
+    static Servo srvGr1;
+    static Servo srvGr2;
+    static CRServo srvExtend;
+    static Servo srvClaw;
+    static Servo srvLR;
+    static Servo srvUD;
+    static Servo srvPhone;
+    static Servo srvLevel;
 
-    ColorSensor snsColorLeft;
-    ColorSensor snsColorRight;
-    BNO055IMU IMUnav;
-
+    static ColorSensor snsColorLeft;
+    static ColorSensor snsColorRight;
+    static BNO055IMU IMUnav;
 }
 

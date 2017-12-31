@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -11,7 +12,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 
-@TeleOp(name = "TeleOp", group = "Competition")
+//@TeleOp(name = "TeleOp", group = "Competition")
 public class TeleOp_V1 extends StateMachine_v5 {
 
     StateMachine_v5 robotFront = new StateMachine_v5();
@@ -23,8 +24,8 @@ public class TeleOp_V1 extends StateMachine_v5 {
     final int FLIPUP = 1450;
     final int FLIPDOWN = -1450;
     final int LIFTUP = 4000;
-    final int LIFTMEDIUM = 3500;
-    final int LIFTDOWN = 0;
+    final int LIFTMEDIUM = 3600;
+    final int LIFTDOWN = 150;
 
 
 
@@ -92,11 +93,9 @@ public class TeleOp_V1 extends StateMachine_v5 {
 
         if(flipOS) set_power(mtrLift, (Math.abs(gamepad2.right_stick_y) <= .3) ? 0 : -gamepad2.right_stick_y * .8);
 
-        set_position(srvShift, (Math.abs(gamepad2.right_stick_x) <= .3) ? 0 : gamepad2.right_stick_x);
-
         set_position(srvLevel, pos);
 
-        set_position(srvClaw, (gamepad2.left_trigger > 0.5) ? 1 : 0.1);
+        set_position(srvClaw, (gamepad2.left_trigger > 0.5) ? .3 : 0.0);
 
         set_power(mtrArmSpin, (Math.abs(gamepad2.left_stick_x) <= .2) ? 0 : gamepad2.left_stick_x * .5);
 
@@ -135,7 +134,7 @@ public class TeleOp_V1 extends StateMachine_v5 {
                 if (next_state_to_execute(robotFront)) {
                     run_to_position(mtrFlip);
                     set_encoder_target(mtrFlip, FLIPUP);
-                    set_power(mtrFlip, 0.8);
+                    set_power(mtrFlip, 0.5);
 
                     if (has_encoder_reached(mtrFlip, FLIPUP)) {
                         reset_encoders(mtrFlip);
@@ -183,7 +182,7 @@ public class TeleOp_V1 extends StateMachine_v5 {
                 if (next_state_to_execute(robotFront)) {
                     run_to_position(mtrFlip);
                     set_encoder_target(mtrFlip, FLIPDOWN);
-                    set_power(mtrFlip, -0.7);
+                    set_power(mtrFlip, -0.5);
                     srvGr1.setPosition(GR1CLOSED);
                     srvGr2.setPosition(GR2CLOSED);
                     if (has_encoder_reached(mtrFlip, FLIPDOWN)) {
@@ -218,7 +217,7 @@ public class TeleOp_V1 extends StateMachine_v5 {
         if(gamepad1.guide && gamepad1.a && !balanceOS) {
             balanceOS = true;
             isBalancing = !isBalancing;
-        }else balanceOS = false;
+        }
 
         if(isBalancing) {
             if(axes.secondAngle > 3) {
@@ -227,7 +226,25 @@ public class TeleOp_V1 extends StateMachine_v5 {
             } else if(axes.secondAngle < -3) {
                 mtrLeftDrive.setPower(-0.2);
                 mtrRightDrive.setPower(-0.2);
-            } else isBalancing = false;
+            } else {
+                isBalancing = false;
+                balanceOS = false;
+            }
+
+        }
+
+        if(flipOS) {
+            run_using_encoder(mtrFlip);
+           set_power(mtrFlip,(!gamepad2.dpad_left && !gamepad2.dpad_right) ? 0 : (gamepad2.dpad_right) ? -0.35 : 0.35);
+        }
+
+        if(gamepad2.x){
+            flipOS = true;
+            resetMachine(robotFront);
+        }
+
+        if(flipOS && gamepad2.guide && gamepad2.a && !gamepad2.start){
+            reset_encoders(mtrFlip);
         }
         //srvGr1.setPosition(gr1Val);
 //        telemetry.addData("GR1pos", GR1pos);
