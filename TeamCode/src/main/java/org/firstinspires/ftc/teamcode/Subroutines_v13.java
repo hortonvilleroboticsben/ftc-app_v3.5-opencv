@@ -77,7 +77,7 @@ class Subroutines_v13 extends OpMode {
     final double GR2OPEN = 0.7;
 
     final double UD_DOWN = .285;
-    final double UD_UP = .745;
+    final double UD_UP = .735;
 
     final double LR_CENTER = .52;
     final double LR_LEFT = .415;
@@ -85,7 +85,7 @@ class Subroutines_v13 extends OpMode {
     final double LR_HOME = .49;
 
     final double CAM_SIDE = .565;
-    final double CAM_VUMARK = .54;
+    final double CAM_VUMARK = .545;
     final double CAM_JEWELS = .65;
     final double CAM_FRONT = .06;
 

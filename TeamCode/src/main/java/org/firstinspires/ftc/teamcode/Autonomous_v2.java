@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.vuforia.PIXEL_FORMAT;
 import com.vuforia.Vuforia;
 
+import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
@@ -151,31 +152,32 @@ public class Autonomous_v2 extends StateMachine_v6 {
         arm.initializeMachine();
         glyph.initializeMachine();
 
+        drive.ServoMove(srvPhone, CAM_VUMARK);
+        drive.Pause(1000);
+        drive.SetFlag(vision, "Read Relic");
+
+        vision.WaitForFlag("Read Relic");
+        vision.ProcessRelic();
+        vision.SetFlag(drive, "Relic Read");
+
+        drive.WaitForFlag("Relic Read");
+        drive.ServoMove(srvPhone, CAM_JEWELS);
+        drive.Pause(1000);
+        drive.SetFlag(vision, "Read Jewels");
+
+        vision.WaitForFlag("Read Jewels");
+        vision.ProcessJewels(vuforiaFrameToMat());
+        vision.SetFlag(arm, "Jewels Read");
+
+        arm.WaitForFlag("Jewels Read");
+        arm.ServoMove(srvLR, LR_CENTER);
+        arm.ServoIncrementalMove(srvUD, UD_DOWN, 0.01);
+//            arm.ServoMove(srvUD, UD_DOWN + .04);
+//            arm.Pause(800);
+//            arm.ServoMove(srvUD, UD_DOWN);
+
         if(Alliance == BLUE) {
             //TODO: DRIVE must grab GLYPH.
-            drive.ServoMove(srvPhone, CAM_VUMARK);
-            drive.Pause(1000);
-            drive.SetFlag(vision, "Read Relic");
-
-            vision.WaitForFlag("Read Relic");
-            vision.ProcessRelic();
-            vision.SetFlag(drive, "Relic Read");
-
-            drive.WaitForFlag("Relic Read");
-            drive.ServoMove(srvPhone, CAM_JEWELS);
-            drive.Pause(1000);
-            drive.SetFlag(vision, "Read Jewels");
-
-            vision.WaitForFlag("Read Jewels");
-            vision.ProcessJewels(vuforiaFrameToMat());
-            vision.SetFlag(arm, "Jewels Read");
-
-            arm.WaitForFlag("Jewels Read");
-            arm.ServoMove(srvLR, LR_CENTER);
-            arm.ServoMove(srvUD, UD_DOWN + .04);
-            arm.Pause(800);
-            arm.ServoMove(srvUD, UD_DOWN);
-            arm.Pause(500);
             if (arm.next_state_to_execute()) {
                 if (ballArray[0] == BallColor.RED) set_position(srvLR, LR_LEFT);
                 else set_position(srvLR, LR_RIGHT);
@@ -186,39 +188,23 @@ public class Autonomous_v2 extends StateMachine_v6 {
             arm.ServoMove(srvUD, UD_UP);
             arm.ServoMove(srvLR, LR_HOME);
 
+            drive.WaitForFlag("Jewels Hit");
+            drive.ServoMove(srvPhone, CAM_FRONT);
+
             if (StartPos == 1) {
-                drive.WaitForFlag("Jewels Hit");
-                drive.ServoMove(srvPhone, CAM_FRONT);
                 drive.Drive(35.75, 0.2);
                 drive.Turn(-88, 0.2);
+            }
+            else if(StartPos == 2){
+                drive.Drive(24,.2);
+                drive.Turn(-89,.2);
+                drive.Drive(11.8,.2);
+                drive.Turn(-90.5,.2);
             }
 
 /////////////////////////RED ALLIANCE////////////////////////////////////
 
         }else if(Alliance == RED){
-            drive.ServoMove(srvPhone, CAM_VUMARK);
-            drive.Pause(1000);
-            drive.SetFlag(vision, "Read Relic");
-
-            vision.WaitForFlag("Read Relic");
-            vision.ProcessRelic();
-            vision.SetFlag(drive, "Relic Read");
-
-            drive.WaitForFlag("Relic Read");
-            drive.ServoMove(srvPhone, CAM_JEWELS);
-            drive.Pause(1000);
-            drive.SetFlag(vision, "Read Jewels");
-
-            vision.WaitForFlag("Read Jewels");
-            vision.ProcessJewels(vuforiaFrameToMat());
-            vision.SetFlag(arm, "Jewels Read");
-
-            arm.WaitForFlag("Jewels Read");
-            arm.ServoMove(srvLR, LR_CENTER);
-            arm.ServoMove(srvUD, UD_DOWN + .04);
-            arm.Pause(800);
-            arm.ServoMove(srvUD, UD_DOWN);
-            arm.Pause(500);
             if (arm.next_state_to_execute()) {
                 if (ballArray[0] == BallColor.BLUE) set_position(srvLR, LR_LEFT);
                 else set_position(srvLR, LR_RIGHT);
@@ -229,11 +215,16 @@ public class Autonomous_v2 extends StateMachine_v6 {
             arm.ServoMove(srvUD, UD_UP);
             arm.ServoMove(srvLR, LR_HOME);
 
+            drive.WaitForFlag("Jewels Hit");
+            drive.ServoMove(srvPhone, CAM_FRONT);
             if(StartPos == 1) {
-                drive.WaitForFlag("Jewels Hit");
-                drive.ServoMove(srvPhone, CAM_FRONT);
                 drive.Drive(-34.5, 0.2);
                 drive.Turn(-88, 0.2);
+            }else if(StartPos == 2){
+                drive.Drive(-24,.2);
+                drive.Turn(88,.2);
+                drive.Drive(-11.3,.2);
+                drive.Turn(-89.5,.2);
             }
         }
 

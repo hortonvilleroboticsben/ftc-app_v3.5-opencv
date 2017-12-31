@@ -123,9 +123,11 @@ public class TeleOp_V2 extends StateMachine_v6 {
 
         set_position(srvLevel, pos);
 
-        set_position(srvClaw, (gamepad2.left_trigger > 0.5) ? .3 : 0.0);
+        set_position(srvClaw, (gamepad2.left_trigger > 0.5) ? 0.0 : 1.0);
 
         set_power(mtrArmSpin, (Math.abs(gamepad2.left_stick_x) <= .2) ? 0 : gamepad2.left_stick_x * .5);
+
+        set_power(mtrArmFlip, ((Math.abs(gamepad2.left_stick_y) <= .2)) ? 0 : gamepad2.left_stick_y * .2);
 
         set_position(srvExtend, gamepad2.dpad_up ? 1 : gamepad2.dpad_down ? -1 : 0);
 
@@ -187,7 +189,7 @@ public class TeleOp_V2 extends StateMachine_v6 {
 
         //////////////////////LIFTING//////////////////////////
 
-        if(!isLifting) set_power(mtrLift, .75*gamepad2.left_stick_y);
+        if(!isLifting) set_power(mtrLift, .75*gamepad2.right_stick_y);
 
         if (((gamepad2.x ^ gamepad2.a) && !gamepad2.start) && !liftOS) {
             isLifting = true;

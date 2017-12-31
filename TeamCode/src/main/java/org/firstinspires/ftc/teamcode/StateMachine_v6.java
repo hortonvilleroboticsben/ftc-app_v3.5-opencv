@@ -363,6 +363,19 @@ class StateMachine_v6 extends Subroutines_v13 {
         }
     }
 
+    public void ServoIncrementalMove(Servo srv, double pos, double inc){
+        if(next_state_to_execute()) {
+            inc = Math.abs(inc);
+            inc = get_servo_position(srv) < pos ? inc : -inc;
+
+            set_position(srv, get_servo_position(srv) + inc);
+
+            if(get_servo_position(srv) <= pos+inc && get_servo_position(srv) >= pos-inc){
+                incrementState();
+            }
+        }
+    }
+
     private int x = 0;
     private int y = 0;
     private int X = 0;
