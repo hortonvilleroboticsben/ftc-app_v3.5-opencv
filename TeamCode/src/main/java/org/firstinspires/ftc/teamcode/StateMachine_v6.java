@@ -47,6 +47,8 @@ class StateMachine_v6 extends Subroutines_v13 {
     static BallColor[] ballArray = {null, null};
     static RelicRecoveryVuMark vuMark = null;
 
+    static Orientation O;
+
     @Override
     public String toString(){
         return "cn:"+current_number+"\tSIP:"+state_in_progress+"\tFlag:"+flag;
@@ -69,6 +71,7 @@ class StateMachine_v6 extends Subroutines_v13 {
     @Override
     public void init() {
         super.init();
+        O = IMUnav.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
     }
 
     void initializeMachine(){
@@ -146,6 +149,13 @@ class StateMachine_v6 extends Subroutines_v13 {
                 }
             }
         }
+    }
+
+    void GyroEndTurn(double degrees, double speed) {
+        StateMachine_v6 s = new StateMachine_v6();
+
+        s.Turn(degrees - 3, speed);
+        s.GyroTurn(3,10);
     }
 
     void Turn(double degrees, double speed) {
@@ -249,7 +259,7 @@ class StateMachine_v6 extends Subroutines_v13 {
         if (next_state_to_execute()) {
             DcMotor.RunMode r = mtrLeftDrive.getMode();
             run_using_drive_encoders();
-            Orientation o = IMUnav.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES);
+            Orientation o = O;
             double z = o.thirdAngle;
             telemetry.addData("rot", z);
             if(Math.abs(z) + 1 <= Math.abs(degrees)){
@@ -438,7 +448,7 @@ class StateMachine_v6 extends Subroutines_v13 {
 
             mRgba = new Mat(height, width, CvType.CV_8UC4);
 
-            rROI = new Rect((int) width / 3, (int)height / 3, (int) width / 3, (int) height / 3);
+            rROI = new Rect((int) width / 3, 2*(int)height / 3, (int) width / 3, (int) height / 3);
             centerROI = new Point(rROI.width / 2, rROI.height / 2);
             mROI = new Mat(mRgba, rROI);
 

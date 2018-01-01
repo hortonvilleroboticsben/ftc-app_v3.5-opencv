@@ -154,6 +154,9 @@ public class TeleOp_V2 extends StateMachine_v6 {
 
         ////////////////GLYPH MANIPULATOR//////////////////////
 
+        set_position(srvGr1,(gamepad2.right_trigger > 0.5) ? GR1OPEN : GR1CLOSED);
+        set_position(srvGr2,(gamepad2.right_trigger > 0.5) ? GR2OPEN : GR2CLOSED);
+
 //        if(gamepad1.dpad_left ^ gamepad1.dpad_right && !OS1) {
 //            OS1 = true;
 //            lrVal += gamepad1.dpad_left ? 0.005 : -0.005;
