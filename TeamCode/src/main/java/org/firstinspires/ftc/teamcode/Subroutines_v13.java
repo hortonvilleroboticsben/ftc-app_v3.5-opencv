@@ -295,7 +295,7 @@ class Subroutines_v13 extends OpMode {
         warning_generated = true;
         warning_message += message;
     }
-    //this is just here so vcs detects that I changed the program and I can commit
+    //this is just here so vcs detects that I changed the program and I can commit.
     private boolean a_warning_generated() {
         return warning_generated;
     }
