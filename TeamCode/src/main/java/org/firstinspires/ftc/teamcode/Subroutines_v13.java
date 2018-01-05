@@ -78,7 +78,7 @@ class Subroutines_v13 extends OpMode {
 
     //fsjfewj
 
-    final double UD_DOWN = .285;
+    final double UD_DOWN = .27;
     final double UD_UP = .735;
 
     final double LR_CENTER = .52;
@@ -97,6 +97,20 @@ class Subroutines_v13 extends OpMode {
     Image rgb = null;
     VuforiaLocalizer.CloseableFrame frame = null;
 
+
+    enum liftPos{
+        ONE(0),TWO(-921),THREE(-1438),FOUR(-2026);
+
+        private int val;
+
+        liftPos(int val){
+            this.val = val;
+        }
+
+        public int getVal(){
+            return val;
+        }
+    }
 
     @Override
     public void init() {

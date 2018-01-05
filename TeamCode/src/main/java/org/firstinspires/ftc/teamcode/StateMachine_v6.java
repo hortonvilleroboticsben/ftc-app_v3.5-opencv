@@ -43,6 +43,7 @@ class StateMachine_v6 extends Subroutines_v13 {
     private final double countsPerRev = 560;
     private final double wheelDiameter = 4.166666666666667;                      //double wheelDiameter = 4.19;
     private final double turnDiameter = 15.45;        // private final double turnDiameter = 13.95;
+    private int count = 0;
 
     static BallColor[] ballArray = {null, null};
     static RelicRecoveryVuMark vuMark = null;
@@ -361,13 +362,13 @@ class StateMachine_v6 extends Subroutines_v13 {
         }
     }
 
-    public void AbsoluteMotorMove(long encCount, double power){
+    public void AbsoluteMotorMove(DcMotor m,long encCount, double power){
         if(next_state_to_execute()) {
-            run_to_position(mtrArmFlip);
-            set_encoder_target(mtrArmFlip, (int) encCount);
-            set_power(mtrArmFlip, power);
-            if(has_encoder_reached(mtrArmFlip, encCount)) {
-                set_power(mtrArmFlip, 0);
+            run_to_position(m);
+            set_encoder_target(m, (int) encCount);
+            set_power(m, power);
+            if(has_encoder_reached(m, encCount)) {
+                set_power(m, 0);
                 incrementState();
             }
         }
@@ -418,9 +419,14 @@ class StateMachine_v6 extends Subroutines_v13 {
 
     void ProcessRelic() {
         if (next_state_to_execute()) {
-            vuMark = RelicRecoveryVuMark.from(relicTemplate);
-            telemetry.addData("vuMark", vuMark);
-            if(vuMark != RelicRecoveryVuMark.UNKNOWN) incrementState();
+            if(++count <= 5) {
+                vuMark = RelicRecoveryVuMark.from(relicTemplate);
+                telemetry.addData("vuMark", vuMark);
+                if (vuMark != RelicRecoveryVuMark.UNKNOWN) incrementState();
+            }else{
+                vuMark = RelicRecoveryVuMark.UNKNOWN;
+                incrementState();
+            }
         }
     }
 

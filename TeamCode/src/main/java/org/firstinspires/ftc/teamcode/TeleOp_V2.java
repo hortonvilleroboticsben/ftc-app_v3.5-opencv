@@ -47,19 +47,7 @@ public class TeleOp_V2 extends StateMachine_v6 {
     boolean phoneOS = false;
     double phonePos = 0;
 
-    enum liftPos{
-        ONE(0),TWO(-721),THREE(-1238),FOUR(-1826);
 
-        private int val;
-
-        liftPos(int val){
-            this.val = val;
-        }
-
-        public int getVal(){
-            return val;
-        }
-    }
 
     Orientation axes;
 
@@ -217,17 +205,16 @@ public class TeleOp_V2 extends StateMachine_v6 {
         if (isLifting) {
             run_to_position(mtrLift);
             set_encoder_target(mtrLift, liftLevel.getVal());
-            set_power(mtrLift, 0.5);
             if (get_encoder_count(mtrLift) > mtrLift.getTargetPosition()) {
                 if (has_encoder_reached(mtrLift, liftLevel.getVal())) {
                     run_using_encoder(mtrLift);
                     isLifting = false;
-                }
+                }else set_power(mtrLift, .5);
             } else {
                 if (!has_encoder_reached(mtrLift, liftLevel.getVal())) {
                     run_using_encoder(mtrLift);
                     isLifting = false;
-                }
+                }else set_power(mtrLift, .4);
             }
         }
 

@@ -15,6 +15,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 import org.opencv.android.BaseLoaderCallback;
@@ -42,6 +43,8 @@ public class Autonomous_v2 extends StateMachine_v6 {
     public void init() {
         super.init();
 
+        set_position(srvGr1,GR1CLOSED);
+        set_position(srvGr2,GR2CLOSED);
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
@@ -155,6 +158,7 @@ public class Autonomous_v2 extends StateMachine_v6 {
         drive.ServoMove(srvPhone, CAM_VUMARK);
         drive.Pause(1000);
         drive.SetFlag(vision, "Read Relic");
+        drive.AbsoluteMotorMove(mtrLift,liftPos.TWO.getVal(),0.3);
 
         vision.WaitForFlag("Read Relic");
         vision.ProcessRelic();
@@ -175,6 +179,7 @@ public class Autonomous_v2 extends StateMachine_v6 {
 //            arm.ServoMove(srvUD, UD_DOWN + .04);
 //            arm.Pause(800);
 //            arm.ServoMove(srvUD, UD_DOWN);
+
 
         if(Alliance == BLUE) {
             //TODO: DRIVE must grab GLYPH.
@@ -227,6 +232,26 @@ public class Autonomous_v2 extends StateMachine_v6 {
                 drive.Turn(-89.5,.2);
             }
         }
+        if(vuMark != null) {
+            if (vuMark ==RelicRecoveryVuMark.LEFT) {
+                drive.Turn(25, 0.2);
+                drive.Drive(-8.5, 0.2);
+                drive.SetFlag(glyph,"open grabber");
+            } else if (vuMark == RelicRecoveryVuMark.RIGHT) {
+                drive.Turn(-25, 0.2);
+                drive.Drive(-9, 0.2);
+                drive.SetFlag(glyph,"open grabber");
+            } else {
+                drive.Turn(5,0.2);
+                drive.Drive(-9, 0.2);
+                drive.SetFlag(glyph,"open grabber");
+            }
+        }
+        glyph.WaitForFlag("open grabber");
+        glyph.ServoMove(srvGr1,GR1OPEN);
+        glyph.ServoMove(srvGr2,GR2OPEN);
+        glyph.Pause(200);
+        glyph.Drive(10,0.2);
 
         if(ballArray[0] != null && ballArray[1] != null)
             telemetry.addData("ballArray", Arrays.toString(ballArray));
