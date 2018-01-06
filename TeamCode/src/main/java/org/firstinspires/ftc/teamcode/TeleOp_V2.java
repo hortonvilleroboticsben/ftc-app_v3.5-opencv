@@ -47,6 +47,8 @@ public class TeleOp_V2 extends StateMachine_v6 {
     boolean phoneOS = false;
     double phonePos = 0;
 
+    long milliSeocondTimeout = 0;
+
 
 
     Orientation axes;
@@ -200,26 +202,35 @@ public class TeleOp_V2 extends StateMachine_v6 {
                     liftLevel = up ? liftPos.FOUR : liftPos.THREE;
                     break;
             }
+            milliSeocondTimeout = milliSeocondTimeout == 0 ? 1500 : milliSeocondTimeout + 800;
         } else if (!gamepad2.x && !gamepad2.a) liftOS = false;
 
         if (isLifting) {
             run_to_position(mtrLift);
             set_encoder_target(mtrLift, liftLevel.getVal());
-            if (get_encoder_count(mtrLift) > mtrLift.getTargetPosition()) {
-                if (has_encoder_reached(mtrLift, liftLevel.getVal())) {
-                    run_using_encoder(mtrLift);
-                    isLifting = false;
-                }else set_power(mtrLift, .5);
-            } else {
-                if (!has_encoder_reached(mtrLift, liftLevel.getVal())) {
-                    run_using_encoder(mtrLift);
-                    isLifting = false;
-                }else set_power(mtrLift, .4);
+            if (!waitHasFinished(milliSeocondTimeout)) {
+                if (get_encoder_count(mtrLift) > mtrLift.getTargetPosition()) {
+                    if (has_encoder_reached(mtrLift, liftLevel.getVal())) {
+                        run_using_encoder(mtrLift);
+                        isLifting = false;
+                    } else set_power(mtrLift, .5);
+                } else {
+                    if (!has_encoder_reached(mtrLift, liftLevel.getVal())) {
+                        run_using_encoder(mtrLift);
+                        isLifting = false;
+                    } else set_power(mtrLift, .5);
+                }
+            }else{
+                run_using_encoder(mtrLift);
+                isLifting = false;
             }
+        }else{
+            milliSeocondTimeout = 0;
+            initOS = true;
         }
 
-        telemetry.addData("lrVal","%.3f", lrVal);
-        telemetry.addData("udVal","%.3f", udVal);
-        telemetry.addData("phoneVal","%.3f", phonePos);
+        telemetry.addData("liftEnc", get_encoder_count(mtrLift));
+        telemetry.addData("timeout", milliSeocondTimeout);
+        telemetry.addData("initOS", initOS);
     }
 }

@@ -158,7 +158,8 @@ public class Autonomous_v2 extends StateMachine_v6 {
         drive.ServoMove(srvPhone, CAM_VUMARK);
         drive.Pause(1000);
         drive.SetFlag(vision, "Read Relic");
-        drive.AbsoluteMotorMove(mtrLift,liftPos.TWO.getVal(),0.3);
+
+        arm.AbsoluteMotorMove(mtrLift,liftPos.TWO.getVal(),0.8);
 
         vision.WaitForFlag("Read Relic");
         vision.ProcessRelic();
@@ -175,7 +176,8 @@ public class Autonomous_v2 extends StateMachine_v6 {
 
         arm.WaitForFlag("Jewels Read");
         arm.ServoMove(srvLR, LR_CENTER);
-        arm.ServoIncrementalMove(srvUD, UD_DOWN, 0.01);
+        arm.ServoMove(srvUD, UD_DOWN);
+        arm.Pause(800);
 //            arm.ServoMove(srvUD, UD_DOWN + .04);
 //            arm.Pause(800);
 //            arm.ServoMove(srvUD, UD_DOWN);
@@ -198,10 +200,20 @@ public class Autonomous_v2 extends StateMachine_v6 {
 
             if (StartPos == 1) {
                 drive.Drive(35.75, 0.2);
+                drive.SetFlag(arm, "Off Platform");
+
+                arm.WaitForFlag("Off Platform");
+                arm.AbsoluteMotorMove(mtrLift, liftPos.ONE.getVal()+500, 0.5);
+
                 drive.Turn(-88, 0.2);
             }
             else if(StartPos == 2){
                 drive.Drive(24,.2);
+                drive.SetFlag(arm, "Off Platform");
+
+                arm.WaitForFlag("Off Platform");
+                arm.AbsoluteMotorMove(mtrLift, liftPos.ONE.getVal()+500, 0.5);
+
                 drive.Turn(-89,.2);
                 drive.Drive(11.8,.2);
                 drive.Turn(-90.5,.2);
@@ -224,32 +236,43 @@ public class Autonomous_v2 extends StateMachine_v6 {
             drive.ServoMove(srvPhone, CAM_FRONT);
             if(StartPos == 1) {
                 drive.Drive(-34.5, 0.2);
+                drive.SetFlag(arm, "Off Platform");
+
+                arm.WaitForFlag("Off Platform");
+                arm.AbsoluteMotorMove(mtrLift, liftPos.ONE.getVal()+500, 0.5);
+
                 drive.Turn(-88, 0.2);
             }else if(StartPos == 2){
                 drive.Drive(-24,.2);
+                drive.SetFlag(arm, "Off Platform");
+
+                arm.WaitForFlag("Off Platform");
+                arm.AbsoluteMotorMove(mtrLift, liftPos.ONE.getVal()+500, 0.5);
+
                 drive.Turn(88,.2);
                 drive.Drive(-11.3,.2);
                 drive.Turn(-89.5,.2);
             }
         }
         if(vuMark != null) {
-            if (vuMark ==RelicRecoveryVuMark.LEFT) {
+            if (vuMark == RelicRecoveryVuMark.LEFT) {
                 drive.Turn(25, 0.2);
                 drive.Drive(-8.5, 0.2);
                 drive.SetFlag(glyph,"open grabber");
             } else if (vuMark == RelicRecoveryVuMark.RIGHT) {
-                drive.Turn(-25, 0.2);
-                drive.Drive(-9, 0.2);
+                drive.Turn(-23, 0.2);
+                drive.Drive(-6, 0.2);
                 drive.SetFlag(glyph,"open grabber");
             } else {
                 drive.Turn(5,0.2);
-                drive.Drive(-9, 0.2);
+                drive.Drive(-8, 0.2);
                 drive.SetFlag(glyph,"open grabber");
             }
         }
         glyph.WaitForFlag("open grabber");
         glyph.ServoMove(srvGr1,GR1OPEN);
         glyph.ServoMove(srvGr2,GR2OPEN);
+        glyph.AbsoluteMotorMove(mtrLift, liftPos.ONE.getVal(), 0.5);
         glyph.Pause(200);
         glyph.Drive(10,0.2);
 
@@ -261,5 +284,10 @@ public class Autonomous_v2 extends StateMachine_v6 {
             telemetry.addData("vuMark", vuMark.toString());
         else
             telemetry.addData("vuMark", "null");
+
+        telemetry.addData("drive", drive);
+        telemetry.addData("vision", vision);
+        telemetry.addData("arm", arm);
+        telemetry.addData("glyph", glyph);
     }
 }

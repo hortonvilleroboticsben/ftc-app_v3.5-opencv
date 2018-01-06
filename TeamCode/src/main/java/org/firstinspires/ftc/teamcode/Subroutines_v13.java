@@ -80,10 +80,10 @@ class Subroutines_v13 extends OpMode {
 
     //fsjfewj
 
-    final double UD_DOWN = .27;
+    final double UD_DOWN = .260;
     final double UD_UP = .735;
 
-    final double LR_CENTER = .52;
+    final double LR_CENTER = .535;
     final double LR_LEFT = .415;
     final double LR_RIGHT = .63;
     final double LR_HOME = .49;
@@ -103,7 +103,7 @@ class Subroutines_v13 extends OpMode {
 
 
     enum liftPos{
-        ONE(0),TWO(-921),THREE(-1438),FOUR(-2026);
+        ONE(0),TWO(-1165),THREE(-1863),FOUR(-2602);
 
         private int val;
 

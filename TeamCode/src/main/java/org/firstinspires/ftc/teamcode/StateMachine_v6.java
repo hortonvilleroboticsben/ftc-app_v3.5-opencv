@@ -366,10 +366,18 @@ class StateMachine_v6 extends Subroutines_v13 {
         if(next_state_to_execute()) {
             run_to_position(m);
             set_encoder_target(m, (int) encCount);
-            set_power(m, power);
-            if(has_encoder_reached(m, encCount)) {
-                set_power(m, 0);
-                incrementState();
+            if (get_encoder_count(m) > m.getTargetPosition()) {
+                if (has_encoder_reached(m, encCount)) {
+                    run_using_encoder(m);
+                    set_power(m,0);
+                    incrementState();
+                } else set_power(m, power);
+            } else {
+                if (!has_encoder_reached(m, encCount)) {
+                    run_using_encoder(m);
+                    set_power(m,0);
+                    incrementState();
+                } else set_power(m, power);
             }
         }
     }

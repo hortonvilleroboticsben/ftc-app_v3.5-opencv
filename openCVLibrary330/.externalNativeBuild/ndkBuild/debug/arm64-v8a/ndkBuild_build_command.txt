@@ -1,14 +1,14 @@
-Executable : C:\Users\sam\AppData\Local\Android\sdk\ndk-bundle\ndk-build.cmd
+Executable : C:\Users\kungl\AppData\Local\Android\sdk\ndk-bundle\ndk-build.cmd
 arguments : 
 NDK_PROJECT_PATH=null
-APP_BUILD_SCRIPT=C:\Users\sam\AndroidStudioProjects\ftc-app\TeamCode\jni\Android.mk
-NDK_APPLICATION_MK=C:\Users\sam\AndroidStudioProjects\ftc-app\TeamCode\jni\Application.mk
+APP_BUILD_SCRIPT=C:\Users\kungl\StudioProjects\ftc-app_v3.5-opencv\TeamCode\jni\Android.mk
+NDK_APPLICATION_MK=C:\Users\kungl\StudioProjects\ftc-app_v3.5-opencv\TeamCode\jni\Application.mk
 APP_ABI=arm64-v8a
 NDK_ALL_ABIS=arm64-v8a
 NDK_DEBUG=1
 APP_PLATFORM=android-21
-NDK_OUT=C:/Users/sam/AndroidStudioProjects/ftc-app/openCVLibrary330/build/intermediates/ndkBuild/debug/obj
-NDK_LIBS_OUT=C:\Users\sam\AndroidStudioProjects\ftc-app\openCVLibrary330\build\intermediates\ndkBuild\debug\lib
+NDK_OUT=C:/Users/kungl/StudioProjects/ftc-app_v3.5-opencv/openCVLibrary330/build/intermediates/ndkBuild/debug/obj
+NDK_LIBS_OUT=C:\Users\kungl\StudioProjects\ftc-app_v3.5-opencv\openCVLibrary330\build\intermediates\ndkBuild\debug\lib
 APP_SHORT_COMMANDS=false
 LOCAL_SHORT_COMMANDS=false
 -B
