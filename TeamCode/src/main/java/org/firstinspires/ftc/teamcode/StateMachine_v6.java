@@ -378,6 +378,7 @@ class StateMachine_v6 extends Subroutines_v13 {
                     set_power(m,0);
                     incrementState();
                 } else set_power(m, power);
+
             }
         }
     }
