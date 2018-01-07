@@ -83,7 +83,7 @@ class Subroutines_v13 extends OpMode {
     final double UD_DOWN = .260;
     final double UD_UP = .735;
 
-    final double LR_CENTER = .535;
+    final double LR_CENTER = .53;
     final double LR_LEFT = .415;
     final double LR_RIGHT = .63;
     final double LR_HOME = .49;
@@ -98,9 +98,7 @@ class Subroutines_v13 extends OpMode {
 
     public Mat lines;
 
-    Image rgb = null;
     VuforiaLocalizer.CloseableFrame frame = null;
-
 
     enum liftPos{
         ONE(0),TWO(-1165),THREE(-1863),FOUR(-2602);

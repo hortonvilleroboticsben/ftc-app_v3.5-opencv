@@ -367,13 +367,13 @@ class StateMachine_v6 extends Subroutines_v13 {
             run_to_position(m);
             set_encoder_target(m, (int) encCount);
             if (get_encoder_count(m) > m.getTargetPosition()) {
-                if (has_encoder_reached(m, encCount)) {
+                if (Math.abs(m.getCurrentPosition()) > (int) Math.abs(encCount) - 100) {
                     run_using_encoder(m);
                     set_power(m,0);
                     incrementState();
                 } else set_power(m, power);
             } else {
-                if (!has_encoder_reached(m, encCount)) {
+                if (!(Math.abs(m.getCurrentPosition()) > (int) Math.abs(encCount) + 100)) {
                     run_using_encoder(m);
                     set_power(m,0);
                     incrementState();
@@ -388,7 +388,9 @@ class StateMachine_v6 extends Subroutines_v13 {
             inc = Math.abs(inc);
             inc = get_servo_position(srv) < pos ? inc : -inc;
 
-            set_position(srv, get_servo_position(srv) + inc);
+            if(waitHasFinished(3)) {
+                set_position(srv, get_servo_position(srv) + inc);
+            }
 
             if(get_servo_position(srv) <= pos+inc && get_servo_position(srv) >= pos-inc){
                 incrementState();
