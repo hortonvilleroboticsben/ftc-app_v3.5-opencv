@@ -73,10 +73,10 @@ class Subroutines_v13 extends OpMode {
     final byte FILTERED = 1;
     final byte CACHE = 0;
 
-    final double GR1CLOSED = 0.143;
-    final double GR1OPEN = 1;
-    final double GR2CLOSED = .143;
-    final double GR2OPEN = 1;
+    final double GR1CLOSED = 0.875;//.95
+    final double GR1OPEN = 0.21;
+    final double GR2CLOSED = GR1CLOSED;
+    final double GR2OPEN = GR1OPEN;
 
     //fsjfewj
 
@@ -101,7 +101,7 @@ class Subroutines_v13 extends OpMode {
     VuforiaLocalizer.CloseableFrame frame = null;
 
     enum liftPos{
-        ONE(0),TWO(-1165),THREE(-1863),FOUR(-2602);
+        ONE(0),TWO(-1165),THREE(-1863),FOUR(-2750);
 
         private int val;
 

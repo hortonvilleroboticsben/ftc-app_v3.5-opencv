@@ -182,6 +182,8 @@ public class TeleOp_V2 extends StateMachine_v6 {
 
         //////////////////////LIFTING//////////////////////////
 
+        if(!isLifting && gamepad2.guide && gamepad2.back) reset_encoders(mtrLift);
+
         if(!isLifting) set_power(mtrLift, .75*gamepad2.right_stick_y);
 
         if (((gamepad2.x ^ gamepad2.a) && !gamepad2.start) && !liftOS) {

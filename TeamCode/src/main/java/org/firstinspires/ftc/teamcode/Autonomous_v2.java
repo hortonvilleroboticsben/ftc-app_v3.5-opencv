@@ -43,9 +43,6 @@ public class Autonomous_v2 extends StateMachine_v6 {
     public void init() {
         super.init();
 
-        set_position(srvGr1,GR1CLOSED);
-        set_position(srvGr2,GR2CLOSED);
-
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
 
@@ -159,6 +156,9 @@ public class Autonomous_v2 extends StateMachine_v6 {
         drive.Pause(1000);
         drive.SetFlag(vision, "Read Relic");
 
+        arm.ServoMove(srvGr1,GR1CLOSED);
+        arm.ServoMove(srvGr2,GR2CLOSED);
+        arm.Pause(500);
         arm.AbsoluteMotorMove(mtrLift,liftPos.TWO.getVal(),0.8);
 
         vision.WaitForFlag("Read Relic");
