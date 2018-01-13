@@ -257,15 +257,15 @@ public class Autonomous_v2 extends StateMachine_v6 {
         if(vuMark != null) {
             if (vuMark == RelicRecoveryVuMark.LEFT) {
                 drive.Turn(23, 0.2);
-                drive.Drive(-6.5, 0.2);
+                drive.Drive(-4.5, 0.2);
                 drive.SetFlag(glyph,"open grabber");
             } else if (vuMark == RelicRecoveryVuMark.RIGHT) {
                 drive.Turn(-20, 0.2);
-                drive.Drive(-6, 0.2);
+                drive.Drive(-4.5, 0.2);
                 drive.SetFlag(glyph,"open grabber");
             } else {
                 drive.Turn(3.25,0.2);
-                drive.Drive(-6.25, 0.2);
+                drive.Drive(-6, 0.2);
                 drive.SetFlag(glyph,"open grabber");
             }
         }

@@ -4,6 +4,7 @@ include $(CLEAR_VARS)
 
 export OPENCV_ANDROID_SDK=C:\Users\sam\opencv-3.3.0-android-sdk\OpenCV-android-sdk
 
+
 OPENCV_INSTALL_MODULES:=on
 #OPENCV_CAMERA_MODULES:=on
 #OPENCV_LIB_TYPE:=SHARED
