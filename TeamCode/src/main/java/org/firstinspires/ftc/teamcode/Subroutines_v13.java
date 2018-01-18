@@ -73,14 +73,14 @@ class Subroutines_v13 extends OpMode {
     final byte FILTERED = 1;
     final byte CACHE = 0;
 
-    final double GR1CLOSED = 0.875;//.95
+    final double GR1CLOSED = 0.855;//.95
     final double GR1OPEN = 0.21;
     final double GR2CLOSED = GR1CLOSED;
     final double GR2OPEN = GR1OPEN;
 
     //fsjfewj
 
-    final double UD_DOWN = .260;
+    final double UD_DOWN = .20;
     final double UD_UP = .735;
 
     final double LR_CENTER = .53;

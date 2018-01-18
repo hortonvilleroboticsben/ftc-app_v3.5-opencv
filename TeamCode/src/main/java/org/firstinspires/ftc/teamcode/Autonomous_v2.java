@@ -176,7 +176,7 @@ public class Autonomous_v2 extends StateMachine_v6 {
 
         arm.WaitForFlag("Jewels Read");
         arm.ServoMove(srvLR, LR_CENTER);
-        arm.ServoIncrementalMove(srvUD, UD_DOWN, 0.005);
+        arm.ServoIncrementalMove(srvUD, UD_DOWN, 0.02);
         arm.Pause(150);
 //            arm.ServoMove(srvUD, UD_DOWN + .04);
 //            arm.Pause(800);
@@ -208,7 +208,7 @@ public class Autonomous_v2 extends StateMachine_v6 {
                 drive.Turn(-88, 0.2);
             }
             else if(StartPos == 2){
-                drive.Drive(24,.2);
+                drive.Drive(26,.2);
                 drive.SetFlag(arm, "Off Platform");
 
                 arm.WaitForFlag("Off Platform");
@@ -217,6 +217,7 @@ public class Autonomous_v2 extends StateMachine_v6 {
                 drive.Turn(-89,.2);
                 drive.Drive(11.8,.2);
                 drive.Turn(-90,.2);
+                drive.Drive(2,0.2);
             }
 
 /////////////////////////RED ALLIANCE////////////////////////////////////
@@ -250,22 +251,22 @@ public class Autonomous_v2 extends StateMachine_v6 {
                 arm.AbsoluteMotorMove(mtrLift, liftPos.ONE.getVal()+500, 0.5);
 
                 drive.Turn(86.5,.2);
-                drive.Drive(-9,.2);
+                drive.Drive(-9.33,.2);
                 drive.Turn(-88,.2);
             }
         }
         if(vuMark != null) {
             if (vuMark == RelicRecoveryVuMark.LEFT) {
-                drive.Turn(23, 0.2);
+                drive.Turn(29, 0.2);
                 drive.Drive(-4.5, 0.2);
                 drive.SetFlag(glyph,"open grabber");
             } else if (vuMark == RelicRecoveryVuMark.RIGHT) {
-                drive.Turn(-20, 0.2);
-                drive.Drive(-4.5, 0.2);
+                drive.Turn(-24, 0.2);
+                drive.Drive(-4.75, 0.2);
                 drive.SetFlag(glyph,"open grabber");
             } else {
                 drive.Turn(3.25,0.2);
-                drive.Drive(-6, 0.2);
+                drive.Drive(-4.5, 0.2);
                 drive.SetFlag(glyph,"open grabber");
             }
         }

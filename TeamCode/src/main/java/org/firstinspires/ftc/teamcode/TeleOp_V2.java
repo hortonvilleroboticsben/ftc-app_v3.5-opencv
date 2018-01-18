@@ -115,32 +115,37 @@ public class TeleOp_V2 extends StateMachine_v6 {
 
         set_position(srvClaw, (gamepad2.left_trigger > 0.5) ? 0.0 : 1.0);
 
-        set_power(mtrArmSpin, (Math.abs(gamepad2.left_stick_x) <= .2) ? 0 : gamepad2.left_stick_x * .5);
+        if(!gamepad2.left_stick_button) {
+            set_power(mtrArmSpin, (Math.abs(gamepad2.left_stick_x) <= .2) ? 0 : gamepad2.left_stick_x * .5);
 
-        set_power(mtrArmFlip, ((Math.abs(gamepad2.left_stick_y) <= .2)) ? 0 : gamepad2.left_stick_y * .2);
+            set_power(mtrArmFlip, ((Math.abs(gamepad2.left_stick_y) <= .2)) ? 0 : gamepad2.left_stick_y * .2);
+        }else{
+            set_power(mtrArmSpin, (Math.abs(gamepad2.left_stick_x) <= .2) ? 0 : gamepad2.left_stick_x * .1);
 
+            set_power(mtrArmFlip, ((Math.abs(gamepad2.left_stick_y) <= .2)) ? 0 : gamepad2.left_stick_y * .1);
+        }
         set_position(srvExtend, gamepad2.dpad_up ? 1 : gamepad2.dpad_down ? -1 : 0);
 
 
         /////////////////AUTOBALANCE//////////////////////
 
-        if(gamepad1.guide && gamepad1.a && !gamepad1.start && !balanceOS) {
-            balanceOS = true;
-            isBalancing = !isBalancing;
-        } else if(!gamepad1.guide && !gamepad1.a)balanceOS = false;
-
-        if(isBalancing) {
-            if(axes.secondAngle > 3) {
-                mtrLeftDrive.setPower(0.2);
-                mtrRightDrive.setPower(0.2);
-            } else if(axes.secondAngle < -3) {
-                mtrLeftDrive.setPower(-0.2);
-                mtrRightDrive.setPower(-0.2);
-            } else {
-                isBalancing = false;
-            }
-
-        }
+//        if(gamepad1.guide && gamepad1.a && !gamepad1.start && !balanceOS) {
+//            balanceOS = true;
+//            isBalancing = !isBalancing;
+//        } else if(!gamepad1.guide && !gamepad1.a)balanceOS = false;
+//
+//        if(isBalancing) {
+//            if(axes.secondAngle > 3) {
+//                mtrLeftDrive.setPower(0.2);
+//                mtrRightDrive.setPower(0.2);
+//            } else if(axes.secondAngle < -3) {
+//                mtrLeftDrive.setPower(-0.2);
+//                mtrRightDrive.setPower(-0.2);
+//            } else {
+//                isBalancing = false;
+//            }
+//
+//        }
 
         ////////////////GLYPH MANIPULATOR//////////////////////
 
@@ -184,7 +189,10 @@ public class TeleOp_V2 extends StateMachine_v6 {
 
         if(!isLifting && gamepad2.guide && gamepad2.back) reset_encoders(mtrLift);
 
-        if(!isLifting) set_power(mtrLift, .75*gamepad2.right_stick_y);
+        if(!gamepad2.right_stick_button)
+            if(!isLifting) set_power(mtrLift, .75*gamepad2.right_stick_y);
+        else
+            if(!isLifting) set_power(mtrLift, .1*gamepad2.right_stick_y);
 
         if (((gamepad2.x ^ gamepad2.a) && !gamepad2.start) && !liftOS) {
             isLifting = true;
