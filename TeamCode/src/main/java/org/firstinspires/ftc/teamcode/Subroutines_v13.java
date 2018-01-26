@@ -80,7 +80,7 @@ class Subroutines_v13 extends OpMode {
     final byte FILTERED = 1;
     final byte CACHE = 0;
 
-    final double GR1CLOSED = 0.2;//.95
+    final double GR1CLOSED = 0.1;//.95
     final double GR1OPEN = 1.0;
     final double GR2CLOSED = 1-GR1CLOSED;
     final double GR2OPEN = 1-GR1OPEN;
@@ -331,6 +331,10 @@ class Subroutines_v13 extends OpMode {
             telemetry.addData("", getWarning_message());
         }
     } // update_telemetry
+
+    public boolean isWithin(int val, int high, int low){
+        return val <= high && val >= low;
+    }
 
     public boolean isPressed(TouchSensor touchSensor) {
         return touchSensor != null && touchSensor.isPressed();

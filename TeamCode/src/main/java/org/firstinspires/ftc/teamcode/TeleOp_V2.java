@@ -14,6 +14,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
+import java.util.Arrays;
+
 
 @TeleOp(name = "teleOp", group = "Competition")
 public class TeleOp_V2 extends StateMachine_v6 {
@@ -34,6 +36,8 @@ public class TeleOp_V2 extends StateMachine_v6 {
 
     boolean balanceOS = false;
     boolean isBalancing = false;
+    boolean balanceInit = true;
+    int[] BalEnc = new int[2];
 
     boolean liftOS = false;
     boolean isLifting = false;
@@ -106,8 +110,10 @@ public class TeleOp_V2 extends StateMachine_v6 {
 
         speedRatio = gamepad1.right_trigger > .5 ^ gamepad1.right_bumper ? gamepad1.right_bumper ? .25 : 1. : .5;
 
-        set_power(mtrLeftDrive, gamepad1.left_stick_y * speedRatio);
-        set_power(mtrRightDrive, gamepad1.right_stick_y * speedRatio);
+        if(!isBalancing) {
+            set_power(mtrLeftDrive, gamepad1.left_stick_y * speedRatio);
+            set_power(mtrRightDrive, gamepad1.right_stick_y * speedRatio);
+        }
 
         ////////////////ARM MOTION/////////////////
 
@@ -129,23 +135,27 @@ public class TeleOp_V2 extends StateMachine_v6 {
 
         /////////////////AUTOBALANCE//////////////////////
 
-//        if(gamepad1.guide && gamepad1.a && !gamepad1.start && !balanceOS) {
-//            balanceOS = true;
-//            isBalancing = !isBalancing;
-//        } else if(!gamepad1.guide && !gamepad1.a)balanceOS = false;
-//
-//        if(isBalancing) {
-//            if(axes.secondAngle > 3) {
-//                mtrLeftDrive.setPower(0.2);
-//                mtrRightDrive.setPower(0.2);
-//            } else if(axes.secondAngle < -3) {
-//                mtrLeftDrive.setPower(-0.2);
-//                mtrRightDrive.setPower(-0.2);
-//            } else {
-//                isBalancing = false;
-//            }
-//
-//        }
+        if(gamepad1.guide && gamepad1.a && !gamepad1.start && !balanceOS) {
+            balanceOS = true;
+            isBalancing = !isBalancing;
+            balanceInit = true;
+            run_using_drive_encoders();
+        } else if(!gamepad1.guide && !gamepad1.a)balanceOS = false;
+
+        if(isBalancing) {
+           run_drive_to_position();
+           if(balanceInit){
+               BalEnc[0] = get_encoder_count(mtrLeftDrive);
+               BalEnc[1] = get_encoder_count(mtrRightDrive);
+               balanceInit = false;
+           }
+           set_drive_target(BalEnc[0], BalEnc[1]);
+           if(isWithin(get_encoder_count(mtrLeftDrive), BalEnc[0]+10, BalEnc[0]-10) &&
+              isWithin(get_encoder_count(mtrRightDrive), BalEnc[1]+10, BalEnc[1]-10))
+                set_drive_power(.15, .15);
+           else
+                set_drive_power(0,0);
+        }
 
         ////////////////GLYPH MANIPULATOR//////////////////////
 
@@ -239,8 +249,11 @@ public class TeleOp_V2 extends StateMachine_v6 {
             initOS = true;
         }
 
-        telemetry.addData("liftEnc", get_encoder_count(mtrLift));
-        telemetry.addData("timeout", milliSeocondTimeout);
-        telemetry.addData("initOS", initOS);
+        telemetry.addData("isBalancing", isBalancing);
+        telemetry.addData("balanceOS", balanceOS);
+        telemetry.addData("balanceInit", balanceInit);
+        telemetry.addData("encTarget", Arrays.toString(BalEnc));
+        telemetry.addData("currEnc", Arrays.toString(new int[]{get_encoder_count(mtrLeftDrive),
+                                                                       get_encoder_count(mtrRightDrive)}));
     }
 }
