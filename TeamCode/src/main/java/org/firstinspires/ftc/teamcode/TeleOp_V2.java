@@ -38,7 +38,7 @@ public class TeleOp_V2 extends StateMachine_v6 {
     boolean liftOS = false;
     boolean isLifting = false;
     liftPos liftLevel = liftPos.ONE;
-    
+
     boolean OS1 = false;
     double lrVal = 0.45 ;
     boolean OS2 = false;
@@ -146,6 +146,17 @@ public class TeleOp_V2 extends StateMachine_v6 {
 
         set_position(srvGr1,(gamepad2.right_trigger > 0.5) ? GR1OPEN : GR1CLOSED);
         set_position(srvGr2,(gamepad2.right_trigger > 0.5) ? GR2OPEN : GR2CLOSED);
+        if(gamepad2.right_trigger > 0.5){
+            if(liftLevel.equals(liftPos.CARRY)) {
+                liftLevel = liftPos.ONE;
+                isLifting = true;
+            }
+        }else{
+            if(liftLevel.equals(liftPos.ONE)) {
+                liftLevel = liftPos.CARRY;
+                isLifting = true;
+            }
+        }
 
 //        if(gamepad1.dpad_left ^ gamepad1.dpad_right && !OS1) {
 //            OS1 = true;
