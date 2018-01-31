@@ -15,6 +15,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
+import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
@@ -44,6 +45,8 @@ class StateMachine_v6 extends Subroutines_v13 {
     private final double wheelDiameter = 4.166666666666667;                      //double wheelDiameter = 4.19;
     private final double turnDiameter = 15.45;        // private final double turnDiameter = 13.95;
     private int count = 0;
+
+    private int countA = 0;
 
     static BallColor[] ballArray = {null, null};
     static RelicRecoveryVuMark vuMark = null;
@@ -456,6 +459,7 @@ class StateMachine_v6 extends Subroutines_v13 {
             ColorBlobDetector mDetectorRed;
             ColorBlobDetector mDetectorBlue;
 
+
             Mat mSpectrumRed;
 
             Scalar CONTOUR_COLOR_RED;
@@ -611,6 +615,71 @@ class StateMachine_v6 extends Subroutines_v13 {
             Imgproc.rectangle(mRgba, new Point(rROI.x, rROI.y), new Point(rROI.x + rROI.width, rROI.y + rROI.height), ROI_COLOR, 16);
             //writeImage(mRgba);
 
+        }
+    }
+
+    public void centerOnTriangle(Mat inputFrame, int alliance) {
+        if(next_state_to_execute()) {
+            if(alliance == 1) {
+                Mat mRed = inputFrame;
+                ColorLineDetector lDetectorRed = new ColorLineDetector();
+                lDetectorRed.processLines(mRed);
+                lDetectorRed.showLines(mRed);
+                if(lDetectorRed.clusters.clusterGroups.size() > 1) {
+                    if (lDetectorRed.centerP.x > (mRed.cols() / 2) + 15) {
+                        set_drive_power(0.1, 0.1);
+                        countA = 0;
+                    } else if (lDetectorRed.centerP.x < (mRed.cols() / 2) - 15) {
+                        set_drive_power(-0.1, -0.1);
+                        countA = 0;
+                    } else {
+                        countA++;
+                    }
+
+                    if (countA > 3) {
+                        countA = 0;
+                        set_drive_power(0, 0);
+                        reset_drive_encoders();
+                        incrementState();
+                    }
+                }
+                else if(lDetectorRed.clusters.clusterGroups.get(0).center().x > mRed.cols()/2) {
+                    set_drive_power(0.1, 0.1);
+                }
+                else if(lDetectorRed.clusters.clusterGroups.get(0).center().x < mRed.cols()/2) {
+                    set_drive_power(-0.1, -0.1);
+                }
+            }
+            else if(alliance == 2) {
+                Mat mBlue = inputFrame;
+                ColorLineDetector lDetectorBlue = new ColorLineDetector();
+                lDetectorBlue.processLines(mBlue);
+                lDetectorBlue.showLines(mBlue);
+                if(lDetectorBlue.clusters.clusterGroups.size() > 1) {
+                    if (lDetectorBlue.centerP.x > (mBlue.cols() / 2) + 15) {
+                        set_drive_power(0.1, 0.1);
+                        countA = 0;
+                    } else if (lDetectorBlue.centerP.x < (mBlue.cols() / 2) - 15) {
+                        set_drive_power(-0.1, -0.1);
+                        countA = 0;
+                    } else {
+                        countA++;
+                    }
+
+                    if (countA > 3) {
+                        countA = 0;
+                        set_drive_power(0, 0);
+                        reset_drive_encoders();
+                        incrementState();
+                    }
+                }
+                else if(lDetectorBlue.clusters.clusterGroups.get(0).center().x > mBlue.cols()/2) {
+                    set_drive_power(0.1, 0.1);
+                }
+                else if(lDetectorBlue.clusters.clusterGroups.get(0).center().x < mBlue.cols()/2) {
+                    set_drive_power(-0.1, -0.1);
+                }
+            }
         }
     }
 

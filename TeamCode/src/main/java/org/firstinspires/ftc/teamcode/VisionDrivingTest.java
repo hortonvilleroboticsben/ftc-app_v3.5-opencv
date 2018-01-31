@@ -9,7 +9,6 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.vuforia.PIXEL_FORMAT;
 import com.vuforia.Vuforia;
 
-import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
@@ -27,7 +26,7 @@ import java.util.Arrays;
 import static org.firstinspires.ftc.robotcontroller.external.samples.ConceptVuMarkIdentification.TAG;
 
 @Autonomous(name = "Auto", group = "Final")
-public class Autonomous_v2 extends StateMachine_v6 {
+public class VisionDrivingTest extends StateMachine_v6 {
     int question_number = 1;
     byte Alliance = 0;
     boolean btnOS;
@@ -149,146 +148,6 @@ public class Autonomous_v2 extends StateMachine_v6 {
     public void loop() {
         vision.initializeMachine();
         drive.initializeMachine();
-        arm.initializeMachine();
-        glyph.initializeMachine();
-
-        drive.ServoMove(srvPhone, CAM_VUMARK);
-        drive.Pause(1000);
-        drive.SetFlag(vision, "Read Relic");
-
-        arm.ServoMove(srvGr1,GR1CLOSED);
-        arm.ServoMove(srvGr2,GR2CLOSED);
-        arm.Pause(500);
-        arm.AbsoluteMotorMove(mtrLift,liftPos.TWO.getVal(),0.8);
-
-        vision.WaitForFlag("Read Relic");
-        vision.ProcessRelic();
-        vision.SetFlag(drive, "Relic Read");
-
-        drive.WaitForFlag("Relic Read");
-        drive.ServoMove(srvPhone, CAM_JEWELS);
-        drive.Pause(1000);
-        drive.SetFlag(vision, "Read Jewels");
-
-        vision.WaitForFlag("Read Jewels");
-        vision.ProcessJewels(vuforiaFrameToMat());
-        vision.SetFlag(arm, "Jewels Read");
-
-        arm.WaitForFlag("Jewels Read");
-        arm.ServoMove(srvLR, LR_CENTER);
-        arm.ServoIncrementalMove(srvUD, UD_DOWN, 0.02);
-        arm.Pause(150);
-//            arm.ServoMove(srvUD, UD_DOWN + .04);
-//            arm.Pause(800);
-//            arm.ServoMove(srvUD, UD_DOWN);
-
-
-        if(Alliance == BLUE) {
-            //TODO: DRIVE must grab GLYPH.
-            if (arm.next_state_to_execute()) {
-                if (ballArray[0] == BallColor.RED) set_position(srvLR, LR_LEFT);
-                else set_position(srvLR, LR_RIGHT);
-                arm.incrementState();
-            }
-            arm.Pause(500);
-            arm.SetFlag(drive, "Jewels Hit");
-            arm.ServoMove(srvUD, UD_UP);
-            arm.ServoMove(srvLR, LR_HOME);
-
-            drive.WaitForFlag("Jewels Hit");
-            drive.ServoMove(srvPhone, CAM_FRONT);
-
-            if (StartPos == 1) {
-                drive.Drive(35.75, 0.2);
-                drive.SetFlag(arm, "Off Platform");
-
-                arm.WaitForFlag("Off Platform");
-                arm.AbsoluteMotorMove(mtrLift, liftPos.ONE.getVal()+500, 0.5);
-
-                drive.Turn(-88, 0.2);
-            }
-            else if(StartPos == 2){
-                drive.Drive(26,.2);
-                drive.SetFlag(arm, "Off Platform");
-
-                arm.WaitForFlag("Off Platform");
-                arm.AbsoluteMotorMove(mtrLift, liftPos.ONE.getVal()+500, 0.5);
-
-                drive.Turn(-89,.2);
-                drive.Drive(11.8,.2);
-                drive.Turn(-90,.2);
-                drive.Drive(2,0.2);
-            }
-
-/////////////////////////RED ALLIANCE////////////////////////////////////
-
-        }else if(Alliance == RED){
-            if (arm.next_state_to_execute()) {
-                if (ballArray[0] == BallColor.BLUE) set_position(srvLR, LR_LEFT);
-                else set_position(srvLR, LR_RIGHT);
-                arm.incrementState();
-            }
-            arm.Pause(500);
-            arm.SetFlag(drive, "Jewels Hit");
-            arm.ServoMove(srvUD, UD_UP);
-            arm.ServoMove(srvLR, LR_HOME);
-
-            drive.WaitForFlag("Jewels Hit");
-            drive.ServoMove(srvPhone, CAM_FRONT);
-            if(StartPos == 1) {
-                drive.Drive(-34, 0.2);
-                drive.SetFlag(arm, "Off Platform");
-
-                arm.WaitForFlag("Off Platform");
-                arm.AbsoluteMotorMove(mtrLift, liftPos.ONE.getVal()+500, 0.5);
-
-                drive.Turn(-89.5, 0.2);
-            }else if(StartPos == 2){
-                drive.Drive(-24,.2);
-                drive.SetFlag(arm, "Off Platform");
-
-                arm.WaitForFlag("Off Platform");
-                arm.AbsoluteMotorMove(mtrLift, liftPos.ONE.getVal()+500, 0.5);
-
-                drive.Turn(86.5,.2);
-                drive.Drive(-9.33,.2);
-                drive.Turn(-88,.2);
-            }
-        }
-        if(vuMark != null) {
-            if (vuMark == RelicRecoveryVuMark.LEFT) {
-                drive.Turn(29, 0.2);
-                drive.Drive(-4.5, 0.2);
-                drive.SetFlag(glyph,"open grabber");
-            } else if (vuMark == RelicRecoveryVuMark.RIGHT) {
-                drive.Turn(-24, 0.2);
-                drive.Drive(-4.75, 0.2);
-                drive.SetFlag(glyph,"open grabber");
-            } else {
-                drive.Turn(3.25,0.2);
-                drive.Drive(-4.5, 0.2);
-                drive.SetFlag(glyph,"open grabber");
-            }
-        }
-        glyph.WaitForFlag("open grabber");
-        glyph.ServoMove(srvGr1,GR1OPEN);
-        glyph.ServoMove(srvGr2,GR2OPEN);
-        glyph.Pause(200);
-        glyph.AbsoluteMotorMove(mtrLift, liftPos.ONE.getVal(), 0.5);
-        glyph.Pause(200);
-        glyph.Drive(5,0.2);
-
-        if(ballArray[0] != null && ballArray[1] != null)
-            telemetry.addData("ballArray", Arrays.toString(ballArray));
-        else
-            telemetry.addData("ballArray", "[null, null]");
-        if(vuMark != null)
-            telemetry.addData("vuMark", vuMark.toString());
-        else
-            telemetry.addData("vuMark", "null");
-
-        telemetry.addData("arm", arm);
-
-
+        drive.centerOnTriangle(vuforiaFrameToMat(),Alliance);
     }
 }
