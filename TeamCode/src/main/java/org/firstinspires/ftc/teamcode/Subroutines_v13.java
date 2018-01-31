@@ -111,7 +111,7 @@ class Subroutines_v13 extends OpMode {
     VuforiaLocalizer.CloseableFrame frame = null;
 
     enum liftPos{
-        ONE(0), CARRY(-500),TWO(-1165),THREE(-1863),FOUR(-2750);
+        ONE(0), CARRY(-200),TWO(-1165),THREE(-1863),FOUR(-2750);
 
         private int val;
 

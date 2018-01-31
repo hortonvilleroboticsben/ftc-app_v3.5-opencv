@@ -25,7 +25,7 @@ import java.util.Arrays;
 
 import static org.firstinspires.ftc.robotcontroller.external.samples.ConceptVuMarkIdentification.TAG;
 
-@Autonomous(name = "Auto", group = "Final")
+@Autonomous(name = "VisionDrivingTest", group = "Final")
 public class VisionDrivingTest extends StateMachine_v6 {
     int question_number = 1;
     byte Alliance = 0;

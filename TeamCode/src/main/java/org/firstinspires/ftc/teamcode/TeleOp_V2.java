@@ -1,8 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.vuforia.PIXEL_FORMAT;
 import com.vuforia.Vuforia;
 
@@ -21,7 +19,7 @@ import java.util.Arrays;
 public class TeleOp_V2 extends StateMachine_v6 {
 
     StateMachine_v6 robotFront = new StateMachine_v6();
-
+    Timer t = new Timer();
 
     final int LIFTUP = 4000;
     final int LIFTMEDIUM = 3600;
@@ -51,7 +49,7 @@ public class TeleOp_V2 extends StateMachine_v6 {
     boolean phoneOS = false;
     double phonePos = 0;
 
-    long milliSeocondTimeout = 0;
+    long milliSecondTimeout = 0;
 
 
 
@@ -161,15 +159,22 @@ public class TeleOp_V2 extends StateMachine_v6 {
 
         set_position(srvGr1,(gamepad2.right_trigger > 0.5) ? GR1OPEN : GR1CLOSED);
         set_position(srvGr2,(gamepad2.right_trigger > 0.5) ? GR2OPEN : GR2CLOSED);
-        if(gamepad2.right_trigger > 0.5){
+
+        if((gamepad2.right_trigger > 0.5 && !isLifting) || t.isWaiting()){
             if(liftLevel.equals(liftPos.CARRY)) {
-                liftLevel = liftPos.ONE;
-                isLifting = true;
+                milliSecondTimeout = milliSecondTimeout == 0 ? 1500 : milliSecondTimeout + 800;
+                if(t.hasWaitFinished(250)) {
+                    liftLevel = liftPos.ONE;
+                    isLifting = true;
+                }
             }
-        }else{
+        }else if((gamepad2.right_trigger <= 0.5 && !isLifting) || t.isWaiting()){
             if(liftLevel.equals(liftPos.ONE)) {
-                liftLevel = liftPos.CARRY;
-                isLifting = true;
+                milliSecondTimeout = milliSecondTimeout == 0 ? 1500 : milliSecondTimeout + 800;
+                if(t.hasWaitFinished(250)) {
+                    liftLevel = liftPos.CARRY;
+                    isLifting = true;
+                }
             }
         }
 
@@ -223,6 +228,9 @@ public class TeleOp_V2 extends StateMachine_v6 {
                 case ONE:
                     liftLevel = up ? liftPos.TWO : liftPos.ONE;
                     break;
+                case CARRY:
+                    liftLevel = up ? liftPos.TWO : liftPos.CARRY;
+                    break;
                 case TWO:
                     liftLevel = up ? liftPos.THREE : liftPos.ONE;
                     break;
@@ -233,13 +241,13 @@ public class TeleOp_V2 extends StateMachine_v6 {
                     liftLevel = up ? liftPos.FOUR : liftPos.THREE;
                     break;
             }
-            milliSeocondTimeout = milliSeocondTimeout == 0 ? 1500 : milliSeocondTimeout + 800;
+            milliSecondTimeout = milliSecondTimeout == 0 ? 1500 : milliSecondTimeout + 800;
         } else if (!gamepad2.x && !gamepad2.a) liftOS = false;
 
         if (isLifting) {
             run_to_position(mtrLift);
             set_encoder_target(mtrLift, liftLevel.getVal());
-            if (!waitHasFinished(milliSeocondTimeout)) {
+            if (!waitHasFinished(milliSecondTimeout)) {
                 if (get_encoder_count(mtrLift) > mtrLift.getTargetPosition()) {
                     if (has_encoder_reached(mtrLift, liftLevel.getVal())) {
                         run_using_encoder(mtrLift);
@@ -256,15 +264,17 @@ public class TeleOp_V2 extends StateMachine_v6 {
                 isLifting = false;
             }
         }else{
-            milliSeocondTimeout = 0;
+            milliSecondTimeout = 0;
             initOS = true;
         }
 
-        telemetry.addData("isBalancing", isBalancing);
-        telemetry.addData("balanceOS", balanceOS);
-        telemetry.addData("balanceInit", balanceInit);
-        telemetry.addData("encTarget", Arrays.toString(BalEnc));
-        telemetry.addData("currEnc", Arrays.toString(new int[]{get_encoder_count(mtrLeftDrive),
-                                                                       get_encoder_count(mtrRightDrive)}));
+//        telemetry.addData("isBalancing", isBalancing);
+//        telemetry.addData("balanceOS", balanceOS);
+//        telemetry.addData("balanceInit", balanceInit);
+//        telemetry.addData("encTarget", Arrays.toString(BalEnc));
+//        telemetry.addData("currEnc", Arrays.toString(new int[]{get_encoder_count(mtrLeftDrive),
+//                                                                       get_encoder_count(mtrRightDrive)}));
+        telemetry.addData("liftPos", liftLevel);
+        telemetry.addData("isLifting", isLifting);
     }
 }
