@@ -25,13 +25,15 @@ import java.util.Arrays;
 
 import static org.firstinspires.ftc.robotcontroller.external.samples.ConceptVuMarkIdentification.TAG;
 
-@Autonomous(name = "Auto", group = "Final")
+@Autonomous(name = "aslfkjasdlk", group = "Final")
 public class VisionDrivingTest extends StateMachine_v6 {
     int question_number = 1;
-    byte Alliance = 0;
+    byte Alliance = BLUE;
     boolean btnOS;
     Orientation axes;
     int StartPos = 0;
+
+    boolean done = false;
 
     StateMachine_v6 drive = new StateMachine_v6(),
                     arm = new StateMachine_v6(),
@@ -96,48 +98,46 @@ public class VisionDrivingTest extends StateMachine_v6 {
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////
-
-        mtrLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        mtrRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
-    @Override
-    public void init_loop() {
-        axes = IMUnav.getAngularOrientation(AxesReference.EXTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES);
+//    @Override
+//    public void init_loop() {
+//        axes = IMUnav.getAngularOrientation(AxesReference.EXTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES);
+//
+//        telemetry.addData("Setup", Arrays.toString(new double[]{axes.firstAngle, axes.secondAngle, axes.thirdAngle}));
+//        telemetry.addData("SetupOK", (int) Math.abs(axes.firstAngle) <= 1 && (int) Math.abs(axes.secondAngle) <= 1 && (int) Math.abs(axes.thirdAngle) <= 1);
+//
+//        switch (question_number) {
+//            case 1:
+//                telemetry.addData("Alliance: a=blue b=red", "");
+//                if ((gamepad1.a ^ gamepad1.b) && !gamepad1.start && btnOS == false) {
+//                    Alliance = (gamepad1.a) ? BLUE : RED;
+//                    btnOS = true;
+//                } else if (!gamepad1.a && !gamepad1.b && !gamepad1.start && btnOS == true) {
+//                    btnOS = false;
+//                    question_number++;
+//                }
+//                break;
+//            case 2:
+//                telemetry.addData("StartPos: a=1 b=2", "");
+//                if ((gamepad1.a ^ gamepad1.b) && !gamepad1.start && btnOS == false) {
+//                    StartPos = (gamepad1.a) ? 1 : 2;
+//                    btnOS = true;
+//                } else if (!gamepad1.a && !gamepad1.b && !gamepad1.start && btnOS == true) {
+//                    btnOS = false;
+//                    question_number++;
+//                }
+//                break;
+//            case 3:
+//                telemetry.addData("Ready to Begin", "");
+//                break;
+//        }
+//
+//        if (StartPos == 0 || Alliance == 0)
+//            telemetry.addData("WARNING YOU DON'T HAVE ALL INITIALIZATION PARAMETERS IN", "");
+//
+//    }
 
-        telemetry.addData("Setup", Arrays.toString(new double[]{axes.firstAngle, axes.secondAngle, axes.thirdAngle}));
-        telemetry.addData("SetupOK", (int) Math.abs(axes.firstAngle) <= 1 && (int) Math.abs(axes.secondAngle) <= 1 && (int) Math.abs(axes.thirdAngle) <= 1);
-
-        switch (question_number) {
-            case 1:
-                telemetry.addData("Alliance: a=blue b=red", "");
-                if ((gamepad1.a ^ gamepad1.b) && !gamepad1.start && btnOS == false) {
-                    Alliance = (gamepad1.a) ? BLUE : RED;
-                    btnOS = true;
-                } else if (!gamepad1.a && !gamepad1.b && !gamepad1.start && btnOS == true) {
-                    btnOS = false;
-                    question_number++;
-                }
-                break;
-            case 2:
-                telemetry.addData("StartPos: a=1 b=2", "");
-                if ((gamepad1.a ^ gamepad1.b) && !gamepad1.start && btnOS == false) {
-                    StartPos = (gamepad1.a) ? 1 : 2;
-                    btnOS = true;
-                } else if (!gamepad1.a && !gamepad1.b && !gamepad1.start && btnOS == true) {
-                    btnOS = false;
-                    question_number++;
-                }
-                break;
-            case 3:
-                telemetry.addData("Ready to Begin", "");
-                break;
-        }
-
-        if (StartPos == 0 || Alliance == 0)
-            telemetry.addData("WARNING YOU DON'T HAVE ALL INITIALIZATION PARAMETERS IN", "");
-
-    }
 
     @Override
     public void start() {
@@ -146,8 +146,13 @@ public class VisionDrivingTest extends StateMachine_v6 {
 
     @Override
     public void loop() {
-        vision.initializeMachine();
         drive.initializeMachine();
         drive.centerOnTriangle(vuforiaFrameToMat(),Alliance);
+        drive.Turn(90,0.3);
+        if(drive.next_state_to_execute()) {
+            done = true;
+        }
+
+        telemetry.addData("done",done);
     }
 }
