@@ -164,9 +164,9 @@ public class TeleOp_V2 extends StateMachine_v6 {
 
 //        if(gamepad1.dpad_left ^ gamepad1.dpad_right && !OS1) {
 //            OS1 = true;
-//            lrVal += gamepad1.dpad_left ? 0.005 : -0.005;
-//            lrVal = lrVal > 1 ? 1 : lrVal;
-//            lrVal = lrVal < -1 ? -1 : lrVal;
+//            srv1Val += gamepad1.dpad_left ? 0.005 : -0.005;
+//            srv1Val = srv1Val > 1 ? 1 : srv1Val;
+//            srv1Val = srv1Val < -1 ? -1 : srv1Val;
 //        }else if(!gamepad1.dpad_left && !gamepad1.dpad_right) OS1 = false;
 //
 //        if(gamepad1.dpad_down ^ gamepad1.dpad_up && !OS2) {
@@ -177,11 +177,11 @@ public class TeleOp_V2 extends StateMachine_v6 {
 //        }else if(!gamepad1.dpad_down && !gamepad1.dpad_up) OS2 = false;
 //
 //        if(gamepad1.guide){
-//            lrVal = 0.45;
+//            srv1Val = 0.45;
 //            udVal = 0.7;
 //        }
 //
-//        set_position(srvLR, lrVal);
+//        set_position(srvLR, srv1Val);
 //        set_position(srvUD, udVal);
 
         ///////////////////////PHONE///////////////////////////
