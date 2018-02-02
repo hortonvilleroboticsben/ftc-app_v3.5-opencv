@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.widget.Toast;
+
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.vuforia.PIXEL_FORMAT;
 import com.vuforia.Vuforia;
@@ -19,7 +21,8 @@ import java.util.Arrays;
 public class TeleOp_V2 extends StateMachine_v6 {
 
     StateMachine_v6 robotFront = new StateMachine_v6();
-    Timer t = new Timer();
+    Timer t0 = new Timer();
+    Timer t1 = new Timer();
 
     final int LIFTUP = 4000;
     final int LIFTMEDIUM = 3600;
@@ -141,17 +144,17 @@ public class TeleOp_V2 extends StateMachine_v6 {
         } else if(!gamepad1.guide && !gamepad1.a)balanceOS = false;
 
         if(isBalancing) {
-           run_drive_to_position();
-           if(balanceInit){
-               BalEnc[0] = get_encoder_count(mtrLeftDrive);
-               BalEnc[1] = get_encoder_count(mtrRightDrive);
-               balanceInit = false;
-           }
-           set_drive_target(BalEnc[0], BalEnc[1]);
-           if(isWithin(get_encoder_count(mtrLeftDrive), BalEnc[0]+10, BalEnc[0]-10) &&
-              isWithin(get_encoder_count(mtrRightDrive), BalEnc[1]+10, BalEnc[1]-10))
+            run_drive_to_position();
+            if(balanceInit){
+                BalEnc[0] = get_encoder_count(mtrLeftDrive);
+                BalEnc[1] = get_encoder_count(mtrRightDrive);
+                balanceInit = false;
+            }
+            set_drive_target(BalEnc[0], BalEnc[1]);
+            if(isWithin(get_encoder_count(mtrLeftDrive), BalEnc[0]+10, BalEnc[0]-10) &&
+                    isWithin(get_encoder_count(mtrRightDrive), BalEnc[1]+10, BalEnc[1]-10))
                 set_drive_power(.15, .15);
-           else
+            else
                 set_drive_power(0,0);
         }
 
@@ -160,18 +163,16 @@ public class TeleOp_V2 extends StateMachine_v6 {
         set_position(srvGr1,(gamepad2.right_trigger > 0.5) ? GR1OPEN : GR1CLOSED);
         set_position(srvGr2,(gamepad2.right_trigger > 0.5) ? GR2OPEN : GR2CLOSED);
 
-        if((gamepad2.right_trigger > 0.5 && !isLifting) || t.isWaiting()){
-            if(liftLevel.equals(liftPos.CARRY)) {
-                milliSecondTimeout = milliSecondTimeout == 0 ? 1500 : milliSecondTimeout + 800;
-                if(t.hasWaitFinished(250)) {
-                    liftLevel = liftPos.ONE;
-                    isLifting = true;
-                }
+        if(((gamepad2.right_trigger > 0.5) || t0.isWaiting()) && liftLevel.equals(liftPos.CARRY)){
+            milliSecondTimeout = milliSecondTimeout == 0 ? 1500 : milliSecondTimeout + 800;
+            if(t0.hasWaitFinished(250)) {
+                liftLevel = liftPos.ONE;
+                isLifting = true;
             }
-        }else if((gamepad2.right_trigger <= 0.5 && !isLifting) || t.isWaiting()){
+        }else if(((gamepad2.right_trigger <= 0.5) || t1.isWaiting()) && liftLevel.equals(liftPos.ONE)){
             if(liftLevel.equals(liftPos.ONE)) {
                 milliSecondTimeout = milliSecondTimeout == 0 ? 1500 : milliSecondTimeout + 800;
-                if(t.hasWaitFinished(250)) {
+                if(t1.hasWaitFinished(250)) {
                     liftLevel = liftPos.CARRY;
                     isLifting = true;
                 }
@@ -217,7 +218,7 @@ public class TeleOp_V2 extends StateMachine_v6 {
 
         if(!gamepad2.right_stick_button)
             if(!isLifting) set_power(mtrLift, .75*gamepad2.right_stick_y);
-        else
+            else
             if(!isLifting) set_power(mtrLift, .1*gamepad2.right_stick_y);
 
         if (((gamepad2.x ^ gamepad2.a) && !gamepad2.start) && !liftOS) {
@@ -276,5 +277,9 @@ public class TeleOp_V2 extends StateMachine_v6 {
 //                                                                       get_encoder_count(mtrRightDrive)}));
         telemetry.addData("liftPos", liftLevel);
         telemetry.addData("isLifting", isLifting);
+        telemetry.addData("isWaiting0", t0.isWaiting());
+        telemetry.addData("elapsedTime0", t0.getElapsedTime());
+        telemetry.addData("isWaiting1", t1.isWaiting());
+        telemetry.addData("elapsedTime1", t1.getElapsedTime());
     }
 }

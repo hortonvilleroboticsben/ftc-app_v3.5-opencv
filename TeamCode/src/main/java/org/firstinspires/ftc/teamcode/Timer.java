@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode;
 public class Timer {
 
     private long startTime = 0;
-    private Timer t = null;
     private boolean isWaiting = false;
 
     public Timer(){
@@ -21,11 +20,11 @@ public class Timer {
     public boolean hasWaitFinished(long time){
         boolean retVal = false;
         if(!isWaiting){
-            t = new Timer();
+            reset();
             isWaiting = true;
         }else{
-            if(retVal = t.getElapsedTime() >= time){
-                t.reset();
+            if(retVal = getElapsedTime() >= time){
+                reset();
                 isWaiting = false;
             }else isWaiting = true;
         }
