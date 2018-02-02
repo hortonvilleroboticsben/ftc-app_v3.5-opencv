@@ -51,6 +51,11 @@ class StateMachine_v6 extends Subroutines_v13 {
     static BallColor[] ballArray = {null, null};
     static RelicRecoveryVuMark vuMark = null;
 
+//    public ColorLineDetector lDetectorBlue = new ColorLineDetector();
+//    public ColorLineDetector lDetectorRed = new ColorLineDetector();
+    //static
+
+
     static Orientation O;
 
     @Override
@@ -75,7 +80,7 @@ class StateMachine_v6 extends Subroutines_v13 {
     @Override
     public void init() {
         super.init();
-        O = IMUnav.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        //O = IMUnav.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
     }
 
     void initializeMachine(){
@@ -620,66 +625,88 @@ class StateMachine_v6 extends Subroutines_v13 {
 
     public void centerOnTriangle(Mat inputFrame, int alliance) {
         if(next_state_to_execute()) {
-            if(alliance == 1) {
-                Mat mRed = inputFrame;
-                ColorLineDetector lDetectorRed = new ColorLineDetector();
-                lDetectorRed.processLines(mRed);
-                lDetectorRed.showLines(mRed);
-                if(lDetectorRed.clusters.clusterGroups.size() > 1) {
-                    if (lDetectorRed.centerP.x > (mRed.cols() / 2) + 15) {
-                        set_drive_power(0.1, 0.1);
-                        countA = 0;
-                    } else if (lDetectorRed.centerP.x < (mRed.cols() / 2) - 15) {
-                        set_drive_power(-0.1, -0.1);
-                        countA = 0;
-                    } else {
-                        countA++;
-                    }
+            String ret = "";
+            try {
+                if (alliance == RED) {
+                    Mat mRed = inputFrame;
+                    ColorLineDetector lDetectorRed = new ColorLineDetector();
+                    lDetectorRed.setColorRange(new Scalar(217, 150, 150, 0), new Scalar(45, 255, 255, 255));
+                    lDetectorRed.processLines(mRed);
+                    lDetectorRed.showLines(mRed);
+                    Point intersect = lDetectorRed.pointIntersect(
+                            lDetectorRed.clusters.clusterGroups.get(0).angle,
+                            lDetectorRed.clusters.clusterGroups.get(0).center(),
+                            lDetectorRed.clusters.clusterGroups.get(1).angle,
+                            lDetectorRed.clusters.clusterGroups.get(1).center()
+                    );
+                    if (lDetectorRed.clusters.clusterGroups.size() > 1) {
+                        if (intersect.x > (mRed.cols() / 2) + 20) {
+                            set_drive_power(0.05, 0.05);
+                            countA = 0;
+                        } else if (intersect.x < (mRed.cols() / 2) - 20) {
+                            set_drive_power(-0.05, -0.05);
+                            countA = 0;
+                        } else {
+                            countA++;
+                        }
 
-                    if (countA > 3) {
-                        countA = 0;
-                        set_drive_power(0, 0);
-                        reset_drive_encoders();
-                        incrementState();
+                        if (countA > 0) {
+                            countA = 0;
+                            set_drive_power(0, 0);
+                            reset_drive_encoders();
+                            incrementState();
+                        }
+                    } else if (lDetectorRed.clusters.clusterGroups.get(0).center().x > mRed.cols() / 2) {
+                        set_drive_power(0.05, 0.05);
+                    } else if (lDetectorRed.clusters.clusterGroups.get(0).center().x < mRed.cols() / 2) {
+                        set_drive_power(-0.05, -0.05);
                     }
-                }
-                else if(lDetectorRed.clusters.clusterGroups.get(0).center().x > mRed.cols()/2) {
-                    set_drive_power(0.1, 0.1);
-                }
-                else if(lDetectorRed.clusters.clusterGroups.get(0).center().x < mRed.cols()/2) {
-                    set_drive_power(-0.1, -0.1);
-                }
-            }
-            else if(alliance == 2) {
-                Mat mBlue = inputFrame;
-                ColorLineDetector lDetectorBlue = new ColorLineDetector();
-                lDetectorBlue.processLines(mBlue);
-                lDetectorBlue.showLines(mBlue);
-                if(lDetectorBlue.clusters.clusterGroups.size() > 1) {
-                    if (lDetectorBlue.centerP.x > (mBlue.cols() / 2) + 15) {
-                        set_drive_power(0.1, 0.1);
-                        countA = 0;
-                    } else if (lDetectorBlue.centerP.x < (mBlue.cols() / 2) - 15) {
-                        set_drive_power(-0.1, -0.1);
-                        countA = 0;
-                    } else {
-                        countA++;
-                    }
+                    telemetry.addData("Center X",lDetectorRed.centerP.x);
+                } else if (alliance == BLUE) {
+                    Mat mBlue = inputFrame;
+                    ColorLineDetector lDetectorBlue = new ColorLineDetector();
+                    lDetectorBlue.setColorRange(new Scalar(125, 120, 130, 0), new Scalar(187, 255, 255, 255));
+                    lDetectorBlue.processLines(mBlue);
+                    lDetectorBlue.showLines(mBlue);
+                    Point intersect = lDetectorBlue.pointIntersect(
+                            lDetectorBlue.clusters.clusterGroups.get(0).angle,
+                            lDetectorBlue.clusters.clusterGroups.get(0).center(),
+                            lDetectorBlue.clusters.clusterGroups.get(1).angle,
+                            lDetectorBlue.clusters.clusterGroups.get(1).center()
+                    );
+                    if (lDetectorBlue.clusters.clusterGroups.size() > 1) {
+                        if (intersect.x > (mBlue.cols() / 2) + 25) {
+                            set_drive_power(0.07, 0.07);
+                            countA = 0;
+                        } else if (intersect.x < (mBlue.cols() / 2) - 25) {
+                            set_drive_power(-0.07, -0.07);
+                            countA = 0;
+                        } else {
+                            countA++;
+                        }
 
-                    if (countA > 3) {
-                        countA = 0;
-                        set_drive_power(0, 0);
-                        reset_drive_encoders();
-                        incrementState();
+                        if (countA > 0) {
+                            countA = 0;
+                            set_drive_power(0, 0);
+                            reset_drive_encoders();
+                            incrementState();
+                        }
+                    } else if (lDetectorBlue.clusters.clusterGroups.get(0).center().x > mBlue.cols() / 2) {
+                        set_drive_power(0.05, 0.05);
+                    } else if (lDetectorBlue.clusters.clusterGroups.get(0).center().x < mBlue.cols() / 2) {
+                        set_drive_power(-0.05, -0.05);
                     }
+                    ret = String.valueOf(intersect.x);
+                    telemetry.addData("Center X",ret);
+                    lDetectorBlue.logToFile(lDetectorBlue.calculateIntersect( lDetectorBlue.clusters.clusterGroups.get(0).angle,
+                            lDetectorBlue.clusters.clusterGroups.get(0).center(),
+                            lDetectorBlue.clusters.clusterGroups.get(1).angle,
+                            lDetectorBlue.clusters.clusterGroups.get(1).center()));
                 }
-                else if(lDetectorBlue.clusters.clusterGroups.get(0).center().x > mBlue.cols()/2) {
-                    set_drive_power(0.1, 0.1);
-                }
-                else if(lDetectorBlue.clusters.clusterGroups.get(0).center().x < mBlue.cols()/2) {
-                    set_drive_power(-0.1, -0.1);
-                }
+            }catch(Exception e) {
+                e.printStackTrace();
             }
+
         }
     }
 
