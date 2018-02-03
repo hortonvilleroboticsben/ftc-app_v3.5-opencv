@@ -80,7 +80,7 @@ class StateMachine_v6 extends Subroutines_v13 {
     @Override
     public void init() {
         super.init();
-        //O = IMUnav.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        O = IMUnav.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
     }
 
     void initializeMachine(){
@@ -164,7 +164,7 @@ class StateMachine_v6 extends Subroutines_v13 {
         StateMachine_v6 s = new StateMachine_v6();
 
         s.Turn(degrees - 3, speed);
-        s.GyroTurn(3,10);
+        s.GyroTurn(3,0.1);
     }
 
     void Turn(double degrees, double speed) {
@@ -269,9 +269,9 @@ class StateMachine_v6 extends Subroutines_v13 {
             DcMotor.RunMode r = mtrLeftDrive.getMode();
             run_using_drive_encoders();
             Orientation o = O;
-            double z = o.thirdAngle;
+            double z = o.firstAngle;
             telemetry.addData("rot", z);
-            if(Math.abs(z) + 1 <= Math.abs(degrees)){
+            if(Math.abs(z) + 2 <= Math.abs(degrees)){
                 set_drive_power(-speed*Math.signum(degrees), speed*Math.signum(degrees));
             }else{
                 set_drive_power(0,0);
@@ -639,12 +639,13 @@ class StateMachine_v6 extends Subroutines_v13 {
                             lDetectorRed.clusters.clusterGroups.get(1).angle,
                             lDetectorRed.clusters.clusterGroups.get(1).center()
                     );
-                    if (lDetectorRed.clusters.clusterGroups.size() > 1) {
+                    if (lDetectorRed.clusters.clusterGroups.size() > 1 && !isWithin(lDetectorRed.clusters.clusterGroups.get(0).angle,lDetectorRed.clusters.clusterGroups.get(1).angle + 30,lDetectorRed.clusters.clusterGroups.get(1).angle -30)) {
+                        double pow = isWithin(intersect.x,mRed.cols()*3/8,mRed.cols()*5/8)?0.05:0.08;
                         if (intersect.x > (mRed.cols() / 2) + 20) {
-                            set_drive_power(0.05, 0.05);
+                            set_drive_power(pow, pow);
                             countA = 0;
                         } else if (intersect.x < (mRed.cols() / 2) - 20) {
-                            set_drive_power(-0.05, -0.05);
+                            set_drive_power(-0.06, -0.06);
                             countA = 0;
                         } else {
                             countA++;
@@ -654,12 +655,13 @@ class StateMachine_v6 extends Subroutines_v13 {
                             countA = 0;
                             set_drive_power(0, 0);
                             reset_drive_encoders();
+                            lDetectorRed.logToFile("done");
                             incrementState();
                         }
                     } else if (lDetectorRed.clusters.clusterGroups.get(0).center().x > mRed.cols() / 2) {
-                        set_drive_power(0.05, 0.05);
+                        set_drive_power(0.06, 0.06);
                     } else if (lDetectorRed.clusters.clusterGroups.get(0).center().x < mRed.cols() / 2) {
-                        set_drive_power(-0.05, -0.05);
+                        set_drive_power(-0.06, -0.06);
                     }
                     telemetry.addData("Center X",lDetectorRed.centerP.x);
                 } else if (alliance == BLUE) {
@@ -674,12 +676,13 @@ class StateMachine_v6 extends Subroutines_v13 {
                             lDetectorBlue.clusters.clusterGroups.get(1).angle,
                             lDetectorBlue.clusters.clusterGroups.get(1).center()
                     );
-                    if (lDetectorBlue.clusters.clusterGroups.size() > 1) {
+                    if (lDetectorBlue.clusters.clusterGroups.size() > 1 && !isWithin(lDetectorBlue.clusters.clusterGroups.get(0).angle,lDetectorBlue.clusters.clusterGroups.get(1).angle + 30,lDetectorBlue.clusters.clusterGroups.get(1).angle -30)) {
+                        double pow = isWithin(intersect.x,mBlue.cols()*3/8,mBlue.cols()*5/8)?0.05:0.08;
                         if (intersect.x > (mBlue.cols() / 2) + 25) {
-                            set_drive_power(0.07, 0.07);
+                            set_drive_power(0.06, 0.06);
                             countA = 0;
                         } else if (intersect.x < (mBlue.cols() / 2) - 25) {
-                            set_drive_power(-0.07, -0.07);
+                            set_drive_power(-0.06, -0.06);
                             countA = 0;
                         } else {
                             countA++;
@@ -689,12 +692,13 @@ class StateMachine_v6 extends Subroutines_v13 {
                             countA = 0;
                             set_drive_power(0, 0);
                             reset_drive_encoders();
+                            //lDetectorBlue.logToFile("done");
                             incrementState();
                         }
                     } else if (lDetectorBlue.clusters.clusterGroups.get(0).center().x > mBlue.cols() / 2) {
-                        set_drive_power(0.05, 0.05);
+                        set_drive_power(0.06, 0.06);
                     } else if (lDetectorBlue.clusters.clusterGroups.get(0).center().x < mBlue.cols() / 2) {
-                        set_drive_power(-0.05, -0.05);
+                        set_drive_power(-0.06, -0.06);
                     }
                     ret = String.valueOf(intersect.x);
                     telemetry.addData("Center X",ret);

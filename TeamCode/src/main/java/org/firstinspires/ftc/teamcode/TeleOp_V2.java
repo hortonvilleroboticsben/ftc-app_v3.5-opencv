@@ -281,5 +281,6 @@ public class TeleOp_V2 extends StateMachine_v6 {
         telemetry.addData("elapsedTime0", t0.getElapsedTime());
         telemetry.addData("isWaiting1", t1.isWaiting());
         telemetry.addData("elapsedTime1", t1.getElapsedTime());
+        telemetry.addData("Voltage",voltageIsGood());
     }
 }

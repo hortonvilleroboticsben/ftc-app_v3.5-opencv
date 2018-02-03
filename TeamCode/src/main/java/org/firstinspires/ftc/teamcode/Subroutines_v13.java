@@ -85,7 +85,7 @@ class Subroutines_v13 extends OpMode {
     final byte FILTERED = 1;
     final byte CACHE = 0;
 
-    final double GR1CLOSED = 0.1;
+    final double GR1CLOSED = 0.25;
     final double GR1OPEN = 1.0;
     final double GR2CLOSED = 1-GR1CLOSED;
     final double GR2OPEN = 1-GR1OPEN;
@@ -334,7 +334,7 @@ class Subroutines_v13 extends OpMode {
         }
     } // update_telemetry
 
-    public boolean isWithin(int val, int high, int low){
+    public boolean isWithin(double val, double high, double low){
         return val <= high && val >= low;
     }
 
@@ -367,12 +367,12 @@ class Subroutines_v13 extends OpMode {
         return distReturn;
     }
 
-    public boolean voltageIsGood() {
+    public double voltageIsGood() {
         try{
-            return (hardwareMap.voltageSensor.get("Expanision Hub 1").getVoltage() > 10);
+            return hardwareMap.voltageSensor.get("Expanision Hub 1").getVoltage();
         } catch(Exception e) {
             e.printStackTrace();
-            return false;
+            return -1;
         }
     }
 
@@ -1373,8 +1373,8 @@ class Subroutines_v13 extends OpMode {
                 totalX = totalX / (countedCount);
                 totalY = totalY / (countedCount);
 
-                final int QUEUE_SIZE = 30;
-
+                final int QUEUE_SIZE = 10;
+                //was 30
                 if (!(Xs.size() < QUEUE_SIZE) || !(Ys.size() < QUEUE_SIZE)) {
                     Xs.remove(0);
                     Ys.remove(0);
