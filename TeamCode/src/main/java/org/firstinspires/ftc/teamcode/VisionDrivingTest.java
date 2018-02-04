@@ -34,7 +34,9 @@ public class VisionDrivingTest extends StateMachine_v6 {
     int StartPos = 0;
 
     long timeElapsed = 0;
+    long maxFrameWait = 0;
     Timer t = new Timer();
+    Timer t0 = new Timer();
 
     boolean done = false;
 
@@ -145,12 +147,16 @@ public class VisionDrivingTest extends StateMachine_v6 {
     @Override
     public void start() {
         t.reset();
+        t0.reset();
     }
 
     @Override
     public void loop() {
         O = IMUnav.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         drive.initializeMachine();
+        if(vuforia.getFrameQueue().peek() != null) {
+            maxFrameWait = Math.max(maxFrameWait, t0.getElapsedTime());
+        }else t0.reset();
         drive.centerOnTriangle(vuforiaFrameToMat(),Alliance);
         if(drive.next_state_to_execute()) {
             done = true;
@@ -160,8 +166,10 @@ public class VisionDrivingTest extends StateMachine_v6 {
         if(!done){
             timeElapsed = t.getElapsedTime();
         }
+
         telemetry.addData("done",done);
         telemetry.addData("timeScanning", timeElapsed);
+        telemetry.addData("maxFrameWait", maxFrameWait);
         telemetry.addData("angle",Arrays.toString(new double[] {O.firstAngle, O.secondAngle, O.thirdAngle}));
     }
 }

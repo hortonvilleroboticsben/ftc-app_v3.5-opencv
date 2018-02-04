@@ -34,7 +34,7 @@ import java.util.List;
 
 import static org.opencv.imgproc.Imgproc.minEnclosingCircle;
 
-class StateMachine_v6 extends Subroutines_v13 {
+class StateMachine_v7 extends Subroutines_v14 {
 
     public String flag = "";
     int current_number = 0;                           //The order of a specific state//
@@ -48,6 +48,11 @@ class StateMachine_v6 extends Subroutines_v13 {
     private int count = 0;
 
     private int countA = 0;
+
+    Timer timeOut = new Timer();
+    boolean timeoutOS = true;
+
+    Timer timer = new Timer();
 
     static BallColor[] ballArray = {null, null};
     static RelicRecoveryVuMark vuMark = null;
@@ -94,7 +99,7 @@ class StateMachine_v6 extends Subroutines_v13 {
         stateComplete = true;
     }
 
-    void SetFlag(StateMachine_v6 receiver, String key){
+    void SetFlag(StateMachine_v7 receiver, String key){
         if(next_state_to_execute()){
             receiver.flag = key;
             incrementState();
@@ -162,7 +167,7 @@ class StateMachine_v6 extends Subroutines_v13 {
     }
 
     void GyroEndTurn(double degrees, double speed) {
-        StateMachine_v6 s = new StateMachine_v6();
+        StateMachine_v7 s = new StateMachine_v7();
 
         s.Turn(degrees - 3, speed);
         s.GyroTurn(3,0.1);
@@ -334,7 +339,7 @@ class StateMachine_v6 extends Subroutines_v13 {
     }
 
     @Deprecated
-    public void WriteI2C(StateMachine_v6 object, I2cDevice device, I2cAddr address, int register, int value){
+    public void WriteI2C(StateMachine_v7 object, I2cDevice device, I2cAddr address, int register, int value){
         if(next_state_to_execute()){
 
             device.enableI2cWriteMode(address,register,value);
@@ -367,6 +372,49 @@ class StateMachine_v6 extends Subroutines_v13 {
                 reset_encoders(motor);
                 motor.setMode(r);
                 incrementState();
+            }
+        }
+    }
+
+    void Shimmy(double distance, double speed,int period) {
+        if(next_state_to_execute()) {
+            if(timeoutOS){
+                timeOut.reset();
+                timeoutOS = false;
+            }
+            double wheelCircumference = wheelDiameter * Math.PI;
+            double revs = distance / wheelCircumference;
+            double targetDegrees = gearRatio * revs * countsPerRev;
+
+            if (speed < 0) {
+                targetDegrees = Math.abs(targetDegrees) * -1;
+            }
+            double theta = timer.getElapsedTime();//(get_encoder_count(mtrLeftDrive) + get_encoder_count(mtrRightDrive))/2;
+//            double lSpeed = ((speed/2)*Math.sin(Math.PI*theta/period))+(speed/2 +0.05);
+//            double rSpeed = ((speed/2)*Math.sin(((Math.PI/period)*(theta+period)))+(speed/2));
+            double lSpeed = ((speed)*Math.sin(2*Math.PI*theta/period));
+            double rSpeed = ((speed)*Math.sin(((2*Math.PI/period)*(theta+period))));
+            lSpeed=(lSpeed<0)?lSpeed:0.5*lSpeed;
+            rSpeed=(rSpeed<0)?rSpeed:0.5*rSpeed;
+
+
+            if (!driveFinished) {
+                run_drive_to_position();
+                set_drive_target((int) targetDegrees, (int) targetDegrees);
+                set_drive_power(lSpeed, rSpeed);
+            }
+
+
+
+            if (have_drive_encoders_reached(targetDegrees, targetDegrees) || driveFinished || getBatteryVoltage() <10 || timeOut.getElapsedTime() > 4000) { //if move is finished
+                if (!driveFinished) reset_drive_encoders(); //if encoders have not been reset,
+                driveFinished = true;                       //reset encoders
+                timeoutOS = true;
+                set_drive_power(-0.0f, -0.0f);//stop robot
+                if (have_drive_encoders_reset()) {//if encoders have actually reset,
+                    driveFinished = false;  //move on to next method
+                    incrementState();
+                }
             }
         }
     }
@@ -419,13 +467,13 @@ class StateMachine_v6 extends Subroutines_v13 {
     private int wave = 0;
 
     @Deprecated
-    void resetVariables(StateMachine_v6 object){
+    void resetVariables(StateMachine_v7 object){
         object.x = 0; object.y = 0; object.X = 0; object.Y = 0; object.counter = 0; object.OS = false;
         object.x_tol = 0; object.y_tol = 0; object.broken = false;
     }
 
     @Deprecated
-    void resetMachine(StateMachine_v6 object){
+    void resetMachine(StateMachine_v7 object){
         resetVariables(object); object.wave = 0;
         object.current_number = 0; object.state_in_progress = 1;
     }

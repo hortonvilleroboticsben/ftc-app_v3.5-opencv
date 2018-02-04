@@ -7,7 +7,6 @@ import android.os.Environment;
 import android.os.Looper;
 import android.util.Log;
 
-import com.google.blocks.ftcrobotcontroller.util.HardwareUtil;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.BNO055IMU.Parameters;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
@@ -18,8 +17,6 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
-import com.qualcomm.robotcore.hardware.HardwareDeviceHealthImpl;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.I2cAddr;
 import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -30,7 +27,6 @@ import com.vuforia.PIXEL_FORMAT;
 import com.vuforia.Vuforia;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
-import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
@@ -40,7 +36,6 @@ import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.Core;
-import org.opencv.core.CvException;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
@@ -68,7 +63,7 @@ import static org.opencv.imgproc.Imgproc.HoughLinesP;
 import static org.opencv.imgproc.Imgproc.minAreaRect;
 
 
-class Subroutines_v13 extends OpMode {
+class Subroutines_v14 extends OpMode {
     //Variable initialization//
     long systemTime = 0;             //System time used to determine how much time has passed for waitHasFinished()//
     boolean initOS = true;           //Oneshot used for waitHasFinished//
@@ -80,15 +75,23 @@ class Subroutines_v13 extends OpMode {
     public final byte RED = -1;
     boolean driveFinished = false;
 
+    ArrayList<Integer> lDeltaEncoder = new ArrayList<>();
+    ArrayList<Integer> rDeltaEncoder = new ArrayList<>();
 
     double rangeVal[] = {0, 0};
     final byte FILTERED = 1;
     final byte CACHE = 0;
 
-    final double GR1CLOSED = 0.25;
+    final double GR1CLOSED = 0.15;
     final double GR1OPEN = 1.0;
     final double GR2CLOSED = 1-GR1CLOSED;
     final double GR2OPEN = 1-GR1OPEN;
+
+    final double CLAWCLOSED = 0;
+    final double CLAWOPEN = 1;
+
+    final double LEVELUP = 0;
+    final double LEVELDOWN = 1;
 
     final double UD_DOWN = .20;
     final double UD_UP = .735;
@@ -111,7 +114,7 @@ class Subroutines_v13 extends OpMode {
     VuforiaLocalizer.CloseableFrame frame = null;
 
     enum liftPos{
-        ONE(0), CARRY(-200),TWO(-1350),THREE(-1950),FOUR(-2900);
+        ONE(0), CARRY(-200),AUTO(-500),TWO(-1165),THREE(-1863),FOUR(-2750);
 
         private int val;
 
@@ -123,6 +126,21 @@ class Subroutines_v13 extends OpMode {
             return val;
         }
     }
+
+    enum extendPos{
+        BLUE_AUTO(700),RED_AUTO(600),HOME(0);
+
+        private int val;
+
+        extendPos(int val){
+            this.val = val;
+        }
+
+        public int getVal(){
+            return val;
+        }
+    }
+
 
     @Override
     public void init() {
@@ -136,7 +154,7 @@ class Subroutines_v13 extends OpMode {
         mtrLeftDrive = addMotor(MotorLocation.LEFT, "mtrLeftDrive");
         mtrRightDrive = addMotor(MotorLocation.RIGHT, "mtrRightDrive");
         mtrLift = addMotor(MotorLocation.SHIFT, "mtrLift");
-        mtrFlip = addMotor(MotorLocation.SHIFT, "mtrFlip");
+        mtrExtend = addMotor(MotorLocation.SHIFT, "mtrExtend");
         mtrArmFlip = addMotor(MotorLocation.SHIFT, "mtrArmFlip");
         mtrArmSpin = addMotor(MotorLocation.SHIFT, "mtrArmSpin");
 
@@ -367,12 +385,14 @@ class Subroutines_v13 extends OpMode {
         return distReturn;
     }
 
-    public double voltageIsGood() {
-        try{
-            return hardwareMap.voltageSensor.get("Expanision Hub 1").getVoltage();
-        } catch(Exception e) {
+    public double getBatteryVoltage() {
+        try {
+            if (hardwareMap.voltageSensor.iterator().hasNext()) {
+                return hardwareMap.voltageSensor.iterator().next().getVoltage();
+            } else return Double.MAX_VALUE;
+        }catch(Exception e) {
             e.printStackTrace();
-            return -1;
+            return Double.MAX_VALUE;
         }
     }
 
@@ -976,6 +996,192 @@ class Subroutines_v13 extends OpMode {
             }
         }
 
+        public void processLines(Mat mRgba, CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+            mRgba = inputFrame.rgba();
+            Imgproc.cvtColor(mRgba,mHsvMat,Imgproc.COLOR_RGB2HSV_FULL);
+            //Imgproc.pyrDown(mHsvMat,mHsvMat);
+            //Imgproc.pyrDown(mHsvMat,mHsvMat);
+
+            if (mUpperBound.val[0] < mLowerBound.val[0]) {
+
+                Mat mMask1 = new Mat();
+                Mat mMask2 = new Mat();
+
+
+                Scalar tLowerBound = mLowerBound.clone();
+                Scalar tUpperBound = mUpperBound.clone();
+
+                tLowerBound.val[0] = 0.0;
+                tUpperBound.val[0] = mUpperBound.val[0];
+
+                Core.inRange(mHsvMat, tLowerBound, tUpperBound, mMask1);
+
+                tLowerBound = mLowerBound.clone();
+                tUpperBound.val[0] = 255.0;
+
+                Core.inRange(mHsvMat, tLowerBound, tUpperBound, mMask2);
+
+                Core.add(mMask1,mMask2,mMask);
+
+            } else {
+                Core.inRange(mHsvMat, mLowerBound, mUpperBound, mMask);
+            }
+
+            Imgproc.Canny(mMask, mMask, 50, 100);
+
+            HoughLinesP(mMask, mLines, 5, Math.PI/180, 7,60, 20);
+
+            //Imgproc.morphologyEx(mMask,mMask,Imgproc.MORPH_CLOSE,mRectangle);
+
+        }
+
+        public void showLines(Mat mRgba){
+
+            try {
+                double val0,val1,val2,val3;
+                LineClusters clusters = new LineClusters();
+                for (int i = 0; i < mLines.rows(); i++) {
+                    double[] val = mLines.get(i,0);
+//                double rho = val[0], theta = val[1];
+//                double cosTheta = Math.cos(theta);
+//                double sinTheta = Math.sin(theta);
+//                double x = cosTheta * rho;
+//                double y = sinTheta * rho;
+//                Point p1 = new Point(x + 10000 * -sinTheta, y + 10000 * cosTheta);
+//                Point p2 = new Point(x - 10000 * -sinTheta, y - 10000 * cosTheta);
+
+                    val0 = val[0];
+                    val1 = val[1];
+                    val2 = val[2];
+                    val3 = val[3];
+
+
+                    double angle = ((Math.atan2(val1-val3,val0-val2)*180/Math.PI) + 180)%180;
+
+                    //Log.println(Log.ASSERT, "TAG", angle+"degrees loop:" + i);
+
+                    if(isWithin(angle,30,150) && !isWithin(angle,80,100)) {
+                        Imgproc.line(mRgba,
+                                new Point(val0, val1),
+                                new Point(val2, val3),
+                                new Scalar(255, 255, 255),
+                                10);
+                        clusters.add(new Line(new Point(val0,val1),new Point(val2,val3),angle));
+                        Log.println(Log.ASSERT,"TAG",angle + " is the angle of line " + i);
+                    }
+//                else Imgproc.line(mRgba,
+//                            new Point(val0, val1),
+//                            new Point(val2, val3),
+//                            new Scalar(255, 0, 0),
+//                            10);
+                }
+                Log.println(Log.ASSERT, "TAG", clusters.toString()+"\n");
+                for(int i = 0; i < clusters.clusters.size(); i ++) {
+                    if(clusters.clusters.get(i).lines.size() > 3) {
+                        Point[] rectPoints = new Point[4];
+                        MatOfPoint2f mp2f = new MatOfPoint2f();
+                        mp2f.fromList(clusters.clusters.get(i).points);
+                        RotatedRect rRect = minAreaRect(mp2f);
+                        rRect.points(rectPoints);
+                        MatOfPoint mPoints = new MatOfPoint(rectPoints);
+                        List<MatOfPoint> lPoints = new ArrayList<>();
+                        lPoints.add(mPoints);
+                        Log.println(Log.ASSERT, "TAG", Arrays.toString(rectPoints) + "Points");
+
+                        Imgproc.polylines(mRgba, lPoints, true, new Scalar(0, 255, 0), 10);
+                    }
+
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        class Line {
+            Point p1, p2;
+            double angle;
+            public Line(Point p1,Point p2, double angle) {
+                this.p1 = p1;
+                this.p2 = p2;
+                this.angle = angle;
+            }
+        }
+
+        class LineCluster {
+
+            RotatedRect rRect = new RotatedRect();
+            List<Line> lines = new ArrayList<>();
+            List<Point> points = new ArrayList<>();
+            double angle = 0;
+
+            public LineCluster(Line line) {
+                addLine(line);
+            }
+            public void addLine(Line line) {
+                lines.add(line);
+                points.add(line.p1);
+                points.add(line.p2);
+                avgAngle();
+                updateRect();
+            }
+            private void updateRect() {
+                MatOfPoint2f mp2f = new MatOfPoint2f();
+                mp2f.fromList(points);
+                rRect = minAreaRect(mp2f);
+            }
+            public boolean isClose(Point p, double tolerance) {
+                for(int i = 0; i < points.size(); i++) {
+                    if(Math.hypot(p.x-points.get(i).x,p.y-points.get(i).y) <= tolerance) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            public Point center() {return rRect.center;}
+            public void avgAngle() {
+                int n = 0;
+                for(int i = 0; i < lines.size(); i++) {
+                    n += lines.get(i).angle;
+                }
+                angle = n / lines.size();
+            }
+            public String toString() {
+                avgAngle();
+                return "Angle is " + angle + "Lines are " + lines.size();
+            }
+        }
+
+        class LineClusters {
+            List<LineCluster> clusters = new ArrayList<>();
+
+            public void add(Line line){
+                boolean foundCluster = false;
+                outerloop:
+                for(int i = 0; i < clusters.size(); i ++) {
+                    for(int j = 0; j < clusters.get(i).lines.size(); j++) {
+                        if(isWithin(line.angle ,clusters.get(i).angle - 7, clusters.get(i).angle + 7)) {
+                            if(clusters.get(i).isClose(line.p1,80) ||clusters.get(i).isClose(line.p2,80)) {
+                                clusters.get(i).addLine(line);
+                                foundCluster = true;
+                                break outerloop;
+                            }
+                        }
+                    }
+                }
+                if(!foundCluster) {
+                    clusters.add(new LineCluster(line));
+                }
+            }
+
+            public String toString() {
+                String returnVal = "";
+                for(int i = 0; i < clusters.size();i++) {
+                    returnVal += "cluster " + i + " " +clusters.get(i).toString() + "\n";
+                }
+                return returnVal;
+            }
+        }
+
         public List<MatOfPoint> getContours() {
             return mContours;
         }
@@ -986,7 +1192,7 @@ class Subroutines_v13 extends OpMode {
     static DcMotor mtrRightDrive;
     static DcMotor mtrLeftDrive;
     static DcMotor mtrLift;
-    static DcMotor mtrFlip;
+    static DcMotor mtrExtend;
     static DcMotor mtrArmSpin;
     static DcMotor mtrArmFlip;
 
@@ -1424,6 +1630,6 @@ class Subroutines_v13 extends OpMode {
         }
 
     }
-
+    
 }
 

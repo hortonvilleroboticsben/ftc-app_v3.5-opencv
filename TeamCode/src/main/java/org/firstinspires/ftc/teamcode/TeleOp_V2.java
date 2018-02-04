@@ -18,9 +18,9 @@ import java.util.Arrays;
 
 
 @TeleOp(name = "teleOp", group = "Competition")
-public class TeleOp_V2 extends StateMachine_v6 {
+public class TeleOp_V2 extends StateMachine_v7 {
 
-    StateMachine_v6 robotFront = new StateMachine_v6();
+    StateMachine_v7 robotFront = new StateMachine_v7();
     Timer t0 = new Timer();
     Timer t1 = new Timer();
 
@@ -281,6 +281,6 @@ public class TeleOp_V2 extends StateMachine_v6 {
         telemetry.addData("elapsedTime0", t0.getElapsedTime());
         telemetry.addData("isWaiting1", t1.isWaiting());
         telemetry.addData("elapsedTime1", t1.getElapsedTime());
-        telemetry.addData("Voltage",voltageIsGood());
+        telemetry.addData("Voltage",getBatteryVoltage());
     }
 }
