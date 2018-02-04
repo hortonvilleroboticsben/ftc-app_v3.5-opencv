@@ -30,6 +30,7 @@ import org.opencv.imgproc.Moments;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.opencv.imgproc.Imgproc.minEnclosingCircle;
@@ -719,39 +720,47 @@ class StateMachine_v7 extends Subroutines_v14 {
                     lDetectorBlue.setColorRange(new Scalar(125, 120, 130, 0), new Scalar(187, 255, 255, 255));
                     lDetectorBlue.processLines(mBlue);
                     lDetectorBlue.showLines(mBlue);
+                    Collections.sort(lDetectorBlue.clusters.clusterGroups);
                     ColorLineDetector.LineCluster l = lDetectorBlue.clusters.clusterGroups.get(0);
-                    ColorLineDetector.LineCluster l0 = lDetectorBlue.clusters.clusterGroups.get(1);
+                    int side1 = l.angle < 90 ? -1 : 1;
+                    int indexOpp = -1;
+                    for(int i = 1; i < lDetectorBlue.clusters.clusterGroups.size(); i++){
+                        int currSide = lDetectorBlue.clusters.clusterGroups.get(i).angle < 90 ? -1 : 1;
+                        indexOpp = currSide != side1 ? i : -1;
+                        if(indexOpp != -1) break;
+                    }
+                    ColorLineDetector.LineCluster l0 = lDetectorBlue.clusters.clusterGroups.get(indexOpp);
                     Point intersect = lDetectorBlue.calculateIntersect(l.angle, l.center(), l0.angle, l0.center());
-                    if (l.angle < 90 ^ l0.angle > 90 || l.angle > 90 ^ l0.angle < 90) {
-                        if (lDetectorBlue.clusters.clusterGroups.size() > 1 && !isWithin(lDetectorBlue.clusters.clusterGroups.get(0).angle, lDetectorBlue.clusters.clusterGroups.get(1).angle + 30, lDetectorBlue.clusters.clusterGroups.get(1).angle - 30)) {
-                            double pow = isWithin(intersect.x, mBlue.cols() * 3 / 8, mBlue.cols() * 5 / 8) ? 0.05 : 0.08;
-                            if (intersect.x > (mBlue.cols() / 2) + 25) {
-                                set_drive_power(pow, pow);
-                                countA = 0;
-                            } else if (intersect.x < (mBlue.cols() / 2) - 25) {
-                                set_drive_power(-pow, -pow);
-                                countA = 0;
-                            } else {
-                                countA++;
-                            }
+                    if(indexOpp != -1){
+                        double pow = isWithin(intersect.x, mBlue.cols() * 3 / 8, mBlue.cols() * 5 / 8) ? 0.05 : 0.08;
+                        if (intersect.x > (mBlue.cols() / 2) + 25) {
+                            set_drive_power(pow, pow);
+                            countA = 0;
+                        } else if (intersect.x < (mBlue.cols() / 2) - 25) {
+                            set_drive_power(-pow, -pow);
+                            countA = 0;
+                        } else {
+                            countA++;
+                        }
 
-                            if (countA > 0) {
-                                countA = 0;
-                                set_drive_power(0, 0);
-                                reset_drive_encoders();
-                                //lDetectorBlue.logToFile("done");
-                                incrementState();
-                            }
-                        } else if (lDetectorBlue.clusters.clusterGroups.get(0).center().x > mBlue.cols() / 2) {
-                            set_drive_power(0.06, 0.06);
-                        } else if (lDetectorBlue.clusters.clusterGroups.get(0).center().x < mBlue.cols() / 2) {
-                            set_drive_power(-0.06, -0.06);
+                        if (countA > 0) {
+                            countA = 0;
+                            set_drive_power(0, 0);
+                            reset_drive_encoders();
+                            //lDetectorBlue.logToFile("done");
+                            incrementState();
                         }
                         ret = String.valueOf(intersect.x);
                         telemetry.addData("Center X", ret);
-                        lDetectorBlue.logToFile(lDetectorBlue.clusters.clusterGroups.get(0).angle + "\t" + lDetectorBlue.clusters.clusterGroups.get(0).center().x + "\t" + lDetectorBlue.clusters.clusterGroups.get(0).center().y + "\t" + lDetectorBlue.clusters.clusterGroups.get(1).angle + "\t" + lDetectorBlue.clusters.clusterGroups.get(1).center().x + "\t" + lDetectorBlue.clusters.clusterGroups.get(1).center().y + "\t" + intersect.x + "\t" + intersect.y + "\t" + System.currentTimeMillis());
+                        lDetectorBlue.logToFile(lDetectorBlue.clusters.clusterGroups.get(0).angle + "\t" + lDetectorBlue.clusters.clusterGroups.get(0).center().x + "\t" + lDetectorBlue.clusters.clusterGroups.get(0).center().y + "\t" + lDetectorBlue.clusters.clusterGroups.get(indexOpp).angle + "\t" + lDetectorBlue.clusters.clusterGroups.get(indexOpp).center().x + "\t" + lDetectorBlue.clusters.clusterGroups.get(indexOpp).center().y + "\t" + intersect.x + "\t" + intersect.y + "\t" + System.currentTimeMillis());
+
+                    } else if (lDetectorBlue.clusters.clusterGroups.get(0).center().x > mBlue.cols() / 2) {
+                        set_drive_power(0.06, 0.06);
+                    } else if (lDetectorBlue.clusters.clusterGroups.get(0).center().x < mBlue.cols() / 2) {
+                        set_drive_power(-0.06, -0.06);
                     }
                 }
+
             }catch(Exception e) {
                 e.printStackTrace();
             }
