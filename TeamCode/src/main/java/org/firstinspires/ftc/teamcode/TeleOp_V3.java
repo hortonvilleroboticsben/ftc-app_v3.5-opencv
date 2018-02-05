@@ -1,27 +1,18 @@
 package org.firstinspires.ftc.teamcode;
 
-import android.widget.Toast;
-
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.vuforia.PIXEL_FORMAT;
-import com.vuforia.Vuforia;
 
-import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
-import java.util.Arrays;
-
-@Disabled()
 @TeleOp(name = "teleOp", group = "Competition")
-public class TeleOp_V2 extends StateMachine_v7 {
+public class TeleOp_V3 extends StateMachine_v7 {
 
-    StateMachine_v7 robotFront = new StateMachine_v7();
+    StateMachine_v7 relicMachine = new StateMachine_v7();
+    Timer relicTimer = new Timer();
+
     Timer t0 = new Timer();
     Timer t1 = new Timer();
 
@@ -50,6 +41,12 @@ public class TeleOp_V2 extends StateMachine_v7 {
     boolean OS2 = false;
     double udVal = 0.7;
 
+    boolean isGrabbingRelic = false;
+    boolean grabOS = true;
+
+    boolean isPlacingRelic = false;
+    boolean placeOS = true;
+
     boolean phoneOS = false;
     double phonePos = 0;
 
@@ -64,24 +61,24 @@ public class TeleOp_V2 extends StateMachine_v7 {
         super.init();
         if(mtrLeftDrive != null)telemetry.addData("mtrLeft", mtrLeftDrive.getMode());
 
-        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
-
-        parameters.vuforiaLicenseKey = "AXlr9dj/////AAAAGRujCnGOL0aIpjtd4y5IK2sFwI4jstOeOlytTrPr3jzeQQ9tGEHgLmuGdxzuxGNY5641pyXeeyJHccL+I4QCZq8Sodm5DAUBsAQQ9ox1EY3+KNfZISN06k1IqDf7YaRXhE02j+7aE4Apnm3Hvn9V5CDKSTgOq73eJId9uzHkuNaIx+UDV4fRS1HK5L6dSGmIw3+RW7uaFdBF0E2bvWzzpZv51KFzw5oy/9qFB9r6ke5B5Gd2zw9JjafwudFSpLVCiNzIreoTaIFYVMmGMuIFIT4C6oC13EcvbNl5CFpl+irLqhSI//nlL2L2DKxKtW5UTQqNBlOSBdTxWR/kSN12edlwOu0kFgzhKBFapn3KHC0V";
-
-        parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
-        this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
-
-        Vuforia.setFrameFormat(PIXEL_FORMAT.RGB565, true);
-
-        VuforiaTrackables relicTrackables = this.vuforia.loadTrackablesFromAsset("RelicVuMark");
-        relicTemplate = relicTrackables.get(0);
-        relicTemplate.setName("relicVuMarkTemplate"); // can help in debugging; otherwise not necessary
-
-        telemetry.addData(">", "Press Play to start");
-        telemetry.update();
-
-        relicTrackables.activate();
+//        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+//        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
+//
+//        parameters.vuforiaLicenseKey = "AXlr9dj/////AAAAGRujCnGOL0aIpjtd4y5IK2sFwI4jstOeOlytTrPr3jzeQQ9tGEHgLmuGdxzuxGNY5641pyXeeyJHccL+I4QCZq8Sodm5DAUBsAQQ9ox1EY3+KNfZISN06k1IqDf7YaRXhE02j+7aE4Apnm3Hvn9V5CDKSTgOq73eJId9uzHkuNaIx+UDV4fRS1HK5L6dSGmIw3+RW7uaFdBF0E2bvWzzpZv51KFzw5oy/9qFB9r6ke5B5Gd2zw9JjafwudFSpLVCiNzIreoTaIFYVMmGMuIFIT4C6oC13EcvbNl5CFpl+irLqhSI//nlL2L2DKxKtW5UTQqNBlOSBdTxWR/kSN12edlwOu0kFgzhKBFapn3KHC0V";
+//
+//        parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
+//        this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
+//
+//        Vuforia.setFrameFormat(PIXEL_FORMAT.RGB565, true);
+//
+//        VuforiaTrackables relicTrackables = this.vuforia.loadTrackablesFromAsset("RelicVuMark");
+//        relicTemplate = relicTrackables.get(0);
+//        relicTemplate.setName("relicVuMarkTemplate"); // can help in debugging; otherwise not necessary
+//
+//        telemetry.addData(">", "Press Play to start");
+//        telemetry.update();
+//
+//        relicTrackables.activate();
 
     }
 
@@ -94,18 +91,6 @@ public class TeleOp_V2 extends StateMachine_v7 {
     public void loop() {
         axes = (IMUnav != null) ? IMUnav.getAngularOrientation(AxesReference.EXTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES) : null;
 
-        ////////////////LEVELING CONTROL////////////////////////
-
-
-
-        if (adjOS) {
-            adjustment += gamepad2.y ? 15. / 270 : gamepad2.b ? -15. / 270 : 0;
-            adjOS = false;
-        }
-        if (!adjOS && !gamepad2.y && !gamepad2.b) adjOS = true;
-
-        if (gamepad2.guide) adjustment = 0.0;
-
         ////////////////////DRIVE//////////////////////
 
         speedRatio = gamepad1.right_trigger > .5 ^ gamepad1.right_bumper ? gamepad1.right_bumper ? .25 : 1. : .5;
@@ -117,15 +102,106 @@ public class TeleOp_V2 extends StateMachine_v7 {
 
         ////////////////ARM MOTION/////////////////
 
+        if(!isGrabbingRelic) {
+            set_position(srvClaw, (gamepad2.left_trigger > 0.5) ? CLAWOPEN : CLAWCLOSED);
 
+            set_power(mtrExtend, (!isWithin(gamepad2.left_stick_y, 0.2, 0.2)) ? 0.2 * gamepad2.left_stick_y : 0);
 
-        set_position(srvClaw, (gamepad2.left_trigger > 0.5) ? 0.0 : 1.0);
+            set_position(srvLevel, gamepad2.dpad_up ? LEVELUP : LEVELDOWN);
+        }
 
-        set_power(mtrExtend,(!isWithin(gamepad2.left_stick_y,0.2,0.2)) ? 0.2*gamepad2.left_stick_y : 0);
+        ////////////////////////AUTOMATED RELIC GRABBING/////////////////////
 
+        if(gamepad2.guide && gamepad2.y && grabOS){
+            grabOS = false;
+            isGrabbingRelic = !isGrabbingRelic;
+        }else if(!gamepad2.y) grabOS = true;
 
-        set_position(srvExtend, gamepad2.dpad_up ? 1 : gamepad2.dpad_down ? -1 : 0);
+        if(isGrabbingRelic && !isPlacingRelic){
+            relicMachine.initializeMachine();
+            relicMachine.AbsoluteMotorMove(mtrExtend, extendPos.PARTIAL_RETRACT.getVal(), 0.5);
+            relicMachine.ServoMove(srvClaw, CLAWOPEN);
+            relicMachine.ServoMove(srvLevel, LEVELDOWN);
+            if(relicMachine.next_state_to_execute()){
+                set_power(mtrExtend, 0.1);
+                relicMachine.incrementState();
+            }
+            if(relicMachine.next_state_to_execute()){
+                if(snsBtnRelic.isPressed()){
+                    relicMachine.incrementState();
+                }
+            }
+            relicMachine.Pause(300);
+            if(relicMachine.next_state_to_execute()){
+                set_power(mtrExtend, 0.0);
+                set_position(srvClaw, CLAWCLOSED);
+                relicMachine.incrementState();
+            }
+            relicMachine.Pause(500);
+            if(relicMachine.next_state_to_execute()){
+                set_power(mtrExtend, -0.2);
+                relicMachine.incrementState();
+            }
+            if(relicMachine.next_state_to_execute()){
+                if(has_encoder_reached(mtrExtend, extendPos.PARTIAL_RETRACT.getVal()) || !snsBtnRelic.isPressed()){
+                    set_position(srvLevel, LEVELUP);
+                    incrementState();
+                }
+            }
+            relicMachine.AbsoluteMotorMove(mtrExtend, extendPos.HOME.getVal(), 0.4);
+            if(relicMachine.next_state_to_execute()){
+                isGrabbingRelic = false;
+                relicMachine.incrementState();
+            }
+        }else{
+            relicMachine.reset();
+        }
 
+        ////////////////////////AUTOMATED RELIC GRABBING/////////////////////
+
+        if(gamepad2.guide && gamepad2.b && placeOS){
+            placeOS = false;
+            isPlacingRelic = !isPlacingRelic;
+        }else if(!gamepad2.b) placeOS = true;
+
+        if(isPlacingRelic && !isGrabbingRelic){
+            relicMachine.initializeMachine();
+            relicMachine.ServoMove(srvClaw, CLAWCLOSED);
+            relicMachine.ServoMove(srvLevel, LEVELUP);
+            relicMachine.Pause(300);
+            relicMachine.AbsoluteMotorMove(mtrExtend, extendPos.PARTIAL_RETRACT.getVal(), 0.5);
+            relicMachine.ServoMove(srvLevel, LEVELPARTIALDOWN);
+            relicMachine.AbsoluteMotorMove(mtrExtend, extendPos.FULL_EXTEND.getVal(), 0.3);
+            if(relicMachine.next_state_to_execute()){
+                double currVal = get_servo_position(srvLevel);
+                if(relicTimer.hasWaitFinished(300)) {
+                    currVal -= .003;
+                    currVal = currVal < 0 ? 0 : currVal;
+                    set_position(srvLevel, currVal);
+                }
+                if(!snsBtnRelic.isPressed() || currVal == 0.0){
+                    relicMachine.incrementState();
+                }
+            }
+            relicMachine.ServoMove(srvClaw, CLAWOPEN);
+            relicMachine.Pause(500);
+            if(relicMachine.next_state_to_execute()){
+                set_power(mtrExtend, -.3);
+                incrementState();
+            }
+            relicMachine.Pause(750);
+            relicMachine.ServoMove(srvClaw, CLAWCLOSED);
+            relicMachine.ServoMove(srvLevel, LEVELUP);
+            relicMachine.AbsoluteMotorMove(mtrExtend, extendPos.HOME.getVal(), -0.5);
+            relicMachine.Pause(750);
+            relicMachine.ServoMove(srvLevel, LEVELDOWN);
+            if(relicMachine.next_state_to_execute()){
+                isPlacingRelic = false;
+                relicMachine.incrementState();
+            }
+        }else{
+            relicMachine.reset();
+        }
 
         /////////////////AUTOBALANCE//////////////////////
 
@@ -162,10 +238,10 @@ public class TeleOp_V2 extends StateMachine_v7 {
                 liftLevel = liftPos.ONE;
                 isLifting = true;
             }
-        }else if(((gamepad2.right_trigger <= 0.5) || t1.isWaiting()) && liftLevel.equals(liftPos.ONE)){
-            if(liftLevel.equals(liftPos.ONE)) {
+        }else if(((gamepad2.right_trigger <= 0.5) || t1.isWaiting()) && liftLevel.equals(liftPos.ONE)) {
+            if (liftLevel.equals(liftPos.ONE)) {
                 milliSecondTimeout = milliSecondTimeout == 0 ? 1500 : milliSecondTimeout + 800;
-                if(t1.hasWaitFinished(250)) {
+                if (t1.hasWaitFinished(250)) {
                     liftLevel = liftPos.CARRY;
                     isLifting = true;
                 }

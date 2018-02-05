@@ -276,7 +276,7 @@ public class Autonomous_v3 extends StateMachine_v7 {
                     drive.SetFlag(glyph, "Grab Relic");
 
                     glyph.WaitForFlag("Grab Relic");
-                    glyph.AbsoluteMotorMove(mtrExtend, extendPos.BLUE_AUTO.getVal(), 0.05);
+                    //glyph.AbsoluteMotorMove(mtrExtend, extendPos.BLUE_AUTO.getVal(), 0.05);
                     glyph.ServoMove(srvClaw, CLAWCLOSED);
                     glyph.Pause(200);
                     glyph.SetFlag(drive, "move again");
@@ -432,7 +432,7 @@ public class Autonomous_v3 extends StateMachine_v7 {
             drive.OWTurn(45,0.2);
             drive.SetFlag(glyph,"grab dat relic");
 
-            glyph.AbsoluteMotorMove(mtrExtend,extendPos.RED_AUTO.getVal(),0.05);
+            //glyph.AbsoluteMotorMove(mtrExtend,extendPos.RED_AUTO.getVal(),0.05);
             glyph.ServoMove(srvClaw,CLAWCLOSED);
             glyph.AbsoluteMotorMove(mtrExtend,extendPos.HOME.getVal(),0.05);
             glyph.SetFlag(drive,"watch those wrist rockets");
