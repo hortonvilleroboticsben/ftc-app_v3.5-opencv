@@ -750,15 +750,16 @@ class StateMachine_v7 extends Subroutines_v14 {
                             //lDetectorBlue.logToFile("done");
                             incrementState();
                         }
-                        ret = String.valueOf(intersect.x);
-                        telemetry.addData("Center X", ret);
-                        lDetectorBlue.logToFile(lDetectorBlue.clusters.clusterGroups.get(0).angle + "\t" + lDetectorBlue.clusters.clusterGroups.get(0).center().x + "\t" + lDetectorBlue.clusters.clusterGroups.get(0).center().y + "\t" + lDetectorBlue.clusters.clusterGroups.get(indexOpp).angle + "\t" + lDetectorBlue.clusters.clusterGroups.get(indexOpp).center().x + "\t" + lDetectorBlue.clusters.clusterGroups.get(indexOpp).center().y + "\t" + intersect.x + "\t" + intersect.y + "\t" + System.currentTimeMillis());
+
 
                     } else if (lDetectorBlue.clusters.clusterGroups.get(0).center().x > mBlue.cols() / 2) {
                         set_drive_power(0.06, 0.06);
                     } else if (lDetectorBlue.clusters.clusterGroups.get(0).center().x < mBlue.cols() / 2) {
                         set_drive_power(-0.06, -0.06);
                     }
+                    ret = String.valueOf(intersect.x);
+                    telemetry.addData("Center X", ret);
+                    lDetectorBlue.logToFile(lDetectorBlue.clusters.clusterGroups.get(0).angle + "\t" + lDetectorBlue.clusters.clusterGroups.get(0).center().x + "\t" + lDetectorBlue.clusters.clusterGroups.get(0).center().y + "\t" + lDetectorBlue.clusters.clusterGroups.get(indexOpp).angle + "\t" + lDetectorBlue.clusters.clusterGroups.get(indexOpp).center().x + "\t" + lDetectorBlue.clusters.clusterGroups.get(indexOpp).center().y + "\t" + intersect.x + "\t" + intersect.y + "\t" + System.currentTimeMillis());
                 }
 
             }catch(Exception e) {

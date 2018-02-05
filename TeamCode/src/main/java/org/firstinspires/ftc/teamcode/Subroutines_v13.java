@@ -169,22 +169,22 @@ class Subroutines_v13 extends OpMode {
         srvPhone = addServo(CAM_SIDE, "srvPhone");
         srvLevel = addServo(0.0, "srvLevel");
 
-        try {
-            IMUnav = hardwareMap.get(BNO055IMU.class, "imu");
-            Parameters p = new Parameters();
-            p.angleUnit = BNO055IMU.AngleUnit.DEGREES;
-            p.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-            p.calibrationDataFile = "BNO055IMUCalibration.json";
-            try {
-                IMUnav.initialize(p);
-            } catch (Exception e) {
-            }
-            IMUnav.isSystemCalibrated();
-        } catch (Exception p_exception) {
-            addWarningMessage("imu");
-            RobotLog.i(p_exception.getLocalizedMessage());
-            IMUnav = null;
-        }
+//        try {
+//            IMUnav = hardwareMap.get(BNO055IMU.class, "imu");
+//            Parameters p = new Parameters();
+//            p.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+//            p.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+//            p.calibrationDataFile = "BNO055IMUCalibration.json";
+//            try {
+//                IMUnav.initialize(p);
+//            } catch (Exception e) {
+//            }
+//            IMUnav.isSystemCalibrated();
+//        } catch (Exception p_exception) {
+//            addWarningMessage("imu");
+//            RobotLog.i(p_exception.getLocalizedMessage());
+//            IMUnav = null;
+//        }
 
         update_telemetry();
 
