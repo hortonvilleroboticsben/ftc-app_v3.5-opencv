@@ -85,7 +85,7 @@ class StateMachine_v6 extends Subroutines_v13 {
     @Override
     public void init() {
         super.init();
-        O = IMUnav.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+//        O = IMUnav.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
     }
 
     void initializeMachine(){
