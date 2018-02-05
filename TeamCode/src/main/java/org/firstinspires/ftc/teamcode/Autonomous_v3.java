@@ -28,15 +28,19 @@ import static org.firstinspires.ftc.robotcontroller.external.samples.ConceptVuMa
 @Autonomous(name = "AutoNew", group = "Final")
 public class Autonomous_v3 extends StateMachine_v7 {
     int question_number = 1;
-    byte Alliance = 0;
     boolean btnOS;
-    Orientation axes;
+
+    byte Alliance = 0;
     int StartPos = 0;
+    long StartPause = 0;
+    boolean GrabRelic,EnterPit;
+
+    Orientation axes;
 
     StateMachine_v7 drive = new StateMachine_v7(),
-                    arm = new StateMachine_v7(),
-                    glyph = new StateMachine_v7(),
-                    vision = new StateMachine_v7();
+            arm = new StateMachine_v7(),
+            glyph = new StateMachine_v7(),
+            vision = new StateMachine_v7();
 
     @Override
     public void init() {
@@ -111,25 +115,60 @@ public class Autonomous_v3 extends StateMachine_v7 {
         switch (question_number) {
             case 1:
                 telemetry.addData("Alliance: a=blue b=red", "");
-                if ((gamepad1.a ^ gamepad1.b) && !gamepad1.start && btnOS == false) {
+                if ((gamepad1.a ^ gamepad1.b) && !gamepad1.start && !btnOS) {
                     Alliance = (gamepad1.a) ? BLUE : RED;
                     btnOS = true;
-                } else if (!gamepad1.a && !gamepad1.b && !gamepad1.start && btnOS == true) {
+                } else if (!gamepad1.a && !gamepad1.b && !gamepad1.start && btnOS) {
                     btnOS = false;
                     question_number++;
                 }
                 break;
             case 2:
                 telemetry.addData("StartPos: a=1 b=2", "");
-                if ((gamepad1.a ^ gamepad1.b) && !gamepad1.start && btnOS == false) {
+                if ((gamepad1.a ^ gamepad1.b) && !gamepad1.start && !btnOS) {
                     StartPos = (gamepad1.a) ? 1 : 2;
                     btnOS = true;
-                } else if (!gamepad1.a && !gamepad1.b && !gamepad1.start && btnOS == true) {
+                } else if (!gamepad1.a && !gamepad1.b && !gamepad1.start && btnOS) {
                     btnOS = false;
                     question_number++;
                 }
                 break;
             case 3:
+                if(StartPos == 1){
+                    telemetry.addData("Enter Pit: a=yes b=no", "");
+                    if ((gamepad1.a ^ gamepad1.b) && !gamepad1.start && !btnOS) {
+                        EnterPit = gamepad1.a;
+                        btnOS = true;
+                    } else if (!gamepad1.a && !gamepad1.b && !gamepad1.start && btnOS) {
+                        btnOS = false;
+                        question_number++;
+                    }
+                }
+                if(StartPos == 2){
+                    telemetry.addData("Grab Relic: a=yes b=no", "");
+                    if ((gamepad1.a ^ gamepad1.b) && !gamepad1.start && !btnOS) {
+                        GrabRelic = gamepad1.a;
+                        btnOS = true;
+                    } else if (!gamepad1.a && !gamepad1.b && !gamepad1.start && btnOS) {
+                        btnOS = false;
+                        question_number++;
+                    }
+                }
+                break;
+            case 4:
+                telemetry.addData("Add time d_up = +1sec, confirm = a", "");
+                telemetry.addData("Beginning Pause",StartPause);
+                if (gamepad1.dpad_up ^ gamepad1.dpad_down && !btnOS) {
+                    if(gamepad1.dpad_up) StartPause += 1000;
+                    if(gamepad1.dpad_down) StartPause -= 1000;
+                    btnOS = true;
+                } else if (!gamepad1.dpad_down && !gamepad1.dpad_up && !gamepad1.a) {
+                    btnOS = false;
+                } else if (gamepad1.a && !btnOS) {
+                    current_number++;
+                }
+                break;
+            case 5:
                 telemetry.addData("Ready to Begin", "");
                 break;
         }
@@ -162,24 +201,31 @@ public class Autonomous_v3 extends StateMachine_v7 {
 
         vision.WaitForFlag("Read Relic");
         vision.ProcessRelic();
+//        if(vision.next_state_to_execute()) {
+//            if(vuMark!=null) {
+//                drive.incrementState();
+//            }
+//        }
         vision.SetFlag(drive, "Relic Read");
 
         drive.WaitForFlag("Relic Read");
         drive.ServoMove(srvPhone, CAM_JEWELS);
-        drive.Pause(200);
+        drive.Pause(1000);
         drive.SetFlag(vision, "Read Jewels");
 
         vision.WaitForFlag("Read Jewels");
         vision.ProcessJewels(vuforiaFrameToMat());
+//        if(vision.next_state_to_execute()){
+//            if(ballArray[0]!=null&&ballArray[1]!=null){
+//                vision.incrementState();
+//            }
+//        }
         vision.SetFlag(arm, "Jewels Read");
 
         arm.WaitForFlag("Jewels Read");
         arm.ServoMove(srvLR, LR_CENTER);
         arm.ServoIncrementalMove(srvUD, UD_DOWN, 0.1);
         arm.Pause(500);
-//            arm.ServoMove(srvUD, UD_DOWN + .04);
-//            arm.Pause(800);
-//            arm.ServoMove(srvUD, UD_DOWN);
 
 
         if(Alliance == BLUE) {
@@ -200,15 +246,18 @@ public class Autonomous_v3 extends StateMachine_v7 {
             if (StartPos == 1) {
                 if(vuMark != null) {
                     if (vuMark == RelicRecoveryVuMark.LEFT) {
-                        drive.Drive(28.75,0.2);
+                        drive.Drive(28,0.2);
                     } else if (vuMark == RelicRecoveryVuMark.RIGHT) {
                         drive.Drive(42.75,0.2);
                     } else {
                         drive.Drive(35.75,0.2);
-                        }
+                    }
                 }
                 drive.SetFlag(arm,"Off Platform");
                 drive.Pause(200);
+//                if(drive.next_state_to_execute()) {
+//                    drive.useThisForTesting = true;
+//                }
 
                 arm.WaitForFlag("Off Platform");
                 arm.AbsoluteMotorMove(mtrLift,liftPos.AUTO.getVal(),.4);
@@ -221,17 +270,22 @@ public class Autonomous_v3 extends StateMachine_v7 {
                 drive.Drive(26,.2);
                 drive.Drive(-4,.2);
                 drive.OWTurn(-45,.2);
-                drive.SetFlag(glyph,"Grab Relic");
+
                 drive.SetFlag(arm, "Off Platform");
+                if(GrabRelic) {
+                    drive.SetFlag(glyph, "Grab Relic");
 
-                glyph.WaitForFlag("Grab Relic");
-                glyph.AbsoluteMotorMove(mtrExtend,extendPos.BLUE_AUTO.getVal(),0.05);
-                glyph.ServoMove(srvClaw,CLAWCLOSED);
-                glyph.Pause(200);
-                glyph.SetFlag(drive,"move again");
+                    glyph.WaitForFlag("Grab Relic");
+                    glyph.AbsoluteMotorMove(mtrExtend, extendPos.BLUE_AUTO.getVal(), 0.05);
+                    glyph.ServoMove(srvClaw, CLAWCLOSED);
+                    glyph.Pause(200);
+                    glyph.SetFlag(drive, "move again");
 
-                drive.WaitForFlag("move again");
-                drive.OWTurn(45,.2);
+                    drive.WaitForFlag("move again");
+                    drive.OWTurn(45, .2);
+                } else {
+                    drive.Turn(88,0.2);
+                }
 
                 if(vuMark != null) {
                     if (vuMark == RelicRecoveryVuMark.LEFT) {
@@ -294,27 +348,11 @@ public class Autonomous_v3 extends StateMachine_v7 {
                         drive.Drive(-9.33,0.2);
                     }
                 }
-                //drive.Drive(-9.33,.2);
                 drive.Turn(-88,.2);
             }
         }
-//        if(vuMark != null) {
-//            if (vuMark == RelicRecoveryVuMark.LEFT) {
-//                drive.Turn(29, 0.2);
-//                drive.Drive(-4.5, 0.2);
-//                drive.SetFlag(glyph,"open grabber");
-//            } else if (vuMark == RelicRecoveryVuMark.RIGHT) {
-//                drive.Turn(-24, 0.2);
-//                drive.Drive(-4.75, 0.2);
-//                drive.SetFlag(glyph,"open grabber");
-//            } else {
-//                drive.Turn(3.25,0.2);
-//                drive.Drive(-4.5, 0.2);
-//                drive.SetFlag(glyph,"open grabber");
-//            }
-//        }
 
-        drive.Drive(-2.5, 0.2);
+        drive.Drive(-3.5, 0.2);
         drive.SetFlag(glyph,"open grabber");
 
         glyph.WaitForFlag("open grabber");
@@ -330,23 +368,53 @@ public class Autonomous_v3 extends StateMachine_v7 {
             drive.WaitForFlag("enter pit");
             drive.Drive(7, 0.2);
             drive.Turn(175, 0.4);
-            drive.Shimmy(-36, 0.5,500);
-            drive.SetFlag(glyph,"grab that block");
+            if(EnterPit) {
+                drive.ServoMove(srvGr1, GR1CLOSED);
+                drive.ServoMove(srvGr2,GR2CLOSED);
+                drive.SetFlag(glyph,"da way");
+                glyph.WaitForFlag("da way");
+                glyph.AbsoluteMotorMove(mtrLift,liftPos.AUTO.getVal(),0.5);
+                drive.Drive(-8,0.5);
+                drive.Turn(-55,0.3);
+                drive.Drive(-17,0.5);
+                drive.Turn(75,75);
+                drive.ServoMove(srvGr2,GR2OPEN);
+                drive.SetFlag(glyph,"oscillate");
 
-            glyph.WaitForFlag("grab that block");
-            glyph.ServoMove(srvGr1,GR1CLOSED);
-            glyph.ServoMove(srvGr2,GR2CLOSED);
-            glyph.Pause(300);
-            glyph.SetFlag(drive,"go back");
-            glyph.AbsoluteMotorMove(mtrLift,liftPos.AUTO.getVal(),0.6);
+                glyph.WaitForFlag("oscillate");
+                if(drive.next_state_to_execute()){
+                    drive.timerToggle.reset();
+                    drive.incrementState();
+                }
+                glyph.ServoToggle(snsBtnGlyph.isPressed() || drive.timerToggle.getElapsedTime()>5000);
+                drive.DriveWithCondition(-15,0.5,snsBtnGlyph.isPressed() || drive.timerToggle.getElapsedTime()>5000);
 
-            drive.WaitForFlag("go back");
-            drive.Pause(200);
-            drive.Drive(10,0.2);
-            drive.Turn(180,0.2);
+//                if(getBatteryVoltage() < 10) {
+//                    drive.incrementState();
+//                }
 
+                //drive.Shimmy(-24, 0.2, 1000);
+                drive.SetFlag(glyph, "grab that block");
 
-        }else if(Alliance == RED) {
+                glyph.WaitForFlag("grab that block");
+                glyph.ServoMove(srvGr1, GR1CLOSED);
+                glyph.ServoMove(srvGr2, GR2CLOSED);
+                glyph.Pause(300);
+                glyph.SetFlag(drive, "go back");
+                glyph.AbsoluteMotorMove(mtrLift, liftPos.TWO.getVal()-300, 0.6);
+
+                drive.WaitForFlag("go back");
+                drive.Pause(200);
+                drive.Drive(6,0.2);
+                drive.Turn(-45, 0.2);
+                drive.Drive(-16,0.2);
+                //drive.RetraceEncoders(0.2);
+                drive.ServoMove(srvGr1,GR1OPEN);
+                drive.ServoMove(srvGr2,GR2OPEN);
+
+            }
+
+        }else if(Alliance == RED && GrabRelic) {
             glyph.SetFlag(drive,"you are good to go now");
 
             drive.WaitForFlag("you are good to go now");
@@ -383,8 +451,6 @@ public class Autonomous_v3 extends StateMachine_v7 {
             telemetry.addData("vuMark", vuMark.toString());
         else
             telemetry.addData("vuMark", "null");
-
-        telemetry.addData("voltage", getBatteryVoltage());
 
 
     }

@@ -95,9 +95,7 @@ public class TeleOp_V2 extends StateMachine_v7 {
 
         ////////////////LEVELING CONTROL////////////////////////
 
-        double pos = Math.abs(((get_encoder_count(mtrArmFlip) * 360 / 1700.)) / 360.);
-        pos += adjustment;
-        pos = pos >= 1 ? 1 : pos;
+
 
         if (adjOS) {
             adjustment += gamepad2.y ? 15. / 270 : gamepad2.b ? -15. / 270 : 0;
@@ -118,19 +116,13 @@ public class TeleOp_V2 extends StateMachine_v7 {
 
         ////////////////ARM MOTION/////////////////
 
-        set_position(srvLevel, pos);
+
 
         set_position(srvClaw, (gamepad2.left_trigger > 0.5) ? 0.0 : 1.0);
 
-        if(!gamepad2.left_stick_button) {
-            set_power(mtrArmSpin, (Math.abs(gamepad2.left_stick_x) <= .2) ? 0 : gamepad2.left_stick_x * .5);
+        set_power(mtrExtend,(!isWithin(gamepad2.left_stick_y,0.2,0.2)) ? 0.2*gamepad2.left_stick_y : 0);
 
-            set_power(mtrArmFlip, ((Math.abs(gamepad2.left_stick_y) <= .2)) ? 0 : gamepad2.left_stick_y * .2);
-        }else{
-            set_power(mtrArmSpin, (Math.abs(gamepad2.left_stick_x) <= .2) ? 0 : gamepad2.left_stick_x * .1);
 
-            set_power(mtrArmFlip, ((Math.abs(gamepad2.left_stick_y) <= .2)) ? 0 : gamepad2.left_stick_y * .1);
-        }
         set_position(srvExtend, gamepad2.dpad_up ? 1 : gamepad2.dpad_down ? -1 : 0);
 
 
@@ -178,6 +170,7 @@ public class TeleOp_V2 extends StateMachine_v7 {
                 }
             }
         }
+
 
 //        if(gamepad1.dpad_left ^ gamepad1.dpad_right && !OS1) {
 //            OS1 = true;
@@ -277,10 +270,11 @@ public class TeleOp_V2 extends StateMachine_v7 {
 //                                                                       get_encoder_count(mtrRightDrive)}));
         telemetry.addData("liftPos", liftLevel);
         telemetry.addData("isLifting", isLifting);
-        telemetry.addData("isWaiting0", t0.isWaiting());
-        telemetry.addData("elapsedTime0", t0.getElapsedTime());
-        telemetry.addData("isWaiting1", t1.isWaiting());
-        telemetry.addData("elapsedTime1", t1.getElapsedTime());
+//        telemetry.addData("isWaiting0", t0.isWaiting());
+//        telemetry.addData("elapsedTime0", t0.getElapsedTime());
+//        telemetry.addData("isWaiting1", t1.isWaiting());
+//        telemetry.addData("elapsedTime1", t1.getElapsedTime());
+        telemetry.addData("extendEnc", get_encoder_count(mtrExtend));
         telemetry.addData("Voltage",getBatteryVoltage());
     }
 }

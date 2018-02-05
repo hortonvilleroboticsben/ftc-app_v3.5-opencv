@@ -199,8 +199,29 @@ public class Autonomous_v2 extends StateMachine_v6 {
             drive.ServoMove(srvPhone, CAM_FRONT);
 
             if (StartPos == 1) {
-                drive.Drive(35.75, 0.2);
-                drive.SetFlag(arm, "Off Platform");
+                if(vuMark != null) {
+                    if (vuMark == RelicRecoveryVuMark.LEFT) {
+                        drive.Drive(29.75,0.2);
+                        drive.SetFlag(arm, "Off Platform");
+                        drive.Turn(29, 0.2);
+                        drive.Drive(-4.5, 0.2);
+                        drive.SetFlag(glyph,"open grabber");
+                    } else if (vuMark == RelicRecoveryVuMark.RIGHT) {
+                        drive.Drive(41.75,0.2);
+                        drive.SetFlag(arm, "Off Platform");
+                        drive.Turn(-24, 0.2);
+                        drive.Drive(-4.75, 0.2);
+                        drive.SetFlag(glyph,"open grabber");
+                    } else {
+                        drive.Drive(35.75,0.2);
+                        drive.SetFlag(arm, "Off Platform");
+                        drive.Turn(3.25,0.2);
+                        drive.Drive(-4.5, 0.2);
+                        drive.SetFlag(glyph,"open grabber");
+                    }
+                }
+//                drive.Drive(35.75, 0.2);
+//                drive.SetFlag(arm, "Off Platform");
 
                 arm.WaitForFlag("Off Platform");
                 arm.AbsoluteMotorMove(mtrLift, liftPos.ONE.getVal()+500, 0.5);
@@ -215,9 +236,24 @@ public class Autonomous_v2 extends StateMachine_v6 {
                 arm.AbsoluteMotorMove(mtrLift, liftPos.ONE.getVal()+500, 0.5);
 
                 drive.Turn(-89,.2);
-                drive.Drive(11.8,.2);
+
+                if(vuMark != null) {
+                    if (vuMark == RelicRecoveryVuMark.LEFT) {
+                        drive.Drive(5.8,0.2);
+                    } else if (vuMark == RelicRecoveryVuMark.RIGHT) {
+                        drive.Drive(17.8,0.2);
+                    } else {
+                        drive.Drive(11.8,0.2);
+                    }
+                }
+
+                //drive.Drive(11.8,.2);
                 drive.Turn(-90,.2);
                 drive.Drive(2,0.2);
+                drive.SetFlag(arm, "Off Platform");
+                drive.Turn(3.25,0.2);
+                drive.Drive(-4.5, 0.2);
+                drive.SetFlag(glyph,"open grabber");
             }
 
 /////////////////////////RED ALLIANCE////////////////////////////////////
@@ -241,6 +277,16 @@ public class Autonomous_v2 extends StateMachine_v6 {
 
                 arm.WaitForFlag("Off Platform");
                 arm.AbsoluteMotorMove(mtrLift, liftPos.ONE.getVal()+500, 0.5);
+
+                if(vuMark != null) {
+                    if (vuMark == RelicRecoveryVuMark.LEFT) {
+                        drive.Drive(5.8,0.2);
+                    } else if (vuMark == RelicRecoveryVuMark.RIGHT) {
+                        drive.Drive(17.8,0.2);
+                    } else {
+                        drive.Drive(11.8,0.2);
+                    }
+                }
 
                 drive.Turn(-89.5, 0.2);
             }else if(StartPos == 2){

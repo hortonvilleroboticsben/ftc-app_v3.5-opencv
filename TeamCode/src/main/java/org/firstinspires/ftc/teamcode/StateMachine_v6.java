@@ -46,18 +46,22 @@ class StateMachine_v6 extends Subroutines_v13 {
     private final double wheelDiameter = 4.166666666666667;                      //double wheelDiameter = 4.19;
     private final double turnDiameter = 15.45;        // private final double turnDiameter = 13.95;
     private int count = 0;
-
     private int countA = 0;
+
+    public boolean useThisForTesting = false;
+
+    private ArrayList<Integer> lEncoderDelta = new ArrayList<>();
+    private ArrayList<Integer> rEncoderDelta = new ArrayList<>();
+
+
+    Timer timeOut = new Timer();
+    boolean timeoutOS = true;
 
     static BallColor[] ballArray = {null, null};
     static RelicRecoveryVuMark vuMark = null;
 
-//    public ColorLineDetector lDetectorBlue = new ColorLineDetector();
-//    public ColorLineDetector lDetectorRed = new ColorLineDetector();
-    //static
-
-
     static Orientation O;
+    Timer timer = new Timer();
 
     @Override
     public String toString(){
@@ -131,6 +135,52 @@ class StateMachine_v6 extends Subroutines_v13 {
     boolean next_state_to_execute(boolean filler) {
         current_number++;
         return (state_in_progress == current_number);
+    }
+
+    void Shimmy(double distance, double speed,int period) {
+        if(next_state_to_execute()) {
+            if(timeoutOS){
+                timeOut.reset();
+                timeoutOS = false;
+            }
+            double wheelCircumference = wheelDiameter * Math.PI;
+            double revs = distance / wheelCircumference;
+            double targetDegrees = gearRatio * revs * countsPerRev;
+
+            if (speed < 0) {
+                targetDegrees = Math.abs(targetDegrees) * -1;
+            }
+            double theta = timer.getElapsedTime();//(get_encoder_count(mtrLeftDrive) + get_encoder_count(mtrRightDrive))/2;
+//            double lSpeed = ((speed/2)*Math.sin(Math.PI*theta/period))+(speed/2 +0.05);
+//            double rSpeed = ((speed/2)*Math.sin(((Math.PI/period)*(theta+period)))+(speed/2));
+            double lSpeed = ((speed)*Math.sin(2*Math.PI*theta/period));
+            double rSpeed = ((speed)*Math.sin(((2*Math.PI/period)*(theta+period))));
+            lSpeed=(lSpeed<0)?lSpeed:0.5*lSpeed;
+            rSpeed=(rSpeed<0)?rSpeed:0.5*rSpeed;
+
+
+            if (!driveFinished) {
+                run_drive_to_position();
+                set_drive_target((int) targetDegrees, (int) targetDegrees);
+                set_drive_power(lSpeed, rSpeed);
+            }
+
+
+
+            if (have_drive_encoders_reached(targetDegrees, targetDegrees) || driveFinished || timeOut.getElapsedTime() > 4000) { //if move is finished
+                if (!driveFinished) reset_drive_encoders(); //if encoders have not been reset,
+                driveFinished = true;                       //reset encoders
+                timeoutOS = true;
+                set_drive_power(-0.0f, -0.0f);//stop robot
+                if (have_drive_encoders_reset()) {//if encoders have actually reset,
+                    driveFinished = false;  //move on to next method
+                    incrementState();
+                }
+            }
+        }
+    }
+    void RetraceEncoders(double speed) {
+
     }
 
     void Drive(double distance, double speed) {
@@ -285,8 +335,10 @@ class StateMachine_v6 extends Subroutines_v13 {
     }
 
     void Pause(long milliseconds) {
+
         if (next_state_to_execute()) {
             if (waitHasFinished(milliseconds)) {
+                useThisForTesting = true;
                 incrementState();
             }
         }
@@ -439,7 +491,7 @@ class StateMachine_v6 extends Subroutines_v13 {
 
     void ProcessRelic() {
         if (next_state_to_execute()) {
-            if(++count <= 5) {
+            if(++count <= 10) {
                 vuMark = RelicRecoveryVuMark.from(relicTemplate);
                 telemetry.addData("vuMark", vuMark);
                 if (vuMark != RelicRecoveryVuMark.UNKNOWN) incrementState();

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Environment;
 import android.os.Looper;
+import android.text.method.Touch;
 import android.util.Log;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
@@ -75,8 +76,10 @@ class Subroutines_v14 extends OpMode {
     public final byte RED = -1;
     boolean driveFinished = false;
 
-    ArrayList<Integer> lDeltaEncoder = new ArrayList<>();
-    ArrayList<Integer> rDeltaEncoder = new ArrayList<>();
+    ArrayList<Long> lDeltaEncoder = new ArrayList<>();
+    Long lPreviousEncoder = new Long(0);
+    ArrayList<Long> rDeltaEncoder = new ArrayList<>();
+    Long rPreviousEncoder = new Long(0);
 
     double rangeVal[] = {0, 0};
     final byte FILTERED = 1;
@@ -93,13 +96,13 @@ class Subroutines_v14 extends OpMode {
     final double LEVELUP = 0;
     final double LEVELDOWN = 1;
 
-    final double UD_DOWN = .20;
+    final double UD_DOWN = .25;
     final double UD_UP = .735;
 
     final double LR_CENTER = .53;
     final double LR_LEFT = .415;
     final double LR_RIGHT = .63;
-    final double LR_HOME = .49;
+    final double LR_HOME = .53;//WAS .49
 
     final double CAM_SIDE = .565;
     final double CAM_VUMARK = .545;
@@ -155,28 +158,6 @@ class Subroutines_v14 extends OpMode {
         mtrRightDrive = addMotor(MotorLocation.RIGHT, "mtrRightDrive");
         mtrLift = addMotor(MotorLocation.SHIFT, "mtrLift");
         mtrExtend = addMotor(MotorLocation.SHIFT, "mtrExtend");
-        mtrArmFlip = addMotor(MotorLocation.SHIFT, "mtrArmFlip");
-        mtrArmSpin = addMotor(MotorLocation.SHIFT, "mtrArmSpin");
-
-
-        try {
-            snsColorRight = hardwareMap.colorSensor.get("snsColorRight");
-            snsColorRight.setI2cAddress(I2cAddr.create8bit(0x2a));
-            snsColorRight.enableLed(true);
-        } catch (Exception p_exception) {
-            addWarningMessage("snsColorRight");
-            RobotLog.i(p_exception.getLocalizedMessage());
-            snsColorRight = null;
-        }
-        try {
-            snsColorLeft = hardwareMap.colorSensor.get("snsColorLeft");
-            snsColorLeft.setI2cAddress(I2cAddr.create8bit(0x1a));
-            snsColorLeft.enableLed(true);
-        } catch (Exception p_exception) {
-            addWarningMessage("snsColorLeft");
-            RobotLog.i(p_exception.getLocalizedMessage());
-            snsColorLeft = null;
-        }
 
         srvGr1 = addServo(GR1OPEN, "srvGr1");
         srvGr2 = addServo(GR2OPEN, "srvGr2");
@@ -186,6 +167,9 @@ class Subroutines_v14 extends OpMode {
         srvUD = addServo(UD_UP, "srvUD");
         srvPhone = addServo(CAM_SIDE, "srvPhone");
         srvLevel = addServo(0.0, "srvLevel");
+
+        snsBtnGlyph = addTouchSensor("btnGlyph");
+        snsBtnRelic = addTouchSensor("btnRelic");
 
         try {
             IMUnav = hardwareMap.get(BNO055IMU.class, "imu");
@@ -378,9 +362,13 @@ class Subroutines_v14 extends OpMode {
     }
 
     public double getVoltage(AnalogInput sensor) {
-        double distReturn = -1;
-        if (sensor != null) {
-            distReturn = sensor.getVoltage();
+        double distReturn = Double.MAX_VALUE;
+        try {
+            if (sensor != null) {
+                distReturn = sensor.getVoltage();
+            }
+        }catch(Exception e) {
+            e.printStackTrace();
         }
         return distReturn;
     }
@@ -844,9 +832,39 @@ class Subroutines_v14 extends OpMode {
         return Math.hypot((center.x - check.x), (center.y - check.y));
     }
 
+    void updateEncoderDelta() {
+        if(mtrLeftDrive!=null&&mtrRightDrive!=null) {
+            if(!isWithin(get_encoder_count(mtrLeftDrive),lPreviousEncoder+70,lPreviousEncoder-70)
+             ||!isWithin(get_encoder_count(mtrRightDrive),rPreviousEncoder+70,rPreviousEncoder-70)) {
 
+                lDeltaEncoder.add(new Long(get_encoder_count(mtrLeftDrive) - lPreviousEncoder));
+                rDeltaEncoder.add(new Long(get_encoder_count(mtrRightDrive) - rPreviousEncoder));
+            }
+        }
+    }
 
+    void clearEncoderDelta() {
+        if(lDeltaEncoder.size() > 0 && rDeltaEncoder.size() > 0) {
+            lDeltaEncoder.remove(lDeltaEncoder.size() - 1);
+            rDeltaEncoder.remove(rDeltaEncoder.size() - 1);
+        }
+    }
 
+    void resetEncoderDelta() {
+        lDeltaEncoder.clear();
+        rDeltaEncoder.clear();
+    }
+
+    Long lDelta() {
+        return lDeltaEncoder.get(lDeltaEncoder.size()-1);
+    }
+    Long rDelta() {
+        return rDeltaEncoder.get(rDeltaEncoder.size()-1);
+    }
+
+    boolean deltaNotZero() {
+        return (lDeltaEncoder.size()>0&&rDeltaEncoder.size()>0);
+    }
 
 
 
@@ -1193,8 +1211,6 @@ class Subroutines_v14 extends OpMode {
     static DcMotor mtrLeftDrive;
     static DcMotor mtrLift;
     static DcMotor mtrExtend;
-    static DcMotor mtrArmSpin;
-    static DcMotor mtrArmFlip;
 
     static Servo srvGr1;
     static Servo srvGr2;
@@ -1205,9 +1221,9 @@ class Subroutines_v14 extends OpMode {
     static Servo srvPhone;
     static Servo srvLevel;
 
-    static ColorSensor snsColorLeft;
-    static ColorSensor snsColorRight;
     static BNO055IMU IMUnav;
+    static TouchSensor snsBtnGlyph;
+    static TouchSensor snsBtnRelic;
 
 
     class ColorLineDetector {
@@ -1630,6 +1646,6 @@ class Subroutines_v14 extends OpMode {
         }
 
     }
-    
+
 }
 

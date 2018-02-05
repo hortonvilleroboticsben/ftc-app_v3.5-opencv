@@ -54,6 +54,8 @@ class StateMachine_v7 extends Subroutines_v14 {
 
     Timer timer = new Timer();
 
+    Timer timerToggle = new Timer();
+
     static BallColor[] ballArray = {null, null};
     static RelicRecoveryVuMark vuMark = null;
 
@@ -138,6 +140,28 @@ class StateMachine_v7 extends Subroutines_v14 {
         return (state_in_progress == current_number);
     }
 
+    void ServoToggle(boolean condition){
+        if(next_state_to_execute()){
+            if(!oneShot) {
+                timerToggle.reset();
+                oneShot = true;
+            }
+            if(!condition){
+                if(timerToggle.getElapsedTime()>300){
+                    srvGr1.setPosition(GR1CLOSED);
+                }else{
+                    srvGr1.setPosition(GR1OPEN);
+                }
+                if(timerToggle.getElapsedTime()>600){
+                    oneShot = false;
+                }
+            }else{
+                srvGr1.setPosition(GR1OPEN);
+                incrementState();
+            }
+        }
+    }
+
     void Drive(double distance, double speed) {
         if(next_state_to_execute()) {
             double wheelCircumference = wheelDiameter * Math.PI;
@@ -155,6 +179,34 @@ class StateMachine_v7 extends Subroutines_v14 {
             }
 
             if (have_drive_encoders_reached(targetDegrees, targetDegrees) || driveFinished) { //if move is finished
+                if (!driveFinished) reset_drive_encoders(); //if encoders have not been reset,
+                driveFinished = true;                       //reset encoders
+                set_drive_power(-0.0f, -0.0f);//stop robot
+                if (have_drive_encoders_reset()) {//if encoders have actually reset,
+                    driveFinished = false;  //move on to next method
+                    incrementState();
+                }
+            }
+        }
+    }
+
+    void DriveWithCondition(double distance, double speed,boolean condition) {
+        if(next_state_to_execute()) {
+            double wheelCircumference = wheelDiameter * Math.PI;
+            double revs = distance / wheelCircumference;
+            double targetDegrees = gearRatio * revs * countsPerRev;
+
+            if (speed < 0) {
+                targetDegrees = Math.abs(targetDegrees) * -1;
+            }
+
+            if (!driveFinished) {
+                run_drive_to_position();
+                set_drive_target((int) targetDegrees, (int) targetDegrees);
+                set_drive_power(speed, speed);
+            }
+
+            if (have_drive_encoders_reached(targetDegrees, targetDegrees) || driveFinished || condition) { //if move is finished
                 if (!driveFinished) reset_drive_encoders(); //if encoders have not been reset,
                 driveFinished = true;                       //reset encoders
                 set_drive_power(-0.0f, -0.0f);//stop robot
@@ -394,16 +446,18 @@ class StateMachine_v7 extends Subroutines_v14 {
 //            double rSpeed = ((speed/2)*Math.sin(((Math.PI/period)*(theta+period)))+(speed/2));
             double lSpeed = ((speed)*Math.sin(2*Math.PI*theta/period));
             double rSpeed = ((speed)*Math.sin(((2*Math.PI/period)*(theta+period))));
-            lSpeed=(lSpeed<0)?lSpeed:0.5*lSpeed;
-            rSpeed=(rSpeed<0)?rSpeed:0.5*rSpeed;
+            double sSpeed = (Math.sin(((3*Math.PI/period)*(theta+period))));
+            lSpeed=(lSpeed<0)?lSpeed:0.7*lSpeed;
+            rSpeed=(rSpeed<0)?rSpeed:0.7*rSpeed;
+            srvGr1.setPosition(Math.abs(sSpeed));
 
 
             if (!driveFinished) {
                 run_drive_to_position();
                 set_drive_target((int) targetDegrees, (int) targetDegrees);
                 set_drive_power(lSpeed, rSpeed);
+                updateEncoderDelta();
             }
-
 
 
             if (have_drive_encoders_reached(targetDegrees, targetDegrees) || driveFinished || getBatteryVoltage() <10 || timeOut.getElapsedTime() > 4000) { //if move is finished
@@ -414,6 +468,33 @@ class StateMachine_v7 extends Subroutines_v14 {
                 if (have_drive_encoders_reset()) {//if encoders have actually reset,
                     driveFinished = false;  //move on to next method
                     incrementState();
+                }
+            }
+        }
+    }
+
+    public void RetraceEncoders(double speed) {
+        if (next_state_to_execute()) {
+            if (rDeltaEncoder.size() > 20 && lDeltaEncoder.size() > 20) {
+                int rTarget = lDelta().intValue();
+                int lTarget = rDelta().intValue();
+                if (!driveFinished) {
+                    run_drive_to_position();
+                    set_drive_target(lTarget, rTarget);
+                    set_drive_power(speed, speed);
+                }
+                if (have_drive_encoders_reached(lTarget, rTarget)) {
+                    if (!driveFinished) reset_drive_encoders(); //if encoders have not been reset,
+                    clearEncoderDelta();
+                    set_drive_power(0, 0);
+                }
+            } else{
+                driveFinished = true;                       //reset encoders
+                set_drive_power(-0.0f, -0.0f);//stop robot
+                if (have_drive_encoders_reset()) {//if encoders have actually reset,
+                    driveFinished = false;  //move on to next method
+                    incrementState();
+                    resetEncoderDelta();
                 }
             }
         }
