@@ -95,6 +95,7 @@ class Subroutines_v14 extends OpMode {
 
     final double LEVELUP = 0;
     final double LEVELDOWN = 1;
+    final double LEVELPARTIALDOWN = 0.75;
 
     final double UD_DOWN = .25;
     final double UD_UP = .735;
@@ -131,7 +132,7 @@ class Subroutines_v14 extends OpMode {
     }
 
     enum extendPos{
-        BLUE_AUTO(700),RED_AUTO(600),HOME(0);
+        HOME(0), PARTIAL_EXTEND(-867), PARTIAL_RETRACT(-2000), FULL_EXTEND(-3380);
 
         private int val;
 
@@ -161,7 +162,6 @@ class Subroutines_v14 extends OpMode {
 
         srvGr1 = addServo(GR1OPEN, "srvGr1");
         srvGr2 = addServo(GR2OPEN, "srvGr2");
-        srvExtend = addCRServo("srvExtend");
         srvClaw = addServo(0.1, "srvClaw");
         srvLR = addServo(LR_HOME, "srvLR");
         srvUD = addServo(UD_UP, "srvUD");
@@ -1214,7 +1214,6 @@ class Subroutines_v14 extends OpMode {
 
     static Servo srvGr1;
     static Servo srvGr2;
-    static CRServo srvExtend;
     static Servo srvClaw;
     static Servo srvLR;
     static Servo srvUD;
@@ -1224,7 +1223,6 @@ class Subroutines_v14 extends OpMode {
     static BNO055IMU IMUnav;
     static TouchSensor snsBtnGlyph;
     static TouchSensor snsBtnRelic;
-
 
     class ColorLineDetector {
 
