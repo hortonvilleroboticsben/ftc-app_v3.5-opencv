@@ -162,6 +162,7 @@ class StateMachine_v7 extends Subroutines_v14 {
             }else{
                 srvGr1.setPosition(GR1OPEN);
                 incrementState();
+                oneShot = false;
             }
         }
     }
@@ -193,6 +194,8 @@ class StateMachine_v7 extends Subroutines_v14 {
             }
         }
     }
+
+    private int hypotState = 0;
 
     void DriveWithCondition(double distance, double speed,boolean condition) {
         if(next_state_to_execute()) {
@@ -508,20 +511,11 @@ class StateMachine_v7 extends Subroutines_v14 {
         if(next_state_to_execute()) {
             run_to_position(m);
             set_encoder_target(m, (int) encCount);
-            if (get_encoder_count(m) > m.getTargetPosition()) {
-                if (Math.abs(m.getCurrentPosition()) > (int) Math.abs(encCount) - 100) {
-                    run_using_encoder(m);
-                    set_power(m,0);
-                    incrementState();
-                } else set_power(m, power);
-            } else {
-                if (!(Math.abs(m.getCurrentPosition()) > (int) Math.abs(encCount) + 100)) {
-                    run_using_encoder(m);
-                    set_power(m,0);
-                    incrementState();
-                } else set_power(m, power);
-
-            }
+            if (isWithin(get_encoder_count(mtrExtend), encCount - 100, encCount+100)) {
+                run_using_encoder(m);
+                set_power(m,0);
+                incrementState();
+            } else set_power(m, power);
         }
     }
 

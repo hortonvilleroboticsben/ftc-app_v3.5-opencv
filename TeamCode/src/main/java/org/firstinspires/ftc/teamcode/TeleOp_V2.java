@@ -124,9 +124,6 @@ public class TeleOp_V2 extends StateMachine_v7 {
         set_power(mtrExtend,(!isWithin(gamepad2.left_stick_y,0.2,0.2)) ? 0.2*gamepad2.left_stick_y : 0);
 
 
-        set_position(srvExtend, gamepad2.dpad_up ? 1 : gamepad2.dpad_down ? -1 : 0);
-
-
         /////////////////AUTOBALANCE//////////////////////
 
         if(gamepad1.guide && gamepad1.a && !gamepad1.start && !balanceOS) {

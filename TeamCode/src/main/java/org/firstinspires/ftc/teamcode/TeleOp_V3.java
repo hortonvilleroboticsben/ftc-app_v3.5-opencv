@@ -105,9 +105,9 @@ public class TeleOp_V3 extends StateMachine_v7 {
         if(!isGrabbingRelic && !isPlacingRelic) {
             set_position(srvClaw, (gamepad2.left_trigger > 0.5) ? CLAWOPEN : CLAWCLOSED);
 
-            set_power(mtrExtend, (!isWithin(gamepad2.left_stick_y, 0.2, 0.2)) ? 0.2 * gamepad2.left_stick_y : 0);
+            set_power(mtrExtend, (!isWithin(gamepad2.left_stick_y, 0.2, 0.2)) ? 0.7 * gamepad2.left_stick_y : 0);
 
-            set_position(srvLevel, gamepad2.dpad_up ? LEVELUP : LEVELDOWN);
+            set_position(srvLevel, gamepad2.left_bumper ? LEVELUP : LEVELDOWN);
         }
 
         ////////////////////////AUTOMATED RELIC GRABBING/////////////////////
@@ -119,11 +119,11 @@ public class TeleOp_V3 extends StateMachine_v7 {
 
         if(isGrabbingRelic && !isPlacingRelic){
             relicMachine.initializeMachine();
-            relicMachine.AbsoluteMotorMove(mtrExtend, extendPos.PARTIAL_RETRACT.getVal(), 0.5);
+            relicMachine.AbsoluteMotorMove(mtrExtend, extendPos.PARTIAL_RETRACT.getVal(), 0.7);
             relicMachine.ServoMove(srvClaw, CLAWOPEN);
             relicMachine.ServoMove(srvLevel, LEVELDOWN);
             if(relicMachine.next_state_to_execute()){
-                set_power(mtrExtend, 0.1);
+                set_power(mtrExtend, 0.5);
                 relicMachine.incrementState();
             }
             if(relicMachine.next_state_to_execute()){
@@ -354,5 +354,6 @@ public class TeleOp_V3 extends StateMachine_v7 {
 //        telemetry.addData("elapsedTime1", t1.getElapsedTime());
         telemetry.addData("extendEnc", get_encoder_count(mtrExtend));
         telemetry.addData("Voltage",getBatteryVoltage());
+        telemetry.addData("RelicMachine:",relicMachine);
     }
 }

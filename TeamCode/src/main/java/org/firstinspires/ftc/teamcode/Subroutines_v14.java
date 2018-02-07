@@ -90,12 +90,12 @@ class Subroutines_v14 extends OpMode {
     final double GR2CLOSED = 1-GR1CLOSED;
     final double GR2OPEN = 1-GR1OPEN;
 
-    final double CLAWCLOSED = 0;
+    final double CLAWCLOSED = 0.685;
     final double CLAWOPEN = 1;
 
     final double LEVELUP = 0;
-    final double LEVELDOWN = 1;
-    final double LEVELPARTIALDOWN = 0.75;
+    final double LEVELDOWN = .57;
+    final double LEVELPARTIALDOWN = 0.25;
 
     final double UD_DOWN = .25;
     final double UD_UP = .735;
@@ -118,7 +118,7 @@ class Subroutines_v14 extends OpMode {
     VuforiaLocalizer.CloseableFrame frame = null;
 
     enum liftPos{
-        ONE(0), CARRY(-200),AUTO(-500),TWO(-1165),THREE(-1863),FOUR(-2750);
+        ONE(0), CARRY(-300),AUTO(-600),TWO(-1265),THREE(-1963),FOUR(-2850);
 
         private int val;
 
@@ -166,7 +166,7 @@ class Subroutines_v14 extends OpMode {
         srvLR = addServo(LR_HOME, "srvLR");
         srvUD = addServo(UD_UP, "srvUD");
         srvPhone = addServo(CAM_SIDE, "srvPhone");
-        srvLevel = addServo(0.0, "srvLevel");
+        srvLevel = addServo(LEVELDOWN, "srvLevel");
 
         snsBtnGlyph = addTouchSensor("btnGlyph");
         snsBtnRelic = addTouchSensor("btnRelic");
