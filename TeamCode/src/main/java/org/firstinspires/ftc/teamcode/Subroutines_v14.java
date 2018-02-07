@@ -118,7 +118,7 @@ class Subroutines_v14 extends OpMode {
     VuforiaLocalizer.CloseableFrame frame = null;
 
     enum liftPos{
-        ONE(0), CARRY(-300),AUTO(-600),TWO(-1265),THREE(-1963),FOUR(-2850);
+        ONE(0), CARRY(-200),AUTO(-600),TWO(-1265),THREE(-1963),FOUR(-2850);
 
         private int val;
 
@@ -337,7 +337,17 @@ class Subroutines_v14 extends OpMode {
     } // update_telemetry
 
     public boolean isWithin(double val, double high, double low){
-        return val <= high && val >= low;
+        boolean retVal;
+        double actHigh = Math.abs(high) > Math.abs(low) ? high : low;
+        double actLow = Math.abs(high) > Math.abs(low) ? low : high;
+        high = actHigh;
+        low = actLow;
+        if(high <= 0)
+            retVal = val >= high && val <= low;
+        else
+            retVal = val <= high && val >= low;
+
+        return retVal;
     }
 
     public boolean isPressed(TouchSensor touchSensor) {

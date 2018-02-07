@@ -119,11 +119,11 @@ public class TeleOp_V3 extends StateMachine_v7 {
 
         if(isGrabbingRelic && !isPlacingRelic){
             relicMachine.initializeMachine();
-            relicMachine.AbsoluteMotorMove(mtrExtend, extendPos.PARTIAL_RETRACT.getVal(), 0.7);
+            relicMachine.AbsoluteMotorMove(mtrExtend, extendPos.PARTIAL_RETRACT.getVal(), -0.7);
             relicMachine.ServoMove(srvClaw, CLAWOPEN);
             relicMachine.ServoMove(srvLevel, LEVELDOWN);
             if(relicMachine.next_state_to_execute()){
-                set_power(mtrExtend, 0.5);
+                set_power(mtrExtend, -0.2);
                 relicMachine.incrementState();
             }
             if(relicMachine.next_state_to_execute()){
@@ -139,7 +139,7 @@ public class TeleOp_V3 extends StateMachine_v7 {
             }
             relicMachine.Pause(500);
             if(relicMachine.next_state_to_execute()){
-                set_power(mtrExtend, -0.2);
+                set_power(mtrExtend, 0.2);
                 relicMachine.incrementState();
             }
             if(relicMachine.next_state_to_execute()){
@@ -153,8 +153,6 @@ public class TeleOp_V3 extends StateMachine_v7 {
                 isGrabbingRelic = false;
                 relicMachine.incrementState();
             }
-        }else{
-            relicMachine.reset();
         }
 
         ////////////////////////AUTOMATED RELIC GRABBING/////////////////////
@@ -169,9 +167,9 @@ public class TeleOp_V3 extends StateMachine_v7 {
             relicMachine.ServoMove(srvClaw, CLAWCLOSED);
             relicMachine.ServoMove(srvLevel, LEVELUP);
             relicMachine.Pause(300);
-            relicMachine.AbsoluteMotorMove(mtrExtend, extendPos.PARTIAL_RETRACT.getVal(), 0.5);
+            relicMachine.AbsoluteMotorMove(mtrExtend, extendPos.PARTIAL_RETRACT.getVal(), -0.5);
             relicMachine.ServoMove(srvLevel, LEVELPARTIALDOWN);
-            relicMachine.AbsoluteMotorMove(mtrExtend, extendPos.FULL_EXTEND.getVal(), 0.3);
+            relicMachine.AbsoluteMotorMove(mtrExtend, extendPos.FULL_EXTEND.getVal(), -0.3);
             if(relicMachine.next_state_to_execute()){
                 double currVal = get_servo_position(srvLevel);
                 if(relicTimer.hasWaitFinished(300)) {
@@ -186,7 +184,7 @@ public class TeleOp_V3 extends StateMachine_v7 {
             relicMachine.ServoMove(srvClaw, CLAWOPEN);
             relicMachine.Pause(500);
             if(relicMachine.next_state_to_execute()){
-                set_power(mtrExtend, -.3);
+                set_power(mtrExtend, .3);
                 incrementState();
             }
             relicMachine.Pause(750);
@@ -199,7 +197,9 @@ public class TeleOp_V3 extends StateMachine_v7 {
                 isPlacingRelic = false;
                 relicMachine.incrementState();
             }
-        }else{
+        }
+
+        if(!isPlacingRelic && !isGrabbingRelic){
             relicMachine.reset();
         }
 
@@ -230,24 +230,24 @@ public class TeleOp_V3 extends StateMachine_v7 {
 
         ////////////////GLYPH MANIPULATOR//////////////////////
 
-        set_position(srvGr1,(gamepad2.right_trigger > 0.5) ? GR1OPEN : GR1CLOSED);
-        set_position(srvGr2,(gamepad2.right_trigger > 0.5) ? GR2OPEN : GR2CLOSED);
-
-        if(((gamepad2.right_trigger > 0.5) || t0.isWaiting()) && liftLevel.equals(liftPos.CARRY)){
-            milliSecondTimeout = milliSecondTimeout == 0 ? 1500 : milliSecondTimeout + 800;
-            if(t0.hasWaitFinished(250)) {
-                liftLevel = liftPos.ONE;
-                isLifting = true;
-            }
-        }else if(((gamepad2.right_trigger <= 0.5) || t1.isWaiting()) && liftLevel.equals(liftPos.ONE)) {
-            if (liftLevel.equals(liftPos.ONE)) {
-                milliSecondTimeout = milliSecondTimeout == 0 ? 1500 : milliSecondTimeout + 800;
-                if (t1.hasWaitFinished(250)) {
-                    liftLevel = liftPos.CARRY;
-                    isLifting = true;
-                }
-            }
-        }
+//        set_position(srvGr1,(gamepad2.right_trigger > 0.5) ? GR1OPEN : GR1CLOSED);
+//        set_position(srvGr2,(gamepad2.right_trigger > 0.5) ? GR2OPEN : GR2CLOSED);
+//
+//        if(((gamepad2.right_trigger > 0.5) || t0.isWaiting()) && liftLevel.equals(liftPos.CARRY)){
+//            milliSecondTimeout = milliSecondTimeout == 0 ? 1500 : milliSecondTimeout + 800;
+//            if(t0.hasWaitFinished(250)) {
+//                liftLevel = liftPos.ONE;
+//                isLifting = true;
+//            }
+//        }else if(((gamepad2.right_trigger <= 0.5) || t1.isWaiting()) && liftLevel.equals(liftPos.ONE)) {
+//            if (liftLevel.equals(liftPos.ONE)) {
+//                milliSecondTimeout = milliSecondTimeout == 0 ? 1500 : milliSecondTimeout + 800;
+//                if (t1.hasWaitFinished(250)) {
+//                    liftLevel = liftPos.CARRY;
+//                    isLifting = true;
+//                }
+//            }
+//        }
 
 
 //        if(gamepad1.dpad_left ^ gamepad1.dpad_right && !OS1) {
