@@ -102,7 +102,7 @@ public class TeleOp_V3 extends StateMachine_v7 {
 
         ////////////////ARM MOTION/////////////////
 
-        if(!isGrabbingRelic) {
+        if(!isGrabbingRelic && !isPlacingRelic) {
             set_position(srvClaw, (gamepad2.left_trigger > 0.5) ? CLAWOPEN : CLAWCLOSED);
 
             set_power(mtrExtend, (!isWithin(gamepad2.left_stick_y, 0.2, 0.2)) ? 0.2 * gamepad2.left_stick_y : 0);
@@ -127,7 +127,7 @@ public class TeleOp_V3 extends StateMachine_v7 {
                 relicMachine.incrementState();
             }
             if(relicMachine.next_state_to_execute()){
-                if(snsBtnRelic.isPressed()){
+                if(gamepad2.guide){
                     relicMachine.incrementState();
                 }
             }
@@ -143,7 +143,7 @@ public class TeleOp_V3 extends StateMachine_v7 {
                 relicMachine.incrementState();
             }
             if(relicMachine.next_state_to_execute()){
-                if(has_encoder_reached(mtrExtend, extendPos.PARTIAL_RETRACT.getVal()) || !snsBtnRelic.isPressed()){
+                if(has_encoder_reached(mtrExtend, extendPos.PARTIAL_RETRACT.getVal()) || gamepad2.guide){
                     set_position(srvLevel, LEVELUP);
                     incrementState();
                 }
@@ -179,7 +179,7 @@ public class TeleOp_V3 extends StateMachine_v7 {
                     currVal = currVal < 0 ? 0 : currVal;
                     set_position(srvLevel, currVal);
                 }
-                if(!snsBtnRelic.isPressed() || currVal == 0.0){
+                if(gamepad2.guide || currVal == 0.0){
                     relicMachine.incrementState();
                 }
             }

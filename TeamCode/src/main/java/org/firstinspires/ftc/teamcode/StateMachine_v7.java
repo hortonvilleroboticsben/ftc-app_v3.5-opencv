@@ -143,7 +143,7 @@ class StateMachine_v7 extends Subroutines_v14 {
         current_number++;
         return (state_in_progress == current_number);
     }
-//TODO:FIX LOGIC
+
     void ServoToggle(boolean condition){
         if(next_state_to_execute()){
             if(!oneShot) {
