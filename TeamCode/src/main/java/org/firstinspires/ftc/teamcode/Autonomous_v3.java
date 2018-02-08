@@ -33,7 +33,7 @@ public class Autonomous_v3 extends StateMachine_v7 {
     byte Alliance = 0;
     int StartPos = 0;
     long StartPause = 0;
-    boolean GrabRelic,EnterPit;
+    boolean GrabRelic = false ,EnterPit = false;
 
     Orientation axes;
 
@@ -45,6 +45,9 @@ public class Autonomous_v3 extends StateMachine_v7 {
     @Override
     public void init() {
         super.init();
+        srvLevel.setPosition(LEVELINIT);
+
+
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
@@ -111,6 +114,11 @@ public class Autonomous_v3 extends StateMachine_v7 {
 
         telemetry.addData("Setup", Arrays.toString(new double[]{axes.firstAngle, axes.secondAngle, axes.thirdAngle}));
         telemetry.addData("SetupOK", (int) Math.abs(axes.firstAngle) <= 1 && (int) Math.abs(axes.secondAngle) <= 1 && (int) Math.abs(axes.thirdAngle) <= 1);
+
+        if(gamepad2.guide && gamepad2.back) reset_encoders(mtrLift);
+
+        if(!gamepad2.right_stick_button) set_power(mtrLift, .75*gamepad2.right_stick_y);
+            else set_power(mtrLift, .1*gamepad2.right_stick_y);
 
         switch (question_number) {
             case 1:
@@ -180,7 +188,9 @@ public class Autonomous_v3 extends StateMachine_v7 {
 
     @Override
     public void start() {
-
+        reset_drive_encoders();
+        reset_encoders(mtrExtend);
+        reset_encoders(mtrLift);
     }
 
     //just in case if I made changes
@@ -196,9 +206,9 @@ public class Autonomous_v3 extends StateMachine_v7 {
         drive.Pause(200);
         drive.SetFlag(vision, "Read Relic");
 
-        arm.ServoMove(srvGr1,GR1CLOSED);
-        arm.ServoMove(srvGr2,GR2CLOSED);
-        arm.Pause(500);
+        arm.ServoMove(srvGr1,GR1AUTO);
+        arm.ServoMove(srvGr2,GR2AUTO);
+        arm.Pause(750);
         arm.AbsoluteMotorMove(mtrLift,liftPos.TWO.getVal(),0.8);
 
         vision.WaitForFlag("Read Relic");
@@ -270,35 +280,67 @@ public class Autonomous_v3 extends StateMachine_v7 {
 
             else if(StartPos == 2){
                 drive.Drive(26,.2);
-                drive.Drive(-4,.2);
-                drive.OWTurn(-45,.2);
+                drive.Drive(-2,.2);
 
                 drive.SetFlag(arm, "Off Platform");
                 if(GrabRelic) {
+                    drive.Drive(-4,.2);
+                    drive.OWTurn(-53.5,.2);
                     drive.SetFlag(glyph, "Grab Relic");
 
                     glyph.WaitForFlag("Grab Relic");
-                    //glyph.AbsoluteMotorMove(mtrExtend, extendPos.BLUE_AUTO.getVal(), 0.05);
-                    glyph.ServoMove(srvClaw, CLAWCLOSED);
-                    glyph.Pause(200);
+                    glyph.AbsoluteMotorMove(mtrExtend, -1000, -1);
+                    glyph.ServoMove(srvClaw, CLAWOPEN);
+                    glyph.ServoMove(srvLevel, LEVELDOWN);
+                    if(glyph.next_state_to_execute()){
+                        set_power(mtrExtend, -0.45);
+                        glyph.incrementState();
+                    }
+                    if(glyph.next_state_to_execute()){
+                        if(isWithin(get_encoder_count(mtrExtend), -1400+100, -1400-100)) {
+                            glyph.incrementState();
+                        }
+                    }
+                    glyph.ServoMove(srvLevel, LEVELPARTIALDOWN);
+                    glyph.Pause(300);
+                    if(glyph.next_state_to_execute()){
+                        set_power(mtrExtend, 0.0);
+                        set_position(srvClaw, CLAWCLOSED);
+                        glyph.incrementState();
+                    }
+                    glyph.Pause(750);
+                    if(glyph.next_state_to_execute()){
+                        set_power(mtrExtend, 0.3);
+                        glyph.incrementState();
+                    }
+                    glyph.AbsoluteMotorMove(mtrExtend, extendPos.HOME.getVal(), 0.5);
+                    glyph.ServoMove(srvLevel, LEVELDOWN);
                     glyph.SetFlag(drive, "move again");
 
                     drive.WaitForFlag("move again");
-                    drive.OWTurn(45, .2);
-                } else {
-                    drive.Turn(88,0.2);
+                    drive.OWTurn(-53.5, -.2);
+                    drive.Drive(5,.2);
                 }
+                drive.ServoMove(srvGr1, GR1CLOSED);
+                drive.ServoMove(srvGr2, GR2CLOSED);
+                drive.ServoMove(srvGr1, GR1AUTO);
+                drive.ServoMove(srvGr2, GR2AUTO);
+                drive.Turn(88,0.2);
+                drive.ServoMove(srvLevel, LEVELUP);
+                arm.WaitForFlag("Off Platform");
+                arm.AbsoluteMotorMove(mtrLift,liftPos.AUTO.getVal()-150,.4);
 
                 if(vuMark != null) {
                     if (vuMark == RelicRecoveryVuMark.LEFT) {
-                        drive.Drive(4.8,0.2);
+                        drive.Drive(-3.5,0.2);
                     } else if (vuMark == RelicRecoveryVuMark.RIGHT) {
-                        drive.Drive(18.8,0.2);
+                        drive.Drive(-18.3,0.2);
                     } else {
-                        drive.Drive(11.8,0.2);
+                        drive.Drive(-11.8,0.2);
                     }
                 }
-                drive.Turn(-90,.2);
+                drive.AbsoluteMotorMove(mtrLift,liftPos.CARRY.getVal(),0.3);
+                drive.Turn(87,.2);
             }
 
 /////////////////////////RED ALLIANCE////////////////////////////////////
@@ -335,6 +377,7 @@ public class Autonomous_v3 extends StateMachine_v7 {
                 drive.Turn(-89.5, 0.2);
             }else if(StartPos == 2){
                 drive.Drive(-24,.2);
+                drive.Drive(2,.2);
                 drive.SetFlag(arm, "Off Platform");
 
                 arm.WaitForFlag("Off Platform");
@@ -350,11 +393,12 @@ public class Autonomous_v3 extends StateMachine_v7 {
                         drive.Drive(-9.33,0.2);
                     }
                 }
+                drive.AbsoluteMotorMove(mtrLift,liftPos.CARRY.getVal(),0.3);
                 drive.Turn(-88,.2);
             }
         }
 
-        drive.Drive(-3.5, 0.2);
+        drive.Drive((StartPos==2)?-6:-3.5, 0.2);
         drive.SetFlag(glyph,"open grabber");
 
         glyph.WaitForFlag("open grabber");
@@ -371,8 +415,8 @@ public class Autonomous_v3 extends StateMachine_v7 {
             drive.Drive(7, 0.2);
             drive.Turn(175, 0.4);
             if(EnterPit) {
-                drive.ServoMove(srvGr1, GR1CLOSED);
-                drive.ServoMove(srvGr2,GR2CLOSED);
+                drive.ServoMove(srvGr1, GR1AUTO);
+                drive.ServoMove(srvGr2,GR2AUTO);
                 drive.SetFlag(glyph,"da way");
                 glyph.WaitForFlag("da way");
                 glyph.AbsoluteMotorMove(mtrLift,liftPos.AUTO.getVal(),0.5);
@@ -399,8 +443,8 @@ public class Autonomous_v3 extends StateMachine_v7 {
                 drive.SetFlag(glyph, "grab that block");
 
                 glyph.WaitForFlag("grab that block");
-                glyph.ServoMove(srvGr1, GR1CLOSED);
-                glyph.ServoMove(srvGr2, GR2CLOSED);
+                glyph.ServoMove(srvGr1, GR1AUTO);
+                glyph.ServoMove(srvGr2, GR2AUTO);
                 glyph.Pause(300);
                 glyph.SetFlag(drive, "go back");
                 glyph.AbsoluteMotorMove(mtrLift, liftPos.TWO.getVal()-300, 0.6);
@@ -443,7 +487,15 @@ public class Autonomous_v3 extends StateMachine_v7 {
             drive.Drive(-11,0.2);
         }
 
-
+        drive.Drive(6, 0.5);
+        if(StartPos == 1)drive.Turn(180, 0.5);
+        else{
+            drive.Turn(-90, 0.5);
+            drive.ServoMove(srvLevel, LEVELDOWN);
+            drive.Drive(-5,0.5);
+            drive.Turn(-47, 0.5);
+            if(vuMark != RelicRecoveryVuMark.LEFT) drive.Drive(7,0.5);
+        }
 
         if(ballArray[0] != null && ballArray[1] != null)
             telemetry.addData("ballArray", Arrays.toString(ballArray));

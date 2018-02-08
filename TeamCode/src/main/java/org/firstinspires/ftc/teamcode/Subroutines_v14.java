@@ -89,13 +89,16 @@ class Subroutines_v14 extends OpMode {
     final double GR1OPEN = 1.0;
     final double GR2CLOSED = 1-GR1CLOSED;
     final double GR2OPEN = 1-GR1OPEN;
+    final double GR1AUTO = 0.425;
+    final double GR2AUTO = 1-GR1AUTO;
 
     final double CLAWCLOSED = 0.685;
     final double CLAWOPEN = 1;
 
     final double LEVELUP = 0;
-    final double LEVELDOWN = .57;
-    final double LEVELPARTIALDOWN = 0.25;
+    final double LEVELDOWN = .45;
+    final double LEVELPARTIALDOWN = 0.395;
+    final double LEVELINIT = 0.61;
 
     final double UD_DOWN = .25;
     final double UD_UP = .735;
@@ -336,17 +339,11 @@ class Subroutines_v14 extends OpMode {
         }
     } // update_telemetry
 
-    public boolean isWithin(double val, double high, double low){
+    public boolean isWithin(double val, double lim1, double lim2){
         boolean retVal;
-        double actHigh = Math.abs(high) > Math.abs(low) ? high : low;
-        double actLow = Math.abs(high) > Math.abs(low) ? low : high;
-        high = actHigh;
-        low = actLow;
-        if(high <= 0)
-            retVal = val >= high && val <= low;
-        else
-            retVal = val <= high && val >= low;
-
+        double high = Math.max(lim1, lim2);
+        double low = Math.min(lim1, lim2);
+        retVal = val <= high && val>=low;
         return retVal;
     }
 

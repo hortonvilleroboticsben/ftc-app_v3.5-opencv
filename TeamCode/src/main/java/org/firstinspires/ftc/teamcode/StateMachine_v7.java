@@ -511,6 +511,7 @@ class StateMachine_v7 extends Subroutines_v14 {
         if(next_state_to_execute()) {
             run_to_position(m);
             set_encoder_target(m, (int) encCount);
+            Log.println(Log.ASSERT, get_encoder_count(m)+" "+(encCount+100)+" "+" "+(encCount-100), isWithin(get_encoder_count(m), encCount+100, encCount-100)+"");
             if (isWithin(get_encoder_count(m), encCount + 100, encCount - 100)) {
                 run_using_encoder(m);
                 set_power(m,0);
