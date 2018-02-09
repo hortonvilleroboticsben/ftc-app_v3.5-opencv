@@ -47,8 +47,10 @@ class StateMachine_v7 extends Subroutines_v14 {
     private final double wheelDiameter = 4.166666666666667;                      //double wheelDiameter = 4.19;
     private final double turnDiameter = 15.45;        // private final double turnDiameter = 13.95;
     private int count = 0;
+    private StateMachine_v7 s = new StateMachine_v7();
 
     private int countA = 0;
+    double countB = 0;
 
     Timer timeOut = new Timer();
     boolean timeoutOS = true;
@@ -66,6 +68,7 @@ class StateMachine_v7 extends Subroutines_v14 {
 
 
     static Orientation O;
+    static Orientation O1;
 
     @Override
     public String toString(){
@@ -226,10 +229,13 @@ class StateMachine_v7 extends Subroutines_v14 {
     }
 
     void GyroEndTurn(double degrees, double speed) {
-        StateMachine_v7 s = new StateMachine_v7();
 
         s.Turn(degrees - 3, speed);
         s.GyroTurn(3,0.1);
+        if(s.next_state_to_execute()) {
+            s.reset();
+            incrementState();
+        }
     }
 
     void Turn(double degrees, double speed) {
@@ -325,6 +331,75 @@ class StateMachine_v7 extends Subroutines_v14 {
                         incrementState();
                     }
                 }
+            }
+        }
+    }
+
+    void GyroEndOWTurn(double degrees, double speed) {
+        if(s.next_state_to_execute()) {
+            s.O1 = IMUnav.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            incrementState();
+        }
+        s.OWTurn((Math.abs(degrees) - (O1.firstAngle) - 5)*Math.signum(degrees), speed);
+
+        s.GyroTurn(3,0.1);
+        if(s.next_state_to_execute()) {
+            s.reset();
+            incrementState();
+        }
+    }
+
+    public void GyroOWTurn(double degrees, double speed){
+        if (next_state_to_execute()) {
+            DcMotor.RunMode r = mtrLeftDrive.getMode();
+            run_using_drive_encoders();
+            Orientation o = O;
+            double z = o.firstAngle;
+            telemetry.addData("rot", z);
+            if(Math.abs(z) + 2 <= Math.abs(degrees)){
+
+                if (degrees < 0) {
+                    if (!driveFinished) {
+                        run_using_encoder(mtrRightDrive);
+                        run_to_position(mtrLeftDrive);
+
+                        set_power(mtrLeftDrive, speed);
+                        set_power(mtrRightDrive, 0);
+                    }
+
+                    if (driveFinished) {
+                        if (!driveFinished) reset_drive_encoders();
+                        driveFinished = true;
+                        set_drive_power(0.0f, 0.0f);
+                        if (have_drive_encoders_reset()) {
+                            driveFinished = false;
+                            incrementState();
+                        }
+                    }
+                } else if (degrees > 0) {
+                    if (!driveFinished) {
+                        run_using_encoder(mtrLeftDrive);
+                        run_to_position(mtrRightDrive);
+                        set_power(mtrRightDrive, speed);
+                        set_power(mtrLeftDrive, 0);
+                    }
+
+                    if (driveFinished) {
+                        if (!driveFinished) reset_drive_encoders();
+                        driveFinished = true;
+                        set_drive_power(0.0f, 0.0f);
+                        if (have_drive_encoders_reset()) {
+                            driveFinished = false;
+                            incrementState();
+                        }
+                    }
+                }
+            }else{
+                set_drive_power(0,0);
+                reset_drive_encoders();
+                mtrLeftDrive.setMode(r);
+                mtrRightDrive.setMode(r);
+                incrementState();
             }
         }
     }

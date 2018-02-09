@@ -96,7 +96,7 @@ class Subroutines_v14 extends OpMode {
     final double CLAWOPEN = 1;
 
     final double LEVELUP = 0;
-    final double LEVELDOWN = .45;
+    final double LEVELDOWN = .44;
     final double LEVELPARTIALDOWN = 0.395;
     final double LEVELINIT = 0.61;
 
