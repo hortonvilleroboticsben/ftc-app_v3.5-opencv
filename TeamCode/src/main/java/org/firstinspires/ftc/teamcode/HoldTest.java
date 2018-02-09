@@ -3,7 +3,8 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-@TeleOp(name="HoldPosTest")
+@Deprecated
+//@TeleOp(name="HoldPosTest")
 public class HoldTest extends StateMachine_v6 {
     static DcMotor mtrHold = null;
 

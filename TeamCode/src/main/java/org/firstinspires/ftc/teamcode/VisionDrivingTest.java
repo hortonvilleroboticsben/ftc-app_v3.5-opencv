@@ -24,8 +24,8 @@ import org.opencv.android.OpenCVLoader;
 import java.util.Arrays;
 
 import static org.firstinspires.ftc.robotcontroller.external.samples.ConceptVuMarkIdentification.TAG;
-
-@Autonomous(name = "aslfkjasdlk", group = "Final")
+@Deprecated
+//@Autonomous(name = "aslfkjasdlk", group = "Final")
 public class VisionDrivingTest extends StateMachine_v6 {
     int question_number = 1;
     byte Alliance = BLUE;

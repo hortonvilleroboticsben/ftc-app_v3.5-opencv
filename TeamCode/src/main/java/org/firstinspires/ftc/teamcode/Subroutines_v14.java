@@ -110,7 +110,7 @@ class Subroutines_v14 extends OpMode {
 
     final double CAM_SIDE = .565;
     final double CAM_VUMARK = .545;
-    final double CAM_JEWELS = .76;
+    final double CAM_JEWELS = .75;
     final double CAM_FRONT = .06;
 
     static VuforiaLocalizer vuforia;

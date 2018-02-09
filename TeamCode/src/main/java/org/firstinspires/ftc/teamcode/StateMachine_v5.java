@@ -44,7 +44,7 @@ import java.util.List;
 import static android.content.ContentValues.TAG;
 import static org.opencv.imgproc.Imgproc.minEnclosingCircle;
 
-
+@Deprecated
 class StateMachine_v5 extends Subroutines_v13 {
 
     public String flag = "";

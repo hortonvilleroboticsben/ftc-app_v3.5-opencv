@@ -25,7 +25,7 @@ import java.util.Arrays;
 
 import static org.firstinspires.ftc.robotcontroller.external.samples.ConceptVuMarkIdentification.TAG;
 
-@Autonomous(name = "AutoV4", group = "Final")
+@Autonomous(name = "Autonomous_State", group = "Final")
 public class Autonomous_v4 extends StateMachine_v7 {
     int question_number = 1;
     boolean btnOS;
@@ -115,11 +115,6 @@ public class Autonomous_v4 extends StateMachine_v7 {
         telemetry.addData("Setup", Arrays.toString(new double[]{axes.firstAngle, axes.secondAngle, axes.thirdAngle}));
         telemetry.addData("SetupOK", (int) Math.abs(axes.firstAngle) <= 1 && (int) Math.abs(axes.secondAngle) <= 1 && (int) Math.abs(axes.thirdAngle) <= 1);
 
-        if(gamepad2.guide && gamepad2.back) reset_encoders(mtrLift);
-
-        if(!gamepad2.right_stick_button) set_power(mtrLift, .75*gamepad2.right_stick_y);
-        else set_power(mtrLift, .1*gamepad2.right_stick_y);
-
         switch (question_number) {
             case 1:
                 telemetry.addData("Alliance: a=blue b=red", "");
@@ -206,10 +201,10 @@ public class Autonomous_v4 extends StateMachine_v7 {
         drive.Pause(200);
         drive.SetFlag(vision, "Read Relic");
 
-        arm.ServoMove(srvGr1,GR1AUTO);
-        arm.ServoMove(srvGr2,GR2AUTO);
+        arm.ServoMove(srvGr1,GR1CLOSED);
+        arm.ServoMove(srvGr2,GR2CLOSED);
         arm.Pause(750);
-        arm.AbsoluteMotorMove(mtrLift,liftPos.TWO.getVal(),0.8);
+        arm.AbsoluteMotorMove(mtrLift,(Alliance==RED&&StartPos==2)?liftPos.AUTO.getVal():liftPos.TWO.getVal(),0.8);
 
         vision.WaitForFlag("Read Relic");
         vision.ProcessRelic();
@@ -242,8 +237,9 @@ public class Autonomous_v4 extends StateMachine_v7 {
 
         if(Alliance == BLUE) {
             if (arm.next_state_to_execute()) {
-                if (ballArray[0] == BallColor.RED) set_position(srvLR, LR_LEFT);
-                else set_position(srvLR, LR_RIGHT);
+                if(ballArray[0] != null)
+                    if (ballArray[0] == BallColor.RED) set_position(srvLR, LR_LEFT);
+                    else set_position(srvLR, LR_RIGHT);
                 arm.incrementState();
             }
             arm.Pause(500);
@@ -279,14 +275,14 @@ public class Autonomous_v4 extends StateMachine_v7 {
 
             else if(StartPos == 2){
                 drive.Drive(26,.2);
-                drive.Drive(-2,.2);
+                drive.Drive(-1,.2);
 
                 drive.SetFlag(arm, "Off Platform");
 
                 drive.ServoMove(srvGr1, GR1CLOSED);
                 drive.ServoMove(srvGr2, GR2CLOSED);
-                drive.ServoMove(srvGr1, GR1AUTO);
-                drive.ServoMove(srvGr2, GR2AUTO);
+                drive.ServoMove(srvGr1, GR1CLOSED);
+                drive.ServoMove(srvGr2, GR2CLOSED);
                 drive.Turn(88,0.2);
                 drive.ServoMove(srvLevel, LEVELUP);
                 arm.WaitForFlag("Off Platform");
@@ -309,8 +305,9 @@ public class Autonomous_v4 extends StateMachine_v7 {
 
         }else if(Alliance == RED){
             if (arm.next_state_to_execute()) {
-                if (ballArray[0] == BallColor.BLUE) set_position(srvLR, LR_LEFT);
-                else set_position(srvLR, LR_RIGHT);
+                if(ballArray[0] != null)
+                    if (ballArray[0] == BallColor.BLUE) set_position(srvLR, LR_LEFT);
+                    else set_position(srvLR, LR_RIGHT);
                 arm.incrementState();
             }
             arm.Pause(500);
@@ -321,46 +318,39 @@ public class Autonomous_v4 extends StateMachine_v7 {
             drive.WaitForFlag("Jewels Hit");
 
             if(StartPos == 1) {
-                if(vuMark != null) {
-                    if (vuMark == RelicRecoveryVuMark.LEFT) {
-                        drive.Drive(-41,0.2);
-                    } else if (vuMark == RelicRecoveryVuMark.RIGHT) {
-                        drive.Drive(-27,0.2);
-                    } else {
-                        drive.Drive(-34,0.2);
-                    }
-                }
+
                 drive.SetFlag(arm, "Off Platform");
                 drive.Pause(200);
 
                 arm.WaitForFlag("Off Platform");
-                arm.AbsoluteMotorMove(mtrLift, liftPos.ONE.getVal()+500, 0.5);
+                arm.AbsoluteMotorMove(mtrLift, liftPos.AUTO.getVal()+500, 0.5);
 
-                drive.Turn(-89.5, 0.2);
+                drive.Turn(-89.5, 0.3);
             }else if(StartPos == 2){
                 drive.Drive(-24,.2);
-                drive.Drive(2,.2);
+                drive.Drive(1,.3);
                 drive.SetFlag(arm, "Off Platform");
 
                 arm.WaitForFlag("Off Platform");
                 arm.AbsoluteMotorMove(mtrLift, liftPos.AUTO.getVal(), 0.5);
 
-                drive.Turn(86.5,.2);
+                drive.Turn(86.5,.3);
                 if(vuMark != null) {
                     if (vuMark == RelicRecoveryVuMark.LEFT) {
-                        drive.Drive(-16.33,0.2);
+                        drive.Drive(-16.33,0.3);
                     } else if (vuMark == RelicRecoveryVuMark.RIGHT) {
-                        drive.Drive(-2.33,0.2);
+                        drive.Drive(-2.33,0.3);
                     } else {
-                        drive.Drive(-9.33,0.2);
+                        drive.Drive(-10.33,0.3);
                     }
                 }
-                drive.AbsoluteMotorMove(mtrLift,liftPos.CARRY.getVal(),0.3);
-                drive.Turn(-88,.2);
+                drive.AbsoluteMotorMove(mtrLift,liftPos.AUTO.getVal(),0.3);
+                drive.Turn(-88,.3);
             }
         }
-
-        drive.Drive((StartPos==2)?-6:-3.5, 0.2);
+        //drive.AbsoluteMotorMove(mtrLift,liftPos.AUTO.getVal(),0.3);
+        //drive.Drive(((StartPos==2&&Alliance==BLUE)||Alliance==RED)?-6:-3.5, 0.2);
+        drive.Drive((Alliance==BLUE)?(StartPos==1)?-6:-4.5:(StartPos==1)?-6:-4.5,0.2);
         drive.SetFlag(glyph,"open grabber");
 
         glyph.WaitForFlag("open grabber");
@@ -371,26 +361,22 @@ public class Autonomous_v4 extends StateMachine_v7 {
 
         //TODO
         if(StartPos == 2 && Alliance == BLUE && GrabRelic) {
-//            drive.Drive(6, 0.2);
-//            drive.Turn(-87,.2);
-//            if(vuMark != null) {
-//                if (vuMark == RelicRecoveryVuMark.LEFT) {
-//                    drive.Drive(-3.5,0.2);
-//                } else if (vuMark == RelicRecoveryVuMark.RIGHT) {
-//                    drive.Drive(-18.3,0.2);
-//                } else {
-//                    drive.Drive(-11.8,0.2);
-//                }
-//            }
-//            drive.Turn(-88,0.2);
-//            drive.Drive(-4,.2);
-//            drive.ServoMove(srvGr1,GR1OPEN);
-//            drive.ServoMove(srvGr2,GR2OPEN);
-//            drive.Pause(300);
-            drive.OWTurn(-53.5,.2);
+            drive.Drive(5, 0.3);
+            drive.Turn(-91,.3);
+            if(vuMark != null) {
+                if (vuMark == RelicRecoveryVuMark.LEFT) {
+                    drive.Drive(2,0.3);
+                } else if (vuMark == RelicRecoveryVuMark.RIGHT) {
+                    drive.Drive(16.5,0.3);
+                } else {
+                    drive.Drive(10.5,0.3);
+                }
+            }
+            drive.Turn(-36,0.3);
+
+            //drive.OWTurn(-53.5,.2);
 
             drive.SetFlag(glyph, "Grab Relic");
-
             glyph.WaitForFlag("Grab Relic");
             glyph.AbsoluteMotorMove(mtrExtend, -1000, -1);
             glyph.ServoMove(srvClaw, CLAWOPEN);
@@ -422,8 +408,8 @@ public class Autonomous_v4 extends StateMachine_v7 {
 
             drive.WaitForFlag("move again");
             drive.OWTurn(-53.5, -.2);
-            drive.ServoMove(srvGr1,GR1AUTO);
-            drive.ServoMove(srvGr2,GR2AUTO);
+            drive.ServoMove(srvGr1,GR1CLOSED);
+            drive.ServoMove(srvGr2,GR2CLOSED);
             drive.Drive(5,.2);
         }
 
@@ -435,8 +421,8 @@ public class Autonomous_v4 extends StateMachine_v7 {
             drive.Drive(7, 0.2);
             drive.Turn(175, 0.4);
 //            if(EnterPit) {
-//                drive.ServoMove(srvGr1, GR1AUTO);
-//                drive.ServoMove(srvGr2,GR2AUTO);
+//                drive.ServoMove(srvGr1, GR1CLOSED);
+//                drive.ServoMove(srvGr2,GR2CLOSED);
 //                drive.SetFlag(glyph,"da way");
 //                glyph.WaitForFlag("da way");
 //                glyph.AbsoluteMotorMove(mtrLift,liftPos.AUTO.getVal(),0.5);
@@ -463,8 +449,8 @@ public class Autonomous_v4 extends StateMachine_v7 {
 //                drive.SetFlag(glyph, "grab that block");
 //
 //                glyph.WaitForFlag("grab that block");
-//                glyph.ServoMove(srvGr1, GR1AUTO);
-//                glyph.ServoMove(srvGr2, GR2AUTO);
+//                glyph.ServoMove(srvGr1, GR1CLOSED);
+//                glyph.ServoMove(srvGr2, GR2CLOSED);
 //                glyph.Pause(300);
 //                glyph.SetFlag(drive, "go back");
 //                glyph.AbsoluteMotorMove(mtrLift, liftPos.TWO.getVal()-300, 0.6);
@@ -482,11 +468,20 @@ public class Autonomous_v4 extends StateMachine_v7 {
 
         }else if(Alliance == RED && GrabRelic) {
             if(GrabRelic) {
-                drive.Drive(-4,.2);
-                drive.ServoMove(srvGr1,GR1OPEN);
-                drive.ServoMove(srvGr2,GR2OPEN);
-                drive.Pause(300);
-                drive.OWTurn(-53.5,.2);
+                drive.Pause(250);
+                drive.Drive(4.5,0.3);
+                drive.Turn(90,0.3);
+                if(vuMark != null) {
+                    if (vuMark == RelicRecoveryVuMark.LEFT) {
+                        drive.Drive(16.33,0.3);
+                    } else if (vuMark == RelicRecoveryVuMark.RIGHT) {
+                        drive.Drive(2.33,0.3);
+                    } else {
+                        drive.Drive(10.33,0.3);
+                    }
+                }
+                drive.Turn(35,0.3);
+                //drive.OWTurn(53.5,.2);
 
                 drive.SetFlag(glyph, "Grab Relic");
 
@@ -520,10 +515,8 @@ public class Autonomous_v4 extends StateMachine_v7 {
                 glyph.SetFlag(drive, "move again");
 
                 drive.WaitForFlag("move again");
-                drive.OWTurn(-53.5, -.2);
-                drive.ServoMove(srvGr1,GR1AUTO);
-                drive.ServoMove(srvGr2,GR2AUTO);
-                drive.Drive(5,.2);
+                drive.OWTurn(-53.5, .2);
+                drive.Drive(-12,.2);
             }
             glyph.SetFlag(drive,"you are good to go now");
 
@@ -539,7 +532,7 @@ public class Autonomous_v4 extends StateMachine_v7 {
                     drive.Drive(9.33,0.2);
                 }
             }
-            drive.OWTurn(45,0.2);
+            drive.Turn(-35,0.3);
             drive.SetFlag(glyph,"grab dat relic");
 
             //glyph.AbsoluteMotorMove(mtrExtend,extendPos.RED_AUTO.getVal(),0.05);

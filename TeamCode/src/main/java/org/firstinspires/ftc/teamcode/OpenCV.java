@@ -45,6 +45,7 @@ import java.util.concurrent.BlockingQueue;
 import static org.firstinspires.ftc.robotcontroller.external.samples.ConceptVuMarkIdentification.TAG;
 import static org.opencv.imgproc.Imgproc.minEnclosingCircle;
 
+@Deprecated
 //@TeleOp(name = "OPENCV")
 public class OpenCV extends OpMode {
 

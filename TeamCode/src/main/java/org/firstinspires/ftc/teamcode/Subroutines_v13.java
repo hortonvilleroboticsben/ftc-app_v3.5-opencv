@@ -67,7 +67,7 @@ import static org.firstinspires.ftc.robotcontroller.external.samples.ConceptVuMa
 import static org.opencv.imgproc.Imgproc.HoughLinesP;
 import static org.opencv.imgproc.Imgproc.minAreaRect;
 
-
+@Deprecated
 class Subroutines_v13 extends OpMode {
     //Variable initialization//
     long systemTime = 0;             //System time used to determine how much time has passed for waitHasFinished()//

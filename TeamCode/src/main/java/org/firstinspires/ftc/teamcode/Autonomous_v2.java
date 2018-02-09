@@ -26,7 +26,8 @@ import java.util.Arrays;
 
 import static org.firstinspires.ftc.robotcontroller.external.samples.ConceptVuMarkIdentification.TAG;
 
-@Autonomous(name = "Auto", group = "Final")
+@Deprecated
+//@Autonomous(name = "Auto", group = "Final")
 public class Autonomous_v2 extends StateMachine_v6 {
     int question_number = 1;
     byte Alliance = 0;

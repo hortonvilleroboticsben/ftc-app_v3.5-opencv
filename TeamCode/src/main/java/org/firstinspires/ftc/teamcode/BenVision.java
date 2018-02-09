@@ -6,7 +6,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 /**
  * Created by kungl on 1/21/2018.
  */
-@TeleOp(name = "BenVisio", group = "Competition")
+@Deprecated
+//@TeleOp(name = "BenVisio", group = "Competition")
 public class BenVision extends StateMachine_v6 {
 
     @Override

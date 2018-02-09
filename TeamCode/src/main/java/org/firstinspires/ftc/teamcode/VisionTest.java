@@ -20,7 +20,8 @@ import static org.firstinspires.ftc.robotcontroller.external.samples.ConceptVuMa
 /**
  * Created by sam on 1/8/2018.
  */
-@TeleOp(name = "Vision")
+@Deprecated
+//@TeleOp(name = "Vision")
 public class VisionTest extends StateMachine_v6 {
 
     StateMachine_v6 vision1 = new StateMachine_v6();

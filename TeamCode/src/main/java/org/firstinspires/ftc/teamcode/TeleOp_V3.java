@@ -10,7 +10,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 @TeleOp(name = "teleOp", group = "Competition")
 public class TeleOp_V3 extends StateMachine_v7 {
 
-    StateMachine_v7 relicMachine = new StateMachine_v7();
+    //StateMachine_v7 relicMachine = new StateMachine_v7();
     Timer relicTimer = new Timer();
 
     Timer t0 = new Timer();
@@ -86,11 +86,6 @@ public class TeleOp_V3 extends StateMachine_v7 {
     }
 
     @Override
-    public void init_loop() {
-//        addIMUSensor("imu");
-    }
-
-    @Override
     public void loop() {
         axes = (IMUnav != null) ? IMUnav.getAngularOrientation(AxesReference.EXTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES) : null;
         OP1 = DEFAULT == LEVELUP ? LEVELDOWN : LEVELUP;
@@ -121,91 +116,91 @@ public class TeleOp_V3 extends StateMachine_v7 {
             isGrabbingRelic = !isGrabbingRelic;
         }else if(!gamepad2.y) grabOS = true;
 
-        if(isGrabbingRelic && !isPlacingRelic){
-            relicMachine.initializeMachine();
-            relicMachine.AbsoluteMotorMove(mtrExtend, extendPos.PARTIAL_RETRACT.getVal(), -1);
-            relicMachine.ServoMove(srvClaw, CLAWOPEN);
-            relicMachine.ServoMove(srvLevel, LEVELDOWN);
-            if(relicMachine.next_state_to_execute()){
-                set_power(mtrExtend, -0.3);
-                relicMachine.incrementState();
-            }
-            if(relicMachine.next_state_to_execute()){
-                if(gamepad2.guide){
-                    relicMachine.incrementState();
-                }
-            }
-            relicMachine.Pause(300);
-            if(relicMachine.next_state_to_execute()){
-                set_power(mtrExtend, 0.0);
-                set_position(srvClaw, CLAWCLOSED);
-                relicMachine.incrementState();
-            }
-            relicMachine.Pause(500);
-            if(relicMachine.next_state_to_execute()){
-                set_power(mtrExtend, 0.3);
-                relicMachine.incrementState();
-            }
-            if(relicMachine.next_state_to_execute()){
-                if(isWithin(get_encoder_count(mtrExtend), extendPos.PARTIAL_EXTEND.getVal()+100, extendPos.PARTIAL_EXTEND.getVal()-100) || gamepad2.guide){
-                    set_position(srvLevel, LEVELUP);
-                    relicMachine.incrementState();
-                }
-            }
-            relicMachine.AbsoluteMotorMove(mtrExtend, extendPos.PARTIAL_EXTEND.getVal(), 1);
-            if(relicMachine.next_state_to_execute()){
-                isGrabbingRelic = false;
-                DEFAULT = LEVELUP;
-                relicMachine.incrementState();
-            }
-        }
-
-        ////////////////////////AUTOMATED RELIC PLACING/////////////////////
-
-        if(gamepad2.guide && gamepad2.b && placeOS){
-            placeOS = false;
-            isPlacingRelic = !isPlacingRelic;
-        }else if(!gamepad2.b) placeOS = true;
-
-        if(isPlacingRelic && !isGrabbingRelic){
-            relicMachine.initializeMachine();
-            relicMachine.ServoMove(srvClaw, CLAWCLOSED);
-            relicMachine.ServoMove(srvLevel, LEVELUP);
-            relicMachine.Pause(300);
-            relicMachine.AbsoluteMotorMove(mtrExtend, extendPos.PARTIAL_RETRACT.getVal(), -1);
-            relicMachine.ServoMove(srvLevel, LEVELDOWN);
-            relicMachine.AbsoluteMotorMove(mtrExtend, extendPos.FULL_EXTEND.getVal(), -0.3);
-            if(relicMachine.next_state_to_execute()){
-                set_power(mtrExtend, -0.02);
-                relicMachine.incrementState();
-            }
-            relicMachine.Pause(750);
-            if(relicMachine.next_state_to_execute()){
-                set_power(mtrExtend, 0.0);
-                relicMachine.incrementState();
-            }
-            relicMachine.ServoMove(srvClaw, CLAWOPEN);
-            relicMachine.Pause(750);
-            if(relicMachine.next_state_to_execute()){
-                set_power(mtrExtend, .3);
-                relicMachine.incrementState();
-            }
-            relicMachine.Pause(750);
-            relicMachine.ServoMove(srvClaw, CLAWCLOSED);
-            relicMachine.ServoMove(srvLevel, LEVELUP);
-            relicMachine.AbsoluteMotorMove(mtrExtend, extendPos.HOME.getVal(), 1);
-            relicMachine.Pause(1500);
-            relicMachine.ServoMove(srvLevel, LEVELDOWN);
-            if(relicMachine.next_state_to_execute()){
-                isPlacingRelic = false;
-                DEFAULT = LEVELDOWN;
-                relicMachine.incrementState();
-            }
-        }
-
-        if(!isPlacingRelic && !isGrabbingRelic){
-            relicMachine.reset();
-        }
+//        if(isGrabbingRelic && !isPlacingRelic){
+//            relicMachine.initializeMachine();
+//            relicMachine.AbsoluteMotorMove(mtrExtend, extendPos.PARTIAL_RETRACT.getVal(), -1);
+//            relicMachine.ServoMove(srvClaw, CLAWOPEN);
+//            relicMachine.ServoMove(srvLevel, LEVELDOWN);
+//            if(relicMachine.next_state_to_execute()){
+//                set_power(mtrExtend, -0.3);
+//                relicMachine.incrementState();
+//            }
+//            if(relicMachine.next_state_to_execute()){
+//                if(gamepad2.guide){
+//                    relicMachine.incrementState();
+//                }
+//            }
+//            relicMachine.Pause(300);
+//            if(relicMachine.next_state_to_execute()){
+//                set_power(mtrExtend, 0.0);
+//                set_position(srvClaw, CLAWCLOSED);
+//                relicMachine.incrementState();
+//            }
+//            relicMachine.Pause(500);
+//            if(relicMachine.next_state_to_execute()){
+//                set_power(mtrExtend, 0.3);
+//                relicMachine.incrementState();
+//            }
+//            if(relicMachine.next_state_to_execute()){
+//                if(isWithin(get_encoder_count(mtrExtend), extendPos.PARTIAL_EXTEND.getVal()+100, extendPos.PARTIAL_EXTEND.getVal()-100) || gamepad2.guide){
+//                    set_position(srvLevel, LEVELUP);
+//                    relicMachine.incrementState();
+//                }
+//            }
+//            relicMachine.AbsoluteMotorMove(mtrExtend, extendPos.PARTIAL_EXTEND.getVal(), 1);
+//            if(relicMachine.next_state_to_execute()){
+//                isGrabbingRelic = false;
+//                DEFAULT = LEVELUP;
+//                relicMachine.incrementState();
+//            }
+//        }
+//
+//        ////////////////////////AUTOMATED RELIC PLACING/////////////////////
+//
+//        if(gamepad2.guide && gamepad2.b && placeOS){
+//            placeOS = false;
+//            isPlacingRelic = !isPlacingRelic;
+//        }else if(!gamepad2.b) placeOS = true;
+//
+//        if(isPlacingRelic && !isGrabbingRelic){
+//            relicMachine.initializeMachine();
+//            relicMachine.ServoMove(srvClaw, CLAWCLOSED);
+//            relicMachine.ServoMove(srvLevel, LEVELUP);
+//            relicMachine.Pause(300);
+//            relicMachine.AbsoluteMotorMove(mtrExtend, extendPos.PARTIAL_RETRACT.getVal(), -1);
+//            relicMachine.ServoMove(srvLevel, LEVELDOWN);
+//            relicMachine.AbsoluteMotorMove(mtrExtend, extendPos.FULL_EXTEND.getVal(), -0.3);
+//            if(relicMachine.next_state_to_execute()){
+//                set_power(mtrExtend, -0.02);
+//                relicMachine.incrementState();
+//            }
+//            relicMachine.Pause(750);
+//            if(relicMachine.next_state_to_execute()){
+//                set_power(mtrExtend, 0.0);
+//                relicMachine.incrementState();
+//            }
+//            relicMachine.ServoMove(srvClaw, CLAWOPEN);
+//            relicMachine.Pause(750);
+//            if(relicMachine.next_state_to_execute()){
+//                set_power(mtrExtend, .3);
+//                relicMachine.incrementState();
+//            }
+//            relicMachine.Pause(750);
+//            relicMachine.ServoMove(srvClaw, CLAWCLOSED);
+//            relicMachine.ServoMove(srvLevel, LEVELUP);
+//            relicMachine.AbsoluteMotorMove(mtrExtend, extendPos.HOME.getVal(), 1);
+//            relicMachine.Pause(1500);
+//            relicMachine.ServoMove(srvLevel, LEVELDOWN);
+//            if(relicMachine.next_state_to_execute()){
+//                isPlacingRelic = false;
+//                DEFAULT = LEVELDOWN;
+//                relicMachine.incrementState();
+//            }
+//        }
+//
+//        if(!isPlacingRelic && !isGrabbingRelic){
+//            relicMachine.reset();
+//        }
 
         /////////////////AUTOBALANCE//////////////////////
 
