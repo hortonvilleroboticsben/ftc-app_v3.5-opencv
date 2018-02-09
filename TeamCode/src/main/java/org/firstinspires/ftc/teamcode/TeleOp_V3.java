@@ -152,7 +152,7 @@ public class TeleOp_V3 extends StateMachine_v7 {
                     relicMachine.incrementState();
                 }
             }
-            relicMachine.AbsoluteMotorMove(mtrExtend, extendPos.PARTIAL_EXTEND.getVal(), 0.5);
+            relicMachine.AbsoluteMotorMove(mtrExtend, extendPos.PARTIAL_EXTEND.getVal(), 1);
             if(relicMachine.next_state_to_execute()){
                 isGrabbingRelic = false;
                 DEFAULT = LEVELUP;
@@ -172,7 +172,7 @@ public class TeleOp_V3 extends StateMachine_v7 {
             relicMachine.ServoMove(srvClaw, CLAWCLOSED);
             relicMachine.ServoMove(srvLevel, LEVELUP);
             relicMachine.Pause(300);
-            relicMachine.AbsoluteMotorMove(mtrExtend, extendPos.PARTIAL_RETRACT.getVal(), -0.8);
+            relicMachine.AbsoluteMotorMove(mtrExtend, extendPos.PARTIAL_RETRACT.getVal(), -1);
             relicMachine.ServoMove(srvLevel, LEVELDOWN);
             relicMachine.AbsoluteMotorMove(mtrExtend, extendPos.FULL_EXTEND.getVal(), -0.3);
             if(relicMachine.next_state_to_execute()){
@@ -193,7 +193,7 @@ public class TeleOp_V3 extends StateMachine_v7 {
             relicMachine.Pause(750);
             relicMachine.ServoMove(srvClaw, CLAWCLOSED);
             relicMachine.ServoMove(srvLevel, LEVELUP);
-            relicMachine.AbsoluteMotorMove(mtrExtend, extendPos.HOME.getVal(), -0.5);
+            relicMachine.AbsoluteMotorMove(mtrExtend, extendPos.HOME.getVal(), 1);
             relicMachine.Pause(1500);
             relicMachine.ServoMove(srvLevel, LEVELDOWN);
             if(relicMachine.next_state_to_execute()){
