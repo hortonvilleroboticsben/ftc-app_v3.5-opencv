@@ -47,7 +47,7 @@ class StateMachine_v7 extends Subroutines_v14 {
     private final double wheelDiameter = 4.166666666666667;                      //double wheelDiameter = 4.19;
     private final double turnDiameter = 15.45;        // private final double turnDiameter = 13.95;
     private int count = 0;
-    private StateMachine_v7 s = new StateMachine_v7();
+//    private StateMachine_v7 s = new StateMachine_v7();
 
     private int countA = 0;
     double countB = 0;
@@ -67,8 +67,8 @@ class StateMachine_v7 extends Subroutines_v14 {
     //static
 
 
-    static Orientation O;
-    static Orientation O1;
+    static Orientation O = new Orientation();
+    static Orientation O1 = new Orientation();
 
     @Override
     public String toString(){
@@ -92,7 +92,7 @@ class StateMachine_v7 extends Subroutines_v14 {
     @Override
     public void init() {
         super.init();
-        O = IMUnav.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        //O = IMUnav.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
     }
 
     void initializeMachine(){
@@ -228,15 +228,15 @@ class StateMachine_v7 extends Subroutines_v14 {
         }
     }
 
-    void GyroEndTurn(double degrees, double speed) {
-
-        s.Turn(degrees - 3, speed);
-        s.GyroTurn(3,0.1);
-        if(s.next_state_to_execute()) {
-            s.reset();
-            incrementState();
-        }
-    }
+//    void GyroEndTurn(double degrees, double speed) {
+//
+//        s.Turn(degrees - 3, speed);
+//        s.GyroTurn(3,0.1);
+//        if(s.next_state_to_execute()) {
+//            s.reset();
+//            incrementState();
+//        }
+//    }
 
     void Turn(double degrees, double speed) {
         if(next_state_to_execute()) {
@@ -334,19 +334,19 @@ class StateMachine_v7 extends Subroutines_v14 {
         }
     }
 
-    void GyroEndOWTurn(double degrees, double speed) {
-        if(s.next_state_to_execute()) {
-            s.O1 = IMUnav.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            incrementState();
-        }
-        s.OWTurn((Math.abs(degrees) - (O1.firstAngle) - 5)*Math.signum(degrees), speed);
-
-        s.GyroTurn(3,0.1);
-        if(s.next_state_to_execute()) {
-            s.reset();
-            incrementState();
-        }
-    }
+//    void GyroEndOWTurn(double degrees, double speed) {
+//        if(s.next_state_to_execute()) {
+//            s.O1 = IMUnav.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+//            incrementState();
+//        }
+//        s.OWTurn((Math.abs(degrees) - (O1.firstAngle) - 5)*Math.signum(degrees), speed);
+//
+//        s.GyroTurn(3,0.1);
+//        if(s.next_state_to_execute()) {
+//            s.reset();
+//            incrementState();
+//        }
+//    }
 
     public void GyroOWTurn(double degrees, double speed){
         if (next_state_to_execute()) {

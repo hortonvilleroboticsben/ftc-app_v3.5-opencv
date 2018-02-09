@@ -7,8 +7,8 @@ import android.util.Log;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import java.io.File;
-
-@TeleOp(name = "TestFileReader")
+@Deprecated
+//@TeleOp(name = "TestFileReader")
 public class TestFileReader extends StateMachine_v6 {
     TextCodeLink link;
     static StateMachine_v6 runner = new StateMachine_v6();

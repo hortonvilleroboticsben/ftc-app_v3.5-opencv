@@ -21,6 +21,7 @@ import static org.firstinspires.ftc.robotcontroller.external.samples.ConceptVuMa
  * Created by sam on 12/14/2017.
  */
 
+@Deprecated
 //@TeleOp(name = "OpenCV State Test")
 public class OpenCVStateTest extends StateMachine_v5 {
     StateMachine_v5 vision = new StateMachine_v5();

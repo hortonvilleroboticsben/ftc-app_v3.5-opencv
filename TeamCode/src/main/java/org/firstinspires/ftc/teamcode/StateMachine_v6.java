@@ -34,6 +34,7 @@ import java.util.List;
 
 import static org.opencv.imgproc.Imgproc.minEnclosingCircle;
 
+@Deprecated
 class StateMachine_v6 extends Subroutines_v13 {
 
     public String flag = "";

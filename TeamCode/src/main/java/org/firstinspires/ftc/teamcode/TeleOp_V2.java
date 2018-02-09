@@ -18,7 +18,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 import java.util.Arrays;
 
 @Disabled()
-@TeleOp(name = "teleOp", group = "Competition")
+@Deprecated
+//@TeleOp(name = "teleOp", group = "Competition")
 public class TeleOp_V2 extends StateMachine_v7 {
 
     StateMachine_v7 robotFront = new StateMachine_v7();

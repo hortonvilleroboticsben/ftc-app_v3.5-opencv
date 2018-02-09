@@ -24,8 +24,8 @@ import org.opencv.android.OpenCVLoader;
 import java.util.Arrays;
 
 import static org.firstinspires.ftc.robotcontroller.external.samples.ConceptVuMarkIdentification.TAG;
-
-@Autonomous(name = "AutoNew", group = "Final")
+@Deprecated
+//@Autonomous(name = "AutoNew", group = "Final")
 public class Autonomous_v3 extends StateMachine_v7 {
     int question_number = 1;
     boolean btnOS;
