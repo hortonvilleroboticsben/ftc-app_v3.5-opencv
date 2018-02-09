@@ -25,8 +25,8 @@ import java.util.Arrays;
 
 import static org.firstinspires.ftc.robotcontroller.external.samples.ConceptVuMarkIdentification.TAG;
 
-@Autonomous(name = "AutoNew", group = "Final")
-public class Autonomous_v3 extends StateMachine_v7 {
+@Autonomous(name = "AutoV4", group = "Final")
+public class Autonomous_v4 extends StateMachine_v7 {
     int question_number = 1;
     boolean btnOS;
 
@@ -118,7 +118,7 @@ public class Autonomous_v3 extends StateMachine_v7 {
         if(gamepad2.guide && gamepad2.back) reset_encoders(mtrLift);
 
         if(!gamepad2.right_stick_button) set_power(mtrLift, .75*gamepad2.right_stick_y);
-            else set_power(mtrLift, .1*gamepad2.right_stick_y);
+        else set_power(mtrLift, .1*gamepad2.right_stick_y);
 
         switch (question_number) {
             case 1:
@@ -241,7 +241,6 @@ public class Autonomous_v3 extends StateMachine_v7 {
 
 
         if(Alliance == BLUE) {
-            //TODO: DRIVE must grab GLYPH.
             if (arm.next_state_to_execute()) {
                 if (ballArray[0] == BallColor.RED) set_position(srvLR, LR_LEFT);
                 else set_position(srvLR, LR_RIGHT);
@@ -253,7 +252,7 @@ public class Autonomous_v3 extends StateMachine_v7 {
             arm.ServoMove(srvLR, LR_HOME);
 
             drive.WaitForFlag("Jewels Hit");
-            drive.ServoMove(srvPhone, CAM_FRONT);
+
 
             if (StartPos == 1) {
                 if(vuMark != null) {
@@ -283,50 +282,7 @@ public class Autonomous_v3 extends StateMachine_v7 {
                 drive.Drive(-2,.2);
 
                 drive.SetFlag(arm, "Off Platform");
-                if(GrabRelic) {
-                    drive.Drive(-4,.2);
-                    drive.ServoMove(srvGr1,GR1OPEN);
-                    drive.ServoMove(srvGr2,GR2OPEN);
-                    drive.Pause(300);
-                    drive.OWTurn(-53.5,.2);
 
-                    drive.SetFlag(glyph, "Grab Relic");
-
-                    glyph.WaitForFlag("Grab Relic");
-                    glyph.AbsoluteMotorMove(mtrExtend, -1000, -1);
-                    glyph.ServoMove(srvClaw, CLAWOPEN);
-                    glyph.ServoMove(srvLevel, LEVELDOWN);
-                    if(glyph.next_state_to_execute()){
-                        set_power(mtrExtend, -0.45);
-                        glyph.incrementState();
-                    }
-                    if(glyph.next_state_to_execute()){
-                        if(isWithin(get_encoder_count(mtrExtend), -1400+100, -1400-100)) {
-                            glyph.incrementState();
-                        }
-                    }
-                    glyph.ServoMove(srvLevel, LEVELPARTIALDOWN);
-                    glyph.Pause(300);
-                    if(glyph.next_state_to_execute()){
-                        set_power(mtrExtend, 0.0);
-                        set_position(srvClaw, CLAWCLOSED);
-                        glyph.incrementState();
-                    }
-                    glyph.Pause(750);
-                    if(glyph.next_state_to_execute()){
-                        set_power(mtrExtend, 0.3);
-                        glyph.incrementState();
-                    }
-                    glyph.AbsoluteMotorMove(mtrExtend, extendPos.HOME.getVal(), 0.5);
-                    glyph.ServoMove(srvLevel, LEVELDOWN);
-                    glyph.SetFlag(drive, "move again");
-
-                    drive.WaitForFlag("move again");
-                    drive.OWTurn(-53.5, -.2);
-                    drive.ServoMove(srvGr1,GR1AUTO);
-                    drive.ServoMove(srvGr2,GR2AUTO);
-                    drive.Drive(5,.2);
-                }
                 drive.ServoMove(srvGr1, GR1CLOSED);
                 drive.ServoMove(srvGr2, GR2CLOSED);
                 drive.ServoMove(srvGr1, GR1AUTO);
@@ -363,7 +319,7 @@ public class Autonomous_v3 extends StateMachine_v7 {
             arm.ServoMove(srvLR, LR_HOME);
 
             drive.WaitForFlag("Jewels Hit");
-            drive.ServoMove(srvPhone, CAM_FRONT);
+
             if(StartPos == 1) {
                 if(vuMark != null) {
                     if (vuMark == RelicRecoveryVuMark.LEFT) {
@@ -413,6 +369,64 @@ public class Autonomous_v3 extends StateMachine_v7 {
         glyph.Pause(200);
         glyph.AbsoluteMotorMove(mtrLift, liftPos.ONE.getVal(), 0.5);
 
+        //TODO
+        if(StartPos == 2 && Alliance == BLUE && GrabRelic) {
+//            drive.Drive(6, 0.2);
+//            drive.Turn(-87,.2);
+//            if(vuMark != null) {
+//                if (vuMark == RelicRecoveryVuMark.LEFT) {
+//                    drive.Drive(-3.5,0.2);
+//                } else if (vuMark == RelicRecoveryVuMark.RIGHT) {
+//                    drive.Drive(-18.3,0.2);
+//                } else {
+//                    drive.Drive(-11.8,0.2);
+//                }
+//            }
+//            drive.Turn(-88,0.2);
+//            drive.Drive(-4,.2);
+//            drive.ServoMove(srvGr1,GR1OPEN);
+//            drive.ServoMove(srvGr2,GR2OPEN);
+//            drive.Pause(300);
+            drive.OWTurn(-53.5,.2);
+
+            drive.SetFlag(glyph, "Grab Relic");
+
+            glyph.WaitForFlag("Grab Relic");
+            glyph.AbsoluteMotorMove(mtrExtend, -1000, -1);
+            glyph.ServoMove(srvClaw, CLAWOPEN);
+            glyph.ServoMove(srvLevel, LEVELDOWN);
+            if(glyph.next_state_to_execute()){
+                set_power(mtrExtend, -0.45);
+                glyph.incrementState();
+            }
+            if(glyph.next_state_to_execute()){
+                if(isWithin(get_encoder_count(mtrExtend), -1400+100, -1400-100)) {
+                    glyph.incrementState();
+                }
+            }
+            glyph.ServoMove(srvLevel, LEVELPARTIALDOWN);
+            glyph.Pause(300);
+            if(glyph.next_state_to_execute()){
+                set_power(mtrExtend, 0.0);
+                set_position(srvClaw, CLAWCLOSED);
+                glyph.incrementState();
+            }
+            glyph.Pause(750);
+            if(glyph.next_state_to_execute()){
+                set_power(mtrExtend, 0.3);
+                glyph.incrementState();
+            }
+            glyph.AbsoluteMotorMove(mtrExtend, extendPos.HOME.getVal(), 0.5);
+            glyph.ServoMove(srvLevel, LEVELDOWN);
+            glyph.SetFlag(drive, "move again");
+
+            drive.WaitForFlag("move again");
+            drive.OWTurn(-53.5, -.2);
+            drive.ServoMove(srvGr1,GR1AUTO);
+            drive.ServoMove(srvGr2,GR2AUTO);
+            drive.Drive(5,.2);
+        }
+
         if(StartPos == 1) {
             glyph.Pause(200);
             glyph.SetFlag(drive, "enter pit");
@@ -420,53 +434,97 @@ public class Autonomous_v3 extends StateMachine_v7 {
             drive.WaitForFlag("enter pit");
             drive.Drive(7, 0.2);
             drive.Turn(175, 0.4);
-            if(EnterPit) {
-                drive.ServoMove(srvGr1, GR1AUTO);
-                drive.ServoMove(srvGr2,GR2AUTO);
-                drive.SetFlag(glyph,"da way");
-                glyph.WaitForFlag("da way");
-                glyph.AbsoluteMotorMove(mtrLift,liftPos.AUTO.getVal(),0.5);
-                drive.Drive(-8,0.5);
-                drive.Turn(-55,0.3);
-                drive.Drive(-17,0.5);
-                drive.Turn(75,75);
-                drive.ServoMove(srvGr2,GR2OPEN);
-                drive.SetFlag(glyph,"oscillate");
-
-                glyph.WaitForFlag("oscillate");
-                if(drive.next_state_to_execute()){
-                    drive.timerToggle.reset();
-                    drive.incrementState();
-                }
-                glyph.ServoToggle(snsBtnGlyph.isPressed() || drive.timerToggle.getElapsedTime()>5000);
-                drive.DriveWithCondition(-15,0.5,snsBtnGlyph.isPressed() || drive.timerToggle.getElapsedTime()>5000);
-
-//                if(getBatteryVoltage() < 10) {
+//            if(EnterPit) {
+//                drive.ServoMove(srvGr1, GR1AUTO);
+//                drive.ServoMove(srvGr2,GR2AUTO);
+//                drive.SetFlag(glyph,"da way");
+//                glyph.WaitForFlag("da way");
+//                glyph.AbsoluteMotorMove(mtrLift,liftPos.AUTO.getVal(),0.5);
+//                drive.Drive(-8,0.5);
+//                drive.Turn(-55,0.3);
+//                drive.Drive(-17,0.5);
+//                drive.Turn(75,75);
+//                drive.ServoMove(srvGr2,GR2OPEN);
+//                drive.SetFlag(glyph,"oscillate");
+//
+//                glyph.WaitForFlag("oscillate");
+//                if(drive.next_state_to_execute()){
+//                    drive.timerToggle.reset();
 //                    drive.incrementState();
 //                }
-
-                //drive.Shimmy(-24, 0.2, 1000);
-                drive.SetFlag(glyph, "grab that block");
-
-                glyph.WaitForFlag("grab that block");
-                glyph.ServoMove(srvGr1, GR1AUTO);
-                glyph.ServoMove(srvGr2, GR2AUTO);
-                glyph.Pause(300);
-                glyph.SetFlag(drive, "go back");
-                glyph.AbsoluteMotorMove(mtrLift, liftPos.TWO.getVal()-300, 0.6);
-
-                drive.WaitForFlag("go back");
-                drive.Pause(200);
-                drive.Drive(6,0.2);
-                drive.Turn(-45, 0.2);
-                drive.Drive(-16,0.2);
-                //drive.RetraceEncoders(0.2);
-                drive.ServoMove(srvGr1,GR1OPEN);
-                drive.ServoMove(srvGr2,GR2OPEN);
-
-            }
+//                glyph.ServoToggle(snsBtnGlyph.isPressed() || drive.timerToggle.getElapsedTime()>5000);
+//                drive.DriveWithCondition(-15,0.5,snsBtnGlyph.isPressed() || drive.timerToggle.getElapsedTime()>5000);
+//
+////                if(getBatteryVoltage() < 10) {
+////                    drive.incrementState();
+////                }
+//
+//                //drive.Shimmy(-24, 0.2, 1000);
+//                drive.SetFlag(glyph, "grab that block");
+//
+//                glyph.WaitForFlag("grab that block");
+//                glyph.ServoMove(srvGr1, GR1AUTO);
+//                glyph.ServoMove(srvGr2, GR2AUTO);
+//                glyph.Pause(300);
+//                glyph.SetFlag(drive, "go back");
+//                glyph.AbsoluteMotorMove(mtrLift, liftPos.TWO.getVal()-300, 0.6);
+//
+//                drive.WaitForFlag("go back");
+//                drive.Pause(200);
+//                drive.Drive(6,0.2);
+//                drive.Turn(-45, 0.2);
+//                drive.Drive(-16,0.2);
+//                //drive.RetraceEncoders(0.2);
+//                drive.ServoMove(srvGr1,GR1OPEN);
+//                drive.ServoMove(srvGr2,GR2OPEN);
+//
+//            }
 
         }else if(Alliance == RED && GrabRelic) {
+            if(GrabRelic) {
+                drive.Drive(-4,.2);
+                drive.ServoMove(srvGr1,GR1OPEN);
+                drive.ServoMove(srvGr2,GR2OPEN);
+                drive.Pause(300);
+                drive.OWTurn(-53.5,.2);
+
+                drive.SetFlag(glyph, "Grab Relic");
+
+                glyph.WaitForFlag("Grab Relic");
+                glyph.AbsoluteMotorMove(mtrExtend, -1000, -1);
+                glyph.ServoMove(srvClaw, CLAWOPEN);
+                glyph.ServoMove(srvLevel, LEVELDOWN);
+                if(glyph.next_state_to_execute()){
+                    set_power(mtrExtend, -0.45);
+                    glyph.incrementState();
+                }
+                if(glyph.next_state_to_execute()){
+                    if(isWithin(get_encoder_count(mtrExtend), -1400+100, -1400-100)) {
+                        glyph.incrementState();
+                    }
+                }
+                glyph.ServoMove(srvLevel, LEVELPARTIALDOWN);
+                glyph.Pause(300);
+                if(glyph.next_state_to_execute()){
+                    set_power(mtrExtend, 0.0);
+                    set_position(srvClaw, CLAWCLOSED);
+                    glyph.incrementState();
+                }
+                glyph.Pause(750);
+                if(glyph.next_state_to_execute()){
+                    set_power(mtrExtend, 0.3);
+                    glyph.incrementState();
+                }
+                glyph.AbsoluteMotorMove(mtrExtend, extendPos.HOME.getVal(), 0.5);
+                glyph.ServoMove(srvLevel, LEVELDOWN);
+                glyph.SetFlag(drive, "move again");
+
+                drive.WaitForFlag("move again");
+                drive.OWTurn(-53.5, -.2);
+                drive.ServoMove(srvGr1,GR1AUTO);
+                drive.ServoMove(srvGr2,GR2AUTO);
+                drive.Drive(5,.2);
+            }
             glyph.SetFlag(drive,"you are good to go now");
 
             drive.WaitForFlag("you are good to go now");

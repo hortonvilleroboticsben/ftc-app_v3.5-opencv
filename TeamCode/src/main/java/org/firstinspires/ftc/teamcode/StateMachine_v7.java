@@ -295,7 +295,7 @@ class StateMachine_v7 extends Subroutines_v14 {
                     run_to_position(mtrLeftDrive);
                     set_encoder_target(mtrLeftDrive, (int) targetDegrees);
                     set_power(mtrLeftDrive, speed);
-                    set_power(mtrRightDrive, 0);
+
                 }
 
                 if (has_encoder_reached(mtrLeftDrive, (int) targetDegrees) || driveFinished) {
@@ -313,7 +313,6 @@ class StateMachine_v7 extends Subroutines_v14 {
                     run_to_position(mtrRightDrive);
                     set_encoder_target(mtrRightDrive, (int) targetDegrees);
                     set_power(mtrRightDrive, speed);
-                    set_power(mtrLeftDrive, 0);
                 }
 
                 if (has_encoder_reached(mtrRightDrive, (int) targetDegrees) || driveFinished) {

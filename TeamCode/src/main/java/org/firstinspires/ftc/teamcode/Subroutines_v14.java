@@ -89,7 +89,7 @@ class Subroutines_v14 extends OpMode {
     final double GR1OPEN = 1.0;
     final double GR2CLOSED = 1-GR1CLOSED;
     final double GR2OPEN = 1-GR1OPEN;
-    final double GR1AUTO = 0.425;
+    final double GR1AUTO = 0.41;
     final double GR2AUTO = 1-GR1AUTO;
 
     final double CLAWCLOSED = 0.685;
@@ -98,7 +98,7 @@ class Subroutines_v14 extends OpMode {
     final double LEVELUP = 0;
     final double LEVELDOWN = .45;
     final double LEVELPARTIALDOWN = 0.395;
-    final double LEVELINIT = 0.61;
+    final double LEVELINIT = 0.62;
 
     final double UD_DOWN = .25;
     final double UD_UP = .735;
@@ -110,7 +110,7 @@ class Subroutines_v14 extends OpMode {
 
     final double CAM_SIDE = .565;
     final double CAM_VUMARK = .545;
-    final double CAM_JEWELS = .65;
+    final double CAM_JEWELS = .76;
     final double CAM_FRONT = .06;
 
     static VuforiaLocalizer vuforia;
