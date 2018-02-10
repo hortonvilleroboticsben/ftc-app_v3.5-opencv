@@ -294,7 +294,7 @@ public class Autonomous_v4 extends StateMachine_v7 {
                     } else if (vuMark == RelicRecoveryVuMark.RIGHT) {
                         drive.Drive(-18.3,0.2);
                     } else {
-                        drive.Drive(-11.8,0.2);
+                        drive.Drive(-10.3,0.2);
                     }
                 }
                 drive.AbsoluteMotorMove(mtrLift,liftPos.CARRY.getVal(),0.3);
@@ -327,7 +327,7 @@ public class Autonomous_v4 extends StateMachine_v7 {
 
                 drive.Turn(-89.5, 0.3);
             }else if(StartPos == 2){
-                drive.Drive(-24,.2);
+                drive.Drive(-24.8,.2);
                 drive.Drive(1,.3);
                 drive.SetFlag(arm, "Off Platform");
 
@@ -337,11 +337,11 @@ public class Autonomous_v4 extends StateMachine_v7 {
                 drive.Turn(86.5,.3);
                 if(vuMark != null) {
                     if (vuMark == RelicRecoveryVuMark.LEFT) {
-                        drive.Drive(-16.33,0.3);
+                        drive.Drive(-17.33,0.3);
                     } else if (vuMark == RelicRecoveryVuMark.RIGHT) {
                         drive.Drive(-2.33,0.3);
                     } else {
-                        drive.Drive(-6.33,0.3);
+                        drive.Drive(-9.33,0.3);
                     }
                 }
                 drive.AbsoluteMotorMove(mtrLift,liftPos.AUTO.getVal(),0.3);
@@ -369,7 +369,7 @@ public class Autonomous_v4 extends StateMachine_v7 {
                 } else if (vuMark == RelicRecoveryVuMark.RIGHT) {
                     drive.Drive(18.5,0.3);
                 } else {
-                    drive.Drive(12.5,0.3);
+                    drive.Drive(13,0.3);
                 }
             }
             drive.Turn(-33.25,0.3);
@@ -469,14 +469,14 @@ public class Autonomous_v4 extends StateMachine_v7 {
 //
 //            }
 
-        }else if(Alliance == RED && GrabRelic) {
+        }else if(Alliance == RED && StartPos == 2 && GrabRelic) {
             if(GrabRelic) {
                 drive.Pause(250);
                 drive.Drive(4.5,0.3);
                 drive.Turn(90,0.3);
                 if(vuMark != null) {
                     if (vuMark == RelicRecoveryVuMark.LEFT) {
-                        drive.Drive(16.33,0.3);
+                        drive.Drive(17.33,0.3);
                     } else if (vuMark == RelicRecoveryVuMark.RIGHT) {
                         drive.Drive(2.33,0.3);
                     } else {
@@ -493,11 +493,11 @@ public class Autonomous_v4 extends StateMachine_v7 {
                 glyph.ServoMove(srvClaw, CLAWOPEN);
                 glyph.ServoMove(srvLevel, LEVELDOWN);
                 if(glyph.next_state_to_execute()){
-                    set_power(mtrExtend, -0.45);
+                    set_power(mtrExtend, -0.55);
                     glyph.incrementState();
                 }
                 if(glyph.next_state_to_execute()){
-                    if(isWithin(get_encoder_count(mtrExtend), -1400+100, -1400-100)) {
+                    if(isWithin(get_encoder_count(mtrExtend), -1800+100, -1800-100)) {
                         glyph.incrementState();
                     }
                 }
@@ -518,7 +518,7 @@ public class Autonomous_v4 extends StateMachine_v7 {
                 glyph.SetFlag(drive, "move again");
 
                 drive.WaitForFlag("move again");
-                drive.OWTurn(-53.5, .2);
+                drive.Turn(20, .2);
                 drive.Drive(-12,.2);
             }
             glyph.SetFlag(drive,"you are good to go now");
