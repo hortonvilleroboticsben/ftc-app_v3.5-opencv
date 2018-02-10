@@ -319,6 +319,15 @@ public class Autonomous_v4 extends StateMachine_v7 {
 
             if(StartPos == 1) {
 
+                if(vuMark != null) {
+                    if (vuMark == RelicRecoveryVuMark.LEFT) {
+                        drive.Drive(-41,0.2);
+                    } else if (vuMark == RelicRecoveryVuMark.RIGHT) {
+                        drive.Drive(-27,0.2);
+                    } else {
+                        drive.Drive(-34,0.2);
+                    }
+                }
                 drive.SetFlag(arm, "Off Platform");
                 drive.Pause(200);
 

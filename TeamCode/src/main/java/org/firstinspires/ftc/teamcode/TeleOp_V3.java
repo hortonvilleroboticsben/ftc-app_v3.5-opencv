@@ -147,7 +147,7 @@ public class TeleOp_V3 extends StateMachine_v7 {
                     relicMachine.incrementState();
                 }
             }
-            relicMachine.AbsoluteMotorMove(mtrExtend, extendPos.PARTIAL_EXTEND.getVal(), 1);
+            relicMachine.AbsoluteMotorMove(mtrExtend, extendPos.HOME.getVal(), 1);
             if(relicMachine.next_state_to_execute()){
                 isGrabbingRelic = false;
                 DEFAULT = LEVELUP;
