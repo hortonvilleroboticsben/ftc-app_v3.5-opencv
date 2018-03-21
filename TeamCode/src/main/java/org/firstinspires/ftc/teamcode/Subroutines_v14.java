@@ -1,12 +1,19 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.Looper;
 import android.text.method.Touch;
 import android.util.Log;
+import android.view.SurfaceView;
+import android.view.Window;
+import android.view.WindowManager;
+
+import java.util.Date;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.BNO055IMU.Parameters;
@@ -42,6 +49,7 @@ import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
+import org.opencv.core.Rect;
 import org.opencv.core.RotatedRect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
@@ -64,7 +72,7 @@ import static org.opencv.imgproc.Imgproc.HoughLinesP;
 import static org.opencv.imgproc.Imgproc.minAreaRect;
 
 
-class Subroutines_v14 extends OpMode {
+class Subroutines_v14 extends OpMode implements CameraBridgeViewBase.CvCameraViewListener2{
     //Variable initialization//
     long systemTime = 0;             //System time used to determine how much time has passed for waitHasFinished()//
     boolean initOS = true;           //Oneshot used for waitHasFinished//
@@ -96,7 +104,7 @@ class Subroutines_v14 extends OpMode {
     final double CLAWOPEN = 1;
 
     final double LEVELUP = 0;
-    final double LEVELDOWN = .435;
+    final double LEVELDOWN = .4;
     final double LEVELPARTIALDOWN = 0.395;
     final double LEVELINIT = 0.62;
 
@@ -117,6 +125,7 @@ class Subroutines_v14 extends OpMode {
     static VuforiaTrackable relicTemplate;
 
     public Mat mLines;
+    public Mat mRgba;
 
     VuforiaLocalizer.CloseableFrame frame = null;
 
@@ -148,6 +157,25 @@ class Subroutines_v14 extends OpMode {
         }
     }
 
+    public void onCameraViewStarted(int width, int height) {
+        mRgba = new Mat(height, width, CvType.CV_8UC4);
+
+
+        Log.d(TAG, "onCamerViewStarted Width: " + width + " Height: " + height);
+
+    }
+
+    @Override
+    public void onCameraViewStopped() {
+        mRgba.release();
+    }
+
+
+    public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+        Log.e("time",""+new java.util.Date().getTime()+"");
+        mRgba = inputFrame.rgba();
+        return mRgba;
+    }
 
     @Override
     public void init() {
@@ -192,6 +220,13 @@ class Subroutines_v14 extends OpMode {
         }
 
         update_telemetry();
+
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+
+
+       // mOpenCvCameraView =
+        mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
+        mOpenCvCameraView.setCvCameraViewListener(this);
 
     }
 
@@ -755,6 +790,39 @@ class Subroutines_v14 extends OpMode {
         vuforia.setFrameQueueCapacity(1);
     }
 
+//    public void onCreate(Bundle savedInstanceState) {
+//        Log.i(TAG, "called onCreate");
+//        super.onCreate(savedInstanceState);
+//        requestWindowFeature(Window.FEATURE_NO_TITLE);
+//        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+//
+//        setContentView(R.layout.color_blob_detection_surface_view);
+//
+//        mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.color_blob_detection_activity_surface_view);
+//        mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
+//        mOpenCvCameraView.setCvCameraViewListener(this);
+//    }
+//
+//    @Override
+//    public void onPause() {
+//        super.onPause();
+//        if (mOpenCvCameraView != null)
+//            mOpenCvCameraView.disableView();
+//    }
+//
+//    @Override
+//    public void onResume() {
+//        super.onResume();
+//        if (!OpenCVLoader.initDebug()) {
+//            Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
+//            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, this, mLoaderCallback);
+//        } else {
+//            Log.d(TAG, "OpenCV library found inside package. Using it!");
+//            mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
+//        }
+//    }
+
+    private CameraBridgeViewBase mOpenCvCameraView;
 
     void initializeOpenCV() {
         if (Looper.myLooper() == null) Looper.prepare();
@@ -767,6 +835,8 @@ class Subroutines_v14 extends OpMode {
                 switch (status) {
                     case LoaderCallbackInterface.SUCCESS: {
                         Log.i(TAG, "OpenCV loaded successfully");
+//                       mOpenCvCameraView.enableView();
+
                     }
                     break;
                     default: {
@@ -794,6 +864,7 @@ class Subroutines_v14 extends OpMode {
     }
 
     Mat vuforiaFrameToMat() {
+
         VuforiaLocalizer.CloseableFrame frame = null;
         try {
             long totalFrame = 0;
@@ -814,7 +885,10 @@ class Subroutines_v14 extends OpMode {
             Bitmap bm = null;
 
             if(rgb != null) bm = Bitmap.createBitmap(rgb.getWidth(), rgb.getHeight(), Bitmap.Config.RGB_565);
-            else return new Mat(700,1280,CvType.CV_8UC4);
+            else {
+                Log.e("time",""+new java.util.Date().getTime()+" null frame");
+                return null;
+            }
             bm.copyPixelsFromBuffer(rgb.getPixels());
 
 
@@ -824,15 +898,44 @@ class Subroutines_v14 extends OpMode {
 
             Utils.bitmapToMat(bm, tmp);
 
+            Log.e("time",""+new java.util.Date().getTime());
+
             return tmp;
 
 
 
 
         } catch (Exception e) {
+
             e.printStackTrace();
-            return new Mat(700, 1200, CvType.CV_8UC4);
+            return null;
         }
+
+
+    }
+
+    boolean isCorrectFrame() {
+        VuforiaLocalizer.CloseableFrame frame = null;
+        try {
+            long totalFrame = 0;
+            if (vuforia.getFrameQueue().size() >= 1) {
+                frame = vuforia.getFrameQueue().take();
+                totalFrame = frame.getNumImages();
+            }
+
+            Image rgb = null;
+
+            int counter = 0;
+            if (counter < totalFrame) {
+                if (frame.getImage(counter).getFormat() == PIXEL_FORMAT.RGB565)
+                    rgb = frame.getImage(counter);
+                counter++;
+            }
+            return rgb != null;
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     double distance(Point center, Point check) {

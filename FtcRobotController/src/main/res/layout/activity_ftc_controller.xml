@@ -178,6 +178,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
   </RelativeLayout>
 
+
+
+
+
   <WebView
     android:id="@+id/webViewBlocksRuntime"
     android:layout_width="1dp"
