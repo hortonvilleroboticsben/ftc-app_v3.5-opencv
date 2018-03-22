@@ -8,9 +8,6 @@ import android.widget.LinearLayout;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
-
-
-import org.lasarobotics.vision.util.FPS;
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.JavaCameraView;
@@ -29,7 +26,6 @@ abstract class VisionOpModeCore extends OpMode implements CameraBridgeViewBase.C
     private static boolean openCVInitialized = false;
     public int width, height;
     public FPS fps;
-    public Sensors sensors;
 
     public VisionOpModeCore() {
         initialized = false;
@@ -88,8 +84,8 @@ abstract class VisionOpModeCore extends OpMode implements CameraBridgeViewBase.C
                         "or because another app is currently locking it.");
         openCVCamera.enableView();
 
-        width = openCVCamera.getFrameWidth();
-        height = openCVCamera.getFrameHeight();
+        width = openCVCamera.getWidth();
+        height = openCVCamera.getHeight();
         if (width == 0 || height == 0) {
             Log.w("FTCVision", "OpenCV Camera failed to initialize width and height properties on startup.\r\n" +
                     "This is generally okay, but if you use width or height during init() you may\r\n" +
@@ -192,11 +188,10 @@ abstract class VisionOpModeCore extends OpMode implements CameraBridgeViewBase.C
 
                 //Initialize FPS counter and sensors
                 fps = new FPS();
-                sensors = new Sensors();
 
                 //Done!
-                width = openCVCamera.getFrameWidth();
-                height = openCVCamera.getFrameHeight();
+                width = openCVCamera.getWidth();
+                height = openCVCamera.getHeight();
                 initialized = true;
             }
         });
@@ -221,9 +216,6 @@ abstract class VisionOpModeCore extends OpMode implements CameraBridgeViewBase.C
             openCVCamera.disableView();
             openCVCamera.disconnectCamera();
         }
-
-        if (sensors != null)
-            sensors.stop();
 
         initialized = false;
         openCVCamera = null;

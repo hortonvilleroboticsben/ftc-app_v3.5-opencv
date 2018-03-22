@@ -13,14 +13,14 @@ public class FPS {
     private static final int FRAME_BUFFER_LENGTH = 5;
     private static final DecimalFormat FPS_FORMAT = new DecimalFormat("0.00");
 
-    //private final RollingAverage<Long> rollingAverage;
+    private final RollingAverage<Long> rollingAverage;
     private long lastTime;
 
     /**
      * Instantiate a new fps counter
      */
     public FPS() {
-        //rollingAverage = new RollingAverage<>(FRAME_BUFFER_LENGTH);
+        rollingAverage = new RollingAverage<>(FRAME_BUFFER_LENGTH);
         lastTime = -1L;
     }
 
@@ -32,7 +32,7 @@ public class FPS {
     public void update() {
         if (lastTime != -1L) {
             long delta = System.nanoTime() - lastTime;
-            //rollingAverage.addValue(delta);
+            rollingAverage.addValue(delta);
         }
         lastTime = System.nanoTime();
     }
@@ -43,8 +43,8 @@ public class FPS {
      * @return The FPS, as a double in frames/second.
      */
     private double getFPS() {
-        //double period = rollingAverage.getAverage() / 1000000000.0; //period: s
-        return 1.0; /// period; //frequency = 1/s
+        double period = rollingAverage.getAverage() / 1000000000.0; //period: s
+        return 1.0/ period; //frequency = 1/s
     }
 
     /**
@@ -70,7 +70,7 @@ public class FPS {
      * Resets the FPS counter.
      */
     public void reset() {
-        //rollingAverage.clear();
+        rollingAverage.clear();
         lastTime = -1L;
     }
 }

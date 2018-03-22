@@ -1,4 +1,4 @@
-Executable : C:\Users\sam\AppData\Local\Android\sdk\ndk-bundle\ndk-build.cmd
+Executable : C:\Users\sam\AppData\Local\Android\Sdk\ndk-bundle\ndk-build.cmd
 arguments : 
 NDK_PROJECT_PATH=null
 APP_BUILD_SCRIPT=C:\Users\sam\AndroidStudioProjects\ftc-app\TeamCode\jni\Android.mk
