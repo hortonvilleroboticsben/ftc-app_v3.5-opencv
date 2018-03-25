@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-import android.os.SystemClock;
 import android.util.Log;
 
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -11,12 +10,8 @@ import com.qualcomm.robotcore.hardware.I2cDevice;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcontroller.external.samples.ConceptVuMarkIdentification;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
-import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
@@ -30,12 +25,12 @@ import org.opencv.imgproc.Moments;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.opencv.imgproc.Imgproc.minEnclosingCircle;
 
-@Deprecated
-class StateMachine_v6 extends Subroutines_v13 {
+class StateMachine_v8 extends Subroutines_v15 {
 
     public String flag = "";
     int current_number = 0;                           //The order of a specific state//
@@ -47,22 +42,28 @@ class StateMachine_v6 extends Subroutines_v13 {
     private final double wheelDiameter = 4.166666666666667;                      //double wheelDiameter = 4.19;
     private final double turnDiameter = 15.45;        // private final double turnDiameter = 13.95;
     private int count = 0;
+//    private StateMachine_v7 s = new StateMachine_v7();
+
     private int countA = 0;
-
-    public boolean useThisForTesting = false;
-
-    private ArrayList<Integer> lEncoderDelta = new ArrayList<>();
-    private ArrayList<Integer> rEncoderDelta = new ArrayList<>();
-
+    double countB = 0;
 
     Timer timeOut = new Timer();
     boolean timeoutOS = true;
 
+    Timer timer = new Timer();
+
+    Timer timerToggle = new Timer();
+
     static BallColor[] ballArray = {null, null};
     static RelicRecoveryVuMark vuMark = null;
 
-    static Orientation O;
-    Timer timer = new Timer();
+//    public ColorLineDetector lDetectorBlue = new ColorLineDetector();
+//    public ColorLineDetector lDetectorRed = new ColorLineDetector();
+    //static
+
+
+    static Orientation O = new Orientation();
+    static Orientation O1 = new Orientation();
 
     @Override
     public String toString(){
@@ -86,7 +87,7 @@ class StateMachine_v6 extends Subroutines_v13 {
     @Override
     public void init() {
         super.init();
-//        O = IMUnav.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        //O = IMUnav.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
     }
 
     void initializeMachine(){
@@ -99,7 +100,7 @@ class StateMachine_v6 extends Subroutines_v13 {
         stateComplete = true;
     }
 
-    void SetFlag(StateMachine_v6 receiver, String key){
+    void SetFlag(StateMachine_v8 receiver, String key){
         if(next_state_to_execute()){
             receiver.flag = key;
             incrementState();
@@ -121,7 +122,10 @@ class StateMachine_v6 extends Subroutines_v13 {
         }
     }
 
-
+    void reset(){
+        state_in_progress = 1;
+        current_number = 0;
+    }
 
     //manages current state number and compares it to state in progress
     boolean next_state_to_execute() {
@@ -138,50 +142,27 @@ class StateMachine_v6 extends Subroutines_v13 {
         return (state_in_progress == current_number);
     }
 
-    void Shimmy(double distance, double speed,int period) {
-        if(next_state_to_execute()) {
-            if(timeoutOS){
-                timeOut.reset();
-                timeoutOS = false;
+    void ServoToggle(boolean condition){
+        if(next_state_to_execute()){
+            if(!oneShot) {
+                timerToggle.reset();
+                oneShot = true;
             }
-            double wheelCircumference = wheelDiameter * Math.PI;
-            double revs = distance / wheelCircumference;
-            double targetDegrees = gearRatio * revs * countsPerRev;
-
-            if (speed < 0) {
-                targetDegrees = Math.abs(targetDegrees) * -1;
-            }
-            double theta = timer.getElapsedTime();//(get_encoder_count(mtrLeftDrive) + get_encoder_count(mtrRightDrive))/2;
-//            double lSpeed = ((speed/2)*Math.sin(Math.PI*theta/period))+(speed/2 +0.05);
-//            double rSpeed = ((speed/2)*Math.sin(((Math.PI/period)*(theta+period)))+(speed/2));
-            double lSpeed = ((speed)*Math.sin(2*Math.PI*theta/period));
-            double rSpeed = ((speed)*Math.sin(((2*Math.PI/period)*(theta+period))));
-            lSpeed=(lSpeed<0)?lSpeed:0.5*lSpeed;
-            rSpeed=(rSpeed<0)?rSpeed:0.5*rSpeed;
-
-
-            if (!driveFinished) {
-                run_drive_to_position();
-                set_drive_target((int) targetDegrees, (int) targetDegrees);
-                set_drive_power(lSpeed, rSpeed);
-            }
-
-
-
-            if (have_drive_encoders_reached(targetDegrees, targetDegrees) || driveFinished || timeOut.getElapsedTime() > 4000) { //if move is finished
-                if (!driveFinished) reset_drive_encoders(); //if encoders have not been reset,
-                driveFinished = true;                       //reset encoders
-                timeoutOS = true;
-                set_drive_power(-0.0f, -0.0f);//stop robot
-                if (have_drive_encoders_reset()) {//if encoders have actually reset,
-                    driveFinished = false;  //move on to next method
-                    incrementState();
+            if(!condition){
+                if(timerToggle.getElapsedTime()>300){
+                    srvGr1.setPosition(GR1CLOSED);
+                }else{
+                    srvGr1.setPosition(GR1OPEN);
                 }
+                if(timerToggle.getElapsedTime()>600){
+                    oneShot = false;
+                }
+            }else{
+                srvGr1.setPosition(GR1OPEN);
+                incrementState();
+                oneShot = false;
             }
         }
-    }
-    void RetraceEncoders(double speed) {
-
     }
 
     void Drive(double distance, double speed) {
@@ -212,12 +193,45 @@ class StateMachine_v6 extends Subroutines_v13 {
         }
     }
 
-    void GyroEndTurn(double degrees, double speed) {
-        StateMachine_v6 s = new StateMachine_v6();
+    private int hypotState = 0;
 
-        s.Turn(degrees - 3, speed);
-        s.GyroTurn(3,0.1);
+    void DriveWithCondition(double distance, double speed,boolean condition) {
+        if(next_state_to_execute()) {
+            double wheelCircumference = wheelDiameter * Math.PI;
+            double revs = distance / wheelCircumference;
+            double targetDegrees = gearRatio * revs * countsPerRev;
+
+            if (speed < 0) {
+                targetDegrees = Math.abs(targetDegrees) * -1;
+            }
+
+            if (!driveFinished) {
+                run_drive_to_position();
+                set_drive_target((int) targetDegrees, (int) targetDegrees);
+                set_drive_power(speed, speed);
+            }
+
+            if (have_drive_encoders_reached(targetDegrees, targetDegrees) || driveFinished || condition) { //if move is finished
+                if (!driveFinished) reset_drive_encoders(); //if encoders have not been reset,
+                driveFinished = true;                       //reset encoders
+                set_drive_power(-0.0f, -0.0f);//stop robot
+                if (have_drive_encoders_reset()) {//if encoders have actually reset,
+                    driveFinished = false;  //move on to next method
+                    incrementState();
+                }
+            }
+        }
     }
+
+//    void GyroEndTurn(double degrees, double speed) {
+//
+//        s.Turn(degrees - 3, speed);
+//        s.GyroTurn(3,0.1);
+//        if(s.next_state_to_execute()) {
+//            s.reset();
+//            incrementState();
+//        }
+//    }
 
     void Turn(double degrees, double speed) {
         if(next_state_to_execute()) {
@@ -282,7 +296,7 @@ class StateMachine_v6 extends Subroutines_v13 {
                     run_to_position(mtrLeftDrive);
                     set_encoder_target(mtrLeftDrive, (int) targetDegrees);
                     set_power(mtrLeftDrive, speed);
-                    set_power(mtrRightDrive, 0);
+
                 }
 
                 if (has_encoder_reached(mtrLeftDrive, (int) targetDegrees) || driveFinished) {
@@ -300,7 +314,6 @@ class StateMachine_v6 extends Subroutines_v13 {
                     run_to_position(mtrRightDrive);
                     set_encoder_target(mtrRightDrive, (int) targetDegrees);
                     set_power(mtrRightDrive, speed);
-                    set_power(mtrLeftDrive, 0);
                 }
 
                 if (has_encoder_reached(mtrRightDrive, (int) targetDegrees) || driveFinished) {
@@ -312,6 +325,75 @@ class StateMachine_v6 extends Subroutines_v13 {
                         incrementState();
                     }
                 }
+            }
+        }
+    }
+
+//    void GyroEndOWTurn(double degrees, double speed) {
+//        if(s.next_state_to_execute()) {
+//            s.O1 = IMUnav.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+//            incrementState();
+//        }
+//        s.OWTurn((Math.abs(degrees) - (O1.firstAngle) - 5)*Math.signum(degrees), speed);
+//
+//        s.GyroTurn(3,0.1);
+//        if(s.next_state_to_execute()) {
+//            s.reset();
+//            incrementState();
+//        }
+//    }
+
+    public void GyroOWTurn(double degrees, double speed){
+        if (next_state_to_execute()) {
+            DcMotor.RunMode r = mtrLeftDrive.getMode();
+            run_using_drive_encoders();
+            Orientation o = O;
+            double z = o.firstAngle;
+            telemetry.addData("rot", z);
+            if(Math.abs(z) + 2 <= Math.abs(degrees)){
+
+                if (degrees < 0) {
+                    if (!driveFinished) {
+                        run_using_encoder(mtrRightDrive);
+                        run_to_position(mtrLeftDrive);
+
+                        set_power(mtrLeftDrive, speed);
+                        set_power(mtrRightDrive, 0);
+                    }
+
+                    if (driveFinished) {
+                        if (!driveFinished) reset_drive_encoders();
+                        driveFinished = true;
+                        set_drive_power(0.0f, 0.0f);
+                        if (have_drive_encoders_reset()) {
+                            driveFinished = false;
+                            incrementState();
+                        }
+                    }
+                } else if (degrees > 0) {
+                    if (!driveFinished) {
+                        run_using_encoder(mtrLeftDrive);
+                        run_to_position(mtrRightDrive);
+                        set_power(mtrRightDrive, speed);
+                        set_power(mtrLeftDrive, 0);
+                    }
+
+                    if (driveFinished) {
+                        if (!driveFinished) reset_drive_encoders();
+                        driveFinished = true;
+                        set_drive_power(0.0f, 0.0f);
+                        if (have_drive_encoders_reset()) {
+                            driveFinished = false;
+                            incrementState();
+                        }
+                    }
+                }
+            }else{
+                set_drive_power(0,0);
+                reset_drive_encoders();
+                mtrLeftDrive.setMode(r);
+                mtrRightDrive.setMode(r);
+                incrementState();
             }
         }
     }
@@ -336,10 +418,8 @@ class StateMachine_v6 extends Subroutines_v13 {
     }
 
     void Pause(long milliseconds) {
-
         if (next_state_to_execute()) {
             if (waitHasFinished(milliseconds)) {
-                useThisForTesting = true;
                 incrementState();
             }
         }
@@ -387,7 +467,7 @@ class StateMachine_v6 extends Subroutines_v13 {
     }
 
     @Deprecated
-    public void WriteI2C(StateMachine_v6 object, I2cDevice device, I2cAddr address, int register, int value){
+    public void WriteI2C(StateMachine_v8 object, I2cDevice device, I2cAddr address, int register, int value){
         if(next_state_to_execute()){
 
             device.enableI2cWriteMode(address,register,value);
@@ -424,23 +504,92 @@ class StateMachine_v6 extends Subroutines_v13 {
         }
     }
 
+    void Shimmy(double distance, double speed,int period) {
+        if(next_state_to_execute()) {
+            if(timeoutOS){
+                timeOut.reset();
+                timeoutOS = false;
+            }
+            double wheelCircumference = wheelDiameter * Math.PI;
+            double revs = distance / wheelCircumference;
+            double targetDegrees = gearRatio * revs * countsPerRev;
+
+            if (speed < 0) {
+                targetDegrees = Math.abs(targetDegrees) * -1;
+            }
+            double theta = timer.getElapsedTime();//(get_encoder_count(mtrLeftDrive) + get_encoder_count(mtrRightDrive))/2;
+//            double lSpeed = ((speed/2)*Math.sin(Math.PI*theta/period))+(speed/2 +0.05);
+//            double rSpeed = ((speed/2)*Math.sin(((Math.PI/period)*(theta+period)))+(speed/2));
+            double lSpeed = ((speed)*Math.sin(2*Math.PI*theta/period));
+            double rSpeed = ((speed)*Math.sin(((2*Math.PI/period)*(theta+period))));
+            double sSpeed = (Math.sin(((3*Math.PI/period)*(theta+period))));
+            lSpeed=(lSpeed<0)?lSpeed:0.7*lSpeed;
+            rSpeed=(rSpeed<0)?rSpeed:0.7*rSpeed;
+            srvGr1.setPosition(Math.abs(sSpeed));
+
+
+            if (!driveFinished) {
+                run_drive_to_position();
+                set_drive_target((int) targetDegrees, (int) targetDegrees);
+                set_drive_power(lSpeed, rSpeed);
+                updateEncoderDelta();
+            }
+
+
+            if (have_drive_encoders_reached(targetDegrees, targetDegrees) || driveFinished || getBatteryVoltage() <10 || timeOut.getElapsedTime() > 4000) { //if move is finished
+                if (!driveFinished) reset_drive_encoders(); //if encoders have not been reset,
+                driveFinished = true;                       //reset encoders
+                timeoutOS = true;
+                set_drive_power(-0.0f, -0.0f);//stop robot
+                if (have_drive_encoders_reset()) {//if encoders have actually reset,
+                    driveFinished = false;  //move on to next method
+                    incrementState();
+                }
+            }
+        }
+    }
+
+    public void RetraceEncoders(double speed) {
+        if (next_state_to_execute()) {
+            if (rDeltaEncoder.size() > 20 && lDeltaEncoder.size() > 20) {
+                int rTarget = lDelta().intValue();
+                int lTarget = rDelta().intValue();
+                if (!driveFinished) {
+                    run_drive_to_position();
+                    set_drive_target(lTarget, rTarget);
+                    set_drive_power(speed, speed);
+                }
+                if (have_drive_encoders_reached(lTarget, rTarget)) {
+                    if (!driveFinished) reset_drive_encoders(); //if encoders have not been reset,
+                    clearEncoderDelta();
+                    set_drive_power(0, 0);
+                }
+            } else{
+                driveFinished = true;                       //reset encoders
+                set_drive_power(-0.0f, -0.0f);//stop robot
+                if (have_drive_encoders_reset()) {//if encoders have actually reset,
+                    driveFinished = false;  //move on to next method
+                    incrementState();
+                    resetEncoderDelta();
+                }
+            }
+        }
+    }
+
     public void AbsoluteMotorMove(DcMotor m,long encCount, double power){
         if(next_state_to_execute()) {
             run_to_position(m);
             set_encoder_target(m, (int) encCount);
-            if (get_encoder_count(m) > m.getTargetPosition()) {
-                if (Math.abs(m.getCurrentPosition()) > (int) Math.abs(encCount) - 100) {
-                    run_using_encoder(m);
-                    set_power(m,0);
-                    incrementState();
-                } else set_power(m, power);
+            Log.println(Log.ASSERT, get_encoder_count(m)+" "+(encCount+100)+" "+" "+(encCount-100), isWithin(get_encoder_count(m), encCount+100, encCount-100)+"");
+            if (isWithin(get_encoder_count(m), encCount + 100, encCount - 100)) {
+                run_using_encoder(m);
+                set_power(m,0);
+                incrementState();
             } else {
-                if (!(Math.abs(m.getCurrentPosition()) > (int) Math.abs(encCount) + 100)) {
-                    run_using_encoder(m);
-                    set_power(m,0);
-                    incrementState();
-                } else set_power(m, power);
-
+                if(Math.abs(encCount) > Math.abs(get_encoder_count(m)))
+                    set_power(m, power*Math.signum(encCount-get_encoder_count(m)));
+                else
+                    set_power(m, -power*Math.signum(encCount-get_encoder_count(m)));
             }
         }
     }
@@ -472,13 +621,13 @@ class StateMachine_v6 extends Subroutines_v13 {
     private int wave = 0;
 
     @Deprecated
-    void resetVariables(StateMachine_v6 object){
+    void resetVariables(StateMachine_v8 object){
         object.x = 0; object.y = 0; object.X = 0; object.Y = 0; object.counter = 0; object.OS = false;
         object.x_tol = 0; object.y_tol = 0; object.broken = false;
     }
 
     @Deprecated
-    void resetMachine(StateMachine_v6 object){
+    void resetMachine(StateMachine_v8 object){
         resetVariables(object); object.wave = 0;
         object.current_number = 0; object.state_in_progress = 1;
     }
@@ -492,7 +641,7 @@ class StateMachine_v6 extends Subroutines_v13 {
 
     void ProcessRelic() {
         if (next_state_to_execute()) {
-            if(++count <= 10) {
+            if(++count <= 5) {
                 vuMark = RelicRecoveryVuMark.from(relicTemplate);
                 telemetry.addData("vuMark", vuMark);
                 if (vuMark != RelicRecoveryVuMark.UNKNOWN) incrementState();
@@ -724,39 +873,47 @@ class StateMachine_v6 extends Subroutines_v13 {
                     lDetectorBlue.setColorRange(new Scalar(125, 120, 130, 0), new Scalar(187, 255, 255, 255));
                     lDetectorBlue.processLines(mBlue);
                     lDetectorBlue.showLines(mBlue);
+                    Collections.sort(lDetectorBlue.clusters.clusterGroups);
                     ColorLineDetector.LineCluster l = lDetectorBlue.clusters.clusterGroups.get(0);
-                    ColorLineDetector.LineCluster l0 = lDetectorBlue.clusters.clusterGroups.get(1);
+                    int side1 = l.angle < 90 ? -1 : 1;
+                    int indexOpp = -1;
+                    for(int i = 1; i < lDetectorBlue.clusters.clusterGroups.size(); i++){
+                        int currSide = lDetectorBlue.clusters.clusterGroups.get(i).angle < 90 ? -1 : 1;
+                        indexOpp = currSide != side1 ? i : -1;
+                        if(indexOpp != -1) break;
+                    }
+                    ColorLineDetector.LineCluster l0 = lDetectorBlue.clusters.clusterGroups.get(indexOpp);
                     Point intersect = lDetectorBlue.calculateIntersect(l.angle, l.center(), l0.angle, l0.center());
-                    if (l.angle < 90 ^ l0.angle > 90 || l.angle > 90 ^ l0.angle < 90) {
-                        if (lDetectorBlue.clusters.clusterGroups.size() > 1 && !isWithin(lDetectorBlue.clusters.clusterGroups.get(0).angle, lDetectorBlue.clusters.clusterGroups.get(1).angle + 30, lDetectorBlue.clusters.clusterGroups.get(1).angle - 30)) {
-                            double pow = isWithin(intersect.x, mBlue.cols() * 3 / 8, mBlue.cols() * 5 / 8) ? 0.05 : 0.08;
-                            if (intersect.x > (mBlue.cols() / 2) + 25) {
-                                set_drive_power(pow, pow);
-                                countA = 0;
-                            } else if (intersect.x < (mBlue.cols() / 2) - 25) {
-                                set_drive_power(-pow, -pow);
-                                countA = 0;
-                            } else {
-                                countA++;
-                            }
+                    if(indexOpp != -1){
+                        double pow = isWithin(intersect.x, mBlue.cols() * 3 / 8, mBlue.cols() * 5 / 8) ? 0.05 : 0.08;
+                        if (intersect.x > (mBlue.cols() / 2) + 25) {
+                            set_drive_power(pow, pow);
+                            countA = 0;
+                        } else if (intersect.x < (mBlue.cols() / 2) - 25) {
+                            set_drive_power(-pow, -pow);
+                            countA = 0;
+                        } else {
+                            countA++;
+                        }
 
-                            if (countA > 0) {
-                                countA = 0;
-                                set_drive_power(0, 0);
-                                reset_drive_encoders();
-                                //lDetectorBlue.logToFile("done");
-                                incrementState();
-                            }
-                        } else if (lDetectorBlue.clusters.clusterGroups.get(0).center().x > mBlue.cols() / 2) {
-                            set_drive_power(0.06, 0.06);
-                        } else if (lDetectorBlue.clusters.clusterGroups.get(0).center().x < mBlue.cols() / 2) {
-                            set_drive_power(-0.06, -0.06);
+                        if (countA > 0) {
+                            countA = 0;
+                            set_drive_power(0, 0);
+                            reset_drive_encoders();
+                            //lDetectorBlue.logToFile("done");
+                            incrementState();
                         }
                         ret = String.valueOf(intersect.x);
                         telemetry.addData("Center X", ret);
-                        lDetectorBlue.logToFile(lDetectorBlue.clusters.clusterGroups.get(0).angle + "\t" + lDetectorBlue.clusters.clusterGroups.get(0).center().x + "\t" + lDetectorBlue.clusters.clusterGroups.get(0).center().y + "\t" + lDetectorBlue.clusters.clusterGroups.get(1).angle + "\t" + lDetectorBlue.clusters.clusterGroups.get(1).center().x + "\t" + lDetectorBlue.clusters.clusterGroups.get(1).center().y + "\t" + intersect.x + "\t" + intersect.y + "\t" + System.currentTimeMillis());
+                        lDetectorBlue.logToFile(lDetectorBlue.clusters.clusterGroups.get(0).angle + "\t" + lDetectorBlue.clusters.clusterGroups.get(0).center().x + "\t" + lDetectorBlue.clusters.clusterGroups.get(0).center().y + "\t" + lDetectorBlue.clusters.clusterGroups.get(indexOpp).angle + "\t" + lDetectorBlue.clusters.clusterGroups.get(indexOpp).center().x + "\t" + lDetectorBlue.clusters.clusterGroups.get(indexOpp).center().y + "\t" + intersect.x + "\t" + intersect.y + "\t" + System.currentTimeMillis());
+
+                    } else if (lDetectorBlue.clusters.clusterGroups.get(0).center().x > mBlue.cols() / 2) {
+                        set_drive_power(0.06, 0.06);
+                    } else if (lDetectorBlue.clusters.clusterGroups.get(0).center().x < mBlue.cols() / 2) {
+                        set_drive_power(-0.06, -0.06);
                     }
                 }
+
             }catch(Exception e) {
                 e.printStackTrace();
             }

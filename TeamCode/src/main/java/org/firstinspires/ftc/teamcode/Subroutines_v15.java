@@ -180,7 +180,7 @@ class Subroutines_v15 extends VisionOpModeCore implements CameraBridgeViewBase.C
 
     @Override
     public void init() {
-
+        super.init();
         warning_generated = false;
         warning_message = "Can't find:  ";
 

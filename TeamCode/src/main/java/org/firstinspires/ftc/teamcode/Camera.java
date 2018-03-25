@@ -1,8 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 import android.content.pm.PackageManager;
 
-import com.qualcomm.robotcore.util.Util;
-
 import org.opencv.core.Size;
 
 import java.util.ArrayList;
@@ -35,7 +33,7 @@ public class Camera {
      */
     public static boolean isHardwareAvailable() {
         //todo
-        return true;//Util.getContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA);
+        return Util.getContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA);
     }
 
     /**

@@ -40,6 +40,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
+import org.opencv.android.JavaCameraView;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
@@ -76,6 +77,8 @@ class Subroutines_v14 extends OpMode implements CameraBridgeViewBase.CvCameraVie
     //Variable initialization//
     long systemTime = 0;             //System time used to determine how much time has passed for waitHasFinished()//
     boolean initOS = true;           //Oneshot used for waitHasFinished//
+
+    public static JavaCameraView openCVCamera;
 
     private boolean warning_generated;
     private String warning_message;
