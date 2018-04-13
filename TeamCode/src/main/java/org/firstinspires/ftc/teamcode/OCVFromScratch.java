@@ -13,8 +13,16 @@ import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
+import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint2f;
+import org.opencv.core.Point;
+import org.opencv.core.Scalar;
+import org.opencv.core.Size;
+import org.opencv.imgproc.Imgproc;
+
+import java.lang.reflect.Method;
 
 /**
  * Created by sam on 3/24/2018.
@@ -27,6 +35,8 @@ public class OCVFromScratch extends OpMode implements CameraBridgeViewBase.CvCam
     private CameraBridgeViewBase mOpenCvCameraView;
     private Context context;
     public Mat mRgba;
+    private Mat mRgbaT;
+    private ColorBlobDetector blobbyFinder;
 
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(context) {
@@ -49,6 +59,7 @@ public class OCVFromScratch extends OpMode implements CameraBridgeViewBase.CvCam
 
     @Override
     public void init() {
+
         context = hardwareMap.appContext;
         try {
             View rootView = ((Activity) context).getWindow().getDecorView().findViewById(android.R.id.content);
@@ -68,7 +79,21 @@ public class OCVFromScratch extends OpMode implements CameraBridgeViewBase.CvCam
             Log.e("OpenCV", "OpenCV library found inside package. Using it!");
             mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
         }
+        blobbyFinder = new ColorBlobDetector();
+        blobbyFinder.setColorRange(new Scalar(125, 120, 130, 0), new Scalar(187, 255, 255, 255));
 
+    }
+    protected void setDisplayOrientation(Camera camera, int angle){
+        Method downPolymorphic;
+        try
+        {
+            downPolymorphic = camera.getClass().getMethod("setDisplayOrientation", new Class[] { int.class });
+            if (downPolymorphic != null)
+                downPolymorphic.invoke(camera, new Object[] { angle });
+        }
+        catch (Exception e1)
+        {
+        }
     }
 
     @Override
@@ -96,7 +121,18 @@ public class OCVFromScratch extends OpMode implements CameraBridgeViewBase.CvCam
     @Override
     public Mat onCameraFrame(Mat inputFrame) {
         mRgba = inputFrame;
-        Log.e("FrameTime",""+new java.util.Date().getTime()+"");
+        mRgbaT = new Mat();
+        Core.flip(mRgba.t(), mRgbaT, 1);
+        //Core.rotate(mRgba,mRgba,1);
+//        Point p = new Point(mRgba.size().width/2,mRgba.size().height/2);
+//        Imgproc.warpAffine(mRgba,mRgbaT,Imgproc.getRotationMatrix2D(p,90,1),new Size(mRgba.rows(),mRgba.cols()));
+        Imgproc.resize(mRgbaT, mRgbaT, mRgba.size());
+        mRgba = mRgbaT;
+//        Log.e("FrameTime",""+new java.util.Date().getTime()+"");
+//        Log.e("Width","" + inputFrame.size().width);
+//        Log.e("Height","" + inputFrame.size().height);
+        blobbyFinder.processLines(mRgba);
+        blobbyFinder.showLines(mRgba);
         return mRgba;
     }
 }

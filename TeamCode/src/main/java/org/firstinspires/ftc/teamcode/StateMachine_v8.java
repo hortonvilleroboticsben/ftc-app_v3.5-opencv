@@ -63,7 +63,6 @@ class StateMachine_v8 extends Subroutines_v15 {
 
 
     static Orientation O = new Orientation();
-    static Orientation O1 = new Orientation();
 
     @Override
     public String toString(){
@@ -848,7 +847,7 @@ class StateMachine_v8 extends Subroutines_v15 {
                             set_drive_power(pow, pow);
                             countA = 0;
                         } else if (intersect.x < (mRed.cols() / 2) - 20) {
-                            set_drive_power(-0.06, -0.06);
+                            set_drive_power(-pow, -pow);
                             countA = 0;
                         } else {
                             countA++;
@@ -882,8 +881,8 @@ class StateMachine_v8 extends Subroutines_v15 {
                         indexOpp = currSide != side1 ? i : -1;
                         if(indexOpp != -1) break;
                     }
-                    ColorLineDetector.LineCluster l0 = lDetectorBlue.clusters.clusterGroups.get(indexOpp);
-                    Point intersect = lDetectorBlue.calculateIntersect(l.angle, l.center(), l0.angle, l0.center());
+                    ColorLineDetector.LineCluster lc = lDetectorBlue.clusters.clusterGroups.get(indexOpp);
+                    Point intersect = lDetectorBlue.calculateIntersect(l.angle, l.center(), lc.angle, lc.center());
                     if(indexOpp != -1){
                         double pow = isWithin(intersect.x, mBlue.cols() * 3 / 8, mBlue.cols() * 5 / 8) ? 0.05 : 0.08;
                         if (intersect.x > (mBlue.cols() / 2) + 25) {
