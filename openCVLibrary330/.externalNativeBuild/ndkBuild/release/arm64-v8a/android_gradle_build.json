@@ -1,19 +1,19 @@
 {
   "buildFiles": [
-    "C:\\Users\\sam\\AndroidStudioProjects\\ftc-app\\TeamCode\\jni\\Android.mk",
-    "C:\\Users\\sam\\AndroidStudioProjects\\ftc-app\\TeamCode\\jni\\Application.mk"
+    "C:\\Users\\Hortonville\\AndroidStudioProjects\\ftc-app_v3.5-opencv\\TeamCode\\jni\\Android.mk",
+    "C:\\Users\\Hortonville\\AndroidStudioProjects\\ftc-app_v3.5-opencv\\TeamCode\\jni\\Application.mk"
   ],
   "cleanCommands": [
-    "C:\\Users\\sam\\AppData\\Local\\Android\\Sdk\\ndk-bundle\\ndk-build.cmd NDK_PROJECT_PATH\u003dnull APP_BUILD_SCRIPT\u003dC:\\Users\\sam\\AndroidStudioProjects\\ftc-app\\TeamCode\\jni\\Android.mk NDK_APPLICATION_MK\u003dC:\\Users\\sam\\AndroidStudioProjects\\ftc-app\\TeamCode\\jni\\Application.mk APP_ABI\u003darm64-v8a NDK_ALL_ABIS\u003darm64-v8a NDK_DEBUG\u003d0 APP_PLATFORM\u003dandroid-21 NDK_OUT\u003dC:/Users/sam/AndroidStudioProjects/ftc-app/openCVLibrary330/build/intermediates/ndkBuild/release/obj NDK_LIBS_OUT\u003dC:\\Users\\sam\\AndroidStudioProjects\\ftc-app\\openCVLibrary330\\build\\intermediates\\ndkBuild\\release\\lib clean"
+    "C:\\Android\\sdk\\ndk-bundle\\ndk-build.cmd NDK_PROJECT_PATH\u003dnull APP_BUILD_SCRIPT\u003dC:\\Users\\Hortonville\\AndroidStudioProjects\\ftc-app_v3.5-opencv\\TeamCode\\jni\\Android.mk NDK_APPLICATION_MK\u003dC:\\Users\\Hortonville\\AndroidStudioProjects\\ftc-app_v3.5-opencv\\TeamCode\\jni\\Application.mk APP_ABI\u003darm64-v8a NDK_ALL_ABIS\u003darm64-v8a NDK_DEBUG\u003d0 APP_PLATFORM\u003dandroid-21 NDK_OUT\u003dC:/Users/Hortonville/AndroidStudioProjects/ftc-app_v3.5-opencv/openCVLibrary330/build/intermediates/ndkBuild/release/obj NDK_LIBS_OUT\u003dC:\\Users\\Hortonville\\AndroidStudioProjects\\ftc-app_v3.5-opencv\\openCVLibrary330\\build\\intermediates\\ndkBuild\\release\\lib clean"
   ],
   "libraries": {
     "color-blob-release-arm64-v8a": {
-      "buildCommand": "C:\\Users\\sam\\AppData\\Local\\Android\\Sdk\\ndk-bundle\\ndk-build.cmd NDK_PROJECT_PATH\u003dnull APP_BUILD_SCRIPT\u003dC:\\Users\\sam\\AndroidStudioProjects\\ftc-app\\TeamCode\\jni\\Android.mk NDK_APPLICATION_MK\u003dC:\\Users\\sam\\AndroidStudioProjects\\ftc-app\\TeamCode\\jni\\Application.mk APP_ABI\u003darm64-v8a NDK_ALL_ABIS\u003darm64-v8a NDK_DEBUG\u003d0 APP_PLATFORM\u003dandroid-21 NDK_OUT\u003dC:/Users/sam/AndroidStudioProjects/ftc-app/openCVLibrary330/build/intermediates/ndkBuild/release/obj NDK_LIBS_OUT\u003dC:\\Users\\sam\\AndroidStudioProjects\\ftc-app\\openCVLibrary330\\build\\intermediates\\ndkBuild\\release\\lib C:/Users/sam/AndroidStudioProjects/ftc-app/openCVLibrary330/build/intermediates/ndkBuild/release/obj/local/arm64-v8a/libcolor-blob.so",
+      "buildCommand": "C:\\Android\\sdk\\ndk-bundle\\ndk-build.cmd NDK_PROJECT_PATH\u003dnull APP_BUILD_SCRIPT\u003dC:\\Users\\Hortonville\\AndroidStudioProjects\\ftc-app_v3.5-opencv\\TeamCode\\jni\\Android.mk NDK_APPLICATION_MK\u003dC:\\Users\\Hortonville\\AndroidStudioProjects\\ftc-app_v3.5-opencv\\TeamCode\\jni\\Application.mk APP_ABI\u003darm64-v8a NDK_ALL_ABIS\u003darm64-v8a NDK_DEBUG\u003d0 APP_PLATFORM\u003dandroid-21 NDK_OUT\u003dC:/Users/Hortonville/AndroidStudioProjects/ftc-app_v3.5-opencv/openCVLibrary330/build/intermediates/ndkBuild/release/obj NDK_LIBS_OUT\u003dC:\\Users\\Hortonville\\AndroidStudioProjects\\ftc-app_v3.5-opencv\\openCVLibrary330\\build\\intermediates\\ndkBuild\\release\\lib C:/Users/Hortonville/AndroidStudioProjects/ftc-app_v3.5-opencv/openCVLibrary330/build/intermediates/ndkBuild/release/obj/local/arm64-v8a/libcolor-blob.so",
       "toolchain": "toolchain-arm64-v8a",
       "abi": "arm64-v8a",
       "artifactName": "color-blob",
       "files": [],
-      "output": "C:\\Users\\sam\\AndroidStudioProjects\\ftc-app\\openCVLibrary330\\build\\intermediates\\ndkBuild\\release\\obj\\local\\arm64-v8a\\libcolor-blob.so"
+      "output": "C:\\Users\\Hortonville\\AndroidStudioProjects\\ftc-app_v3.5-opencv\\openCVLibrary330\\build\\intermediates\\ndkBuild\\release\\obj\\local\\arm64-v8a\\libcolor-blob.so"
     }
   },
   "toolchains": {

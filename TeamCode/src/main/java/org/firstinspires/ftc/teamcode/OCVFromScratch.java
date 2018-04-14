@@ -121,18 +121,10 @@ public class OCVFromScratch extends OpMode implements CameraBridgeViewBase.CvCam
     @Override
     public Mat onCameraFrame(Mat inputFrame) {
         mRgba = inputFrame;
-        mRgbaT = new Mat();
-        Core.flip(mRgba.t(), mRgbaT, 1);
-        //Core.rotate(mRgba,mRgba,1);
-//        Point p = new Point(mRgba.size().width/2,mRgba.size().height/2);
-//        Imgproc.warpAffine(mRgba,mRgbaT,Imgproc.getRotationMatrix2D(p,90,1),new Size(mRgba.rows(),mRgba.cols()));
-        Imgproc.resize(mRgbaT, mRgbaT, mRgba.size());
-        mRgba = mRgbaT;
-//        Log.e("FrameTime",""+new java.util.Date().getTime()+"");
-//        Log.e("Width","" + inputFrame.size().width);
-//        Log.e("Height","" + inputFrame.size().height);
-        blobbyFinder.processLines(mRgba);
-        blobbyFinder.showLines(mRgba);
+        Imgproc.warpAffine(mRgba, mRgba, Imgproc.getRotationMatrix2D(new Point(mRgba.cols(), mRgba.rows()),90, 1), new Size(mRgba.rows(), mRgba.cols()));
+//TODO:Re-implement
+//        blobbyFinder.processLines(mRgba);
+//        blobbyFinder.showLines(mRgba);
         return mRgba;
     }
 }

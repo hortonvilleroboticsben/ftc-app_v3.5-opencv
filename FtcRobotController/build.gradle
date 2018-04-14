@@ -28,3 +28,7 @@ repositories {
 }
 
 apply from: 'build.release.gradle'
+
+dependencies {
+    compile project(path: ':openCVLibrary330')
+}
