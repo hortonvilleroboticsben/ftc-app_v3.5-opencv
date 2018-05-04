@@ -1,5 +1,6 @@
 package org.opencv.android;
 
+import java.lang.reflect.Method;
 import java.util.List;
 
 import android.content.Context;
@@ -227,6 +228,22 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
 
         return result;
     }
+
+    //TODO:Added by Ben 4/14/2018
+    protected void setDisplayOrientation(android.hardware.Camera camera, int angle){
+        Method downPolymorphic;
+        try
+        {
+            downPolymorphic = camera.getClass().getMethod("setDisplayOrientation", new Class[] { int.class });
+            if (downPolymorphic != null)
+                downPolymorphic.invoke(camera, new Object[] { angle });
+        }
+        catch (Exception e1)
+        {
+        }
+    }
+
+
 
     protected void releaseCamera() {
         synchronized (this) {

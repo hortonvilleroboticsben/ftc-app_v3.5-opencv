@@ -246,7 +246,7 @@ public class ColorBlobDetector {
 
                 //Log.println(Log.ASSERT, "TAG", angle+"degrees loop:" + i);
 
-                if(isWithin(angle,30,150) && !isWithin(angle,80,100)) {
+                if(isWithin(angle,30,150) && !isWithin(angle,85,95)) {
                     Imgproc.line(mRgba,
                             new Point(val0, val1),
                             new Point(val2, val3),
@@ -255,13 +255,23 @@ public class ColorBlobDetector {
                     clusters.add(new Line(new Point(val0,val1),new Point(val2,val3),angle));
                     Log.println(Log.ASSERT,"TAG",angle + " is the angle of line " + i);
                 }
+
+
+//                Imgproc.line(mRgba,
+//                        new Point(val0, val1),
+//                        new Point(val2, val3),
+//                        new Scalar(255, 255, 255),
+//                        10);
+//                clusters.add(new Line(new Point(val0,val1),new Point(val2,val3),angle));
+//                Log.println(Log.ASSERT,"Angle ",angle + " is the angle of line " + i);
+
 //                else Imgproc.line(mRgba,
 //                            new Point(val0, val1),
 //                            new Point(val2, val3),
 //                            new Scalar(255, 0, 0),
 //                            10);
             }
-            Log.println(Log.ASSERT, "TAG", clusters.toString()+"\n");
+//            Log.println(Log.ASSERT, "TAG", clusters.toString()+"\n");
             for(int i = 0; i < clusters.clusters.size(); i ++) {
                 //if(clusters.clusters.get(i).lines.size() > 3) {
                     Point[] rectPoints = new Point[4];
@@ -272,7 +282,7 @@ public class ColorBlobDetector {
                     MatOfPoint mPoints = new MatOfPoint(rectPoints);
                     List<MatOfPoint> lPoints = new ArrayList<>();
                     lPoints.add(mPoints);
-                    Log.println(Log.ASSERT, "TAG", Arrays.toString(rectPoints) + "Points");
+//                    Log.println(Log.ASSERT, "TAG", Arrays.toString(rectPoints) + "Points");
 
                     Imgproc.polylines(mRgba, lPoints, true, new Scalar(0, 255, 0), 10);
                // }

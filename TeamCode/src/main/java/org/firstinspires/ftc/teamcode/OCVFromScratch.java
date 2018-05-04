@@ -36,7 +36,7 @@ public class OCVFromScratch extends OpMode implements CameraBridgeViewBase.CvCam
     private Context context;
     public Mat mRgba;
     private Mat mRgbaT;
-    private ColorBlobDetector blobbyFinder;
+    private ColorLineDetector blobbyFinder;
 
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(context) {
@@ -79,7 +79,7 @@ public class OCVFromScratch extends OpMode implements CameraBridgeViewBase.CvCam
             Log.e("OpenCV", "OpenCV library found inside package. Using it!");
             mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
         }
-        blobbyFinder = new ColorBlobDetector();
+        blobbyFinder = new ColorLineDetector();
         blobbyFinder.setColorRange(new Scalar(125, 120, 130, 0), new Scalar(187, 255, 255, 255));
 
     }
@@ -141,4 +141,9 @@ public class OCVFromScratch extends OpMode implements CameraBridgeViewBase.CvCam
 
         return mRgba;
     }
+
+    public ColorLineDetector getBlobbyFinder() {
+        return blobbyFinder;
+    }
+
 }

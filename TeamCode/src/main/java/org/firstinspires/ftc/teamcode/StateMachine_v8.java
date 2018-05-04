@@ -65,8 +65,8 @@ class StateMachine_v8 extends Subroutines_v15 {
     static Orientation O = new Orientation();
 
     @Override
-    public String toString(){
-        return "cn:"+current_number+"\tSIP:"+state_in_progress+"\tFlag:"+flag;
+    public String toString() {
+        return "cn:" + current_number + "\tSIP:" + state_in_progress + "\tFlag:" + flag;
     }
 
     boolean waitHasFinished(long milliseconds) {
@@ -89,39 +89,39 @@ class StateMachine_v8 extends Subroutines_v15 {
         //O = IMUnav.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
     }
 
-    void initializeMachine(){
+    void initializeMachine() {
         current_number = 0;
         stateComplete = false;
     }
 
-    void incrementState(){
+    void incrementState() {
         state_in_progress++;
         stateComplete = true;
     }
 
-    void SetFlag(StateMachine_v8 receiver, String key){
-        if(next_state_to_execute()){
+    void SetFlag(StateMachine_v8 receiver, String key) {
+        if (next_state_to_execute()) {
             receiver.flag = key;
             incrementState();
         }
     }
 
-    void WaitForFlag(String key){
-        if(next_state_to_execute()){
-            if(flag.equals(key)){
+    void WaitForFlag(String key) {
+        if (next_state_to_execute()) {
+            if (flag.equals(key)) {
                 incrementState();
             }
         }
     }
 
-    void ClearFlag(){
-        if(next_state_to_execute()){
+    void ClearFlag() {
+        if (next_state_to_execute()) {
             flag = "";
             incrementState();
         }
     }
 
-    void reset(){
+    void reset() {
         state_in_progress = 1;
         current_number = 0;
     }
@@ -131,7 +131,7 @@ class StateMachine_v8 extends Subroutines_v15 {
         return (state_in_progress == ++current_number && !stateComplete);
     }
 
-    boolean previous_state_running(){
+    boolean previous_state_running() {
         return state_in_progress == current_number;
     }
 
@@ -141,22 +141,22 @@ class StateMachine_v8 extends Subroutines_v15 {
         return (state_in_progress == current_number);
     }
 
-    void ServoToggle(boolean condition){
-        if(next_state_to_execute()){
-            if(!oneShot) {
+    void ServoToggle(boolean condition) {
+        if (next_state_to_execute()) {
+            if (!oneShot) {
                 timerToggle.reset();
                 oneShot = true;
             }
-            if(!condition){
-                if(timerToggle.getElapsedTime()>300){
+            if (!condition) {
+                if (timerToggle.getElapsedTime() > 300) {
                     srvGr1.setPosition(GR1CLOSED);
-                }else{
+                } else {
                     srvGr1.setPosition(GR1OPEN);
                 }
-                if(timerToggle.getElapsedTime()>600){
+                if (timerToggle.getElapsedTime() > 600) {
                     oneShot = false;
                 }
-            }else{
+            } else {
                 srvGr1.setPosition(GR1OPEN);
                 incrementState();
                 oneShot = false;
@@ -165,7 +165,8 @@ class StateMachine_v8 extends Subroutines_v15 {
     }
 
     void Drive(double distance, double speed) {
-        if(next_state_to_execute()) {
+        Log.println(Log.ASSERT, "Entered Drive", "");
+        if (next_state_to_execute()) {
             double wheelCircumference = wheelDiameter * Math.PI;
             double revs = distance / wheelCircumference;
             double targetDegrees = gearRatio * revs * countsPerRev;
@@ -187,15 +188,17 @@ class StateMachine_v8 extends Subroutines_v15 {
                 if (have_drive_encoders_reset()) {//if encoders have actually reset,
                     driveFinished = false;  //move on to next method
                     incrementState();
+                    Log.println(Log.ASSERT, "Incremented Drive", "");
                 }
             }
         }
+        Log.println(Log.ASSERT, "Exited Drive", "");
     }
 
     private int hypotState = 0;
 
-    void DriveWithCondition(double distance, double speed,boolean condition) {
-        if(next_state_to_execute()) {
+    void DriveWithCondition(double distance, double speed, boolean condition) {
+        if (next_state_to_execute()) {
             double wheelCircumference = wheelDiameter * Math.PI;
             double revs = distance / wheelCircumference;
             double targetDegrees = gearRatio * revs * countsPerRev;
@@ -233,7 +236,7 @@ class StateMachine_v8 extends Subroutines_v15 {
 //    }
 
     void Turn(double degrees, double speed) {
-        if(next_state_to_execute()) {
+        if (next_state_to_execute()) {
             double wheelCircumference = wheelDiameter * Math.PI;//
             double turnCircumference = turnDiameter * Math.PI;
             double turnDistance = turnCircumference / wheelCircumference;
@@ -249,7 +252,7 @@ class StateMachine_v8 extends Subroutines_v15 {
                     set_drive_power(-speed, speed);
                 }
 
-                if (have_drive_encoders_reached( -targetDegrees, targetDegrees) || driveFinished) {
+                if (have_drive_encoders_reached(-targetDegrees, targetDegrees) || driveFinished) {
                     if (!driveFinished) reset_drive_encoders();
                     driveFinished = true;
                     set_drive_power(0.0f, 0.0f);
@@ -279,7 +282,7 @@ class StateMachine_v8 extends Subroutines_v15 {
     }
 
     void OWTurn(double degrees, double speed) {
-        if(next_state_to_execute()) {
+        if (next_state_to_execute()) {
             double wheelCircumference = wheelDiameter * Math.PI;//
             double turnCircumference = turnDiameter * 2 * Math.PI;
             double turnDistance = turnCircumference / wheelCircumference;
@@ -287,7 +290,7 @@ class StateMachine_v8 extends Subroutines_v15 {
             double revs = degreeValue * Math.abs(degrees);
             double targetDegrees = gearRatio * revs * countsPerRev;
 
-            if(speed < 0) targetDegrees*=-1;
+            if (speed < 0) targetDegrees *= -1;
 
             if (degrees < 0) {
                 if (!driveFinished) {
@@ -342,14 +345,14 @@ class StateMachine_v8 extends Subroutines_v15 {
 //        }
 //    }
 
-    public void GyroOWTurn(double degrees, double speed){
+    public void GyroOWTurn(double degrees, double speed) {
         if (next_state_to_execute()) {
             DcMotor.RunMode r = mtrLeftDrive.getMode();
             run_using_drive_encoders();
             Orientation o = O;
             double z = o.firstAngle;
             telemetry.addData("rot", z);
-            if(Math.abs(z) + 2 <= Math.abs(degrees)){
+            if (Math.abs(z) + 2 <= Math.abs(degrees)) {
 
                 if (degrees < 0) {
                     if (!driveFinished) {
@@ -387,8 +390,8 @@ class StateMachine_v8 extends Subroutines_v15 {
                         }
                     }
                 }
-            }else{
-                set_drive_power(0,0);
+            } else {
+                set_drive_power(0, 0);
                 reset_drive_encoders();
                 mtrLeftDrive.setMode(r);
                 mtrRightDrive.setMode(r);
@@ -397,17 +400,17 @@ class StateMachine_v8 extends Subroutines_v15 {
         }
     }
 
-    public void GyroTurn(double degrees, double speed){
+    public void GyroTurn(double degrees, double speed) {
         if (next_state_to_execute()) {
             DcMotor.RunMode r = mtrLeftDrive.getMode();
             run_using_drive_encoders();
             Orientation o = O;
             double z = o.firstAngle;
             telemetry.addData("rot", z);
-            if(Math.abs(z) + 2 <= Math.abs(degrees)){
-                set_drive_power(-speed*Math.signum(degrees), speed*Math.signum(degrees));
-            }else{
-                set_drive_power(0,0);
+            if (Math.abs(z) + 2 <= Math.abs(degrees)) {
+                set_drive_power(-speed * Math.signum(degrees), speed * Math.signum(degrees));
+            } else {
+                set_drive_power(0, 0);
                 reset_drive_encoders();
                 mtrLeftDrive.setMode(r);
                 mtrRightDrive.setMode(r);
@@ -466,11 +469,11 @@ class StateMachine_v8 extends Subroutines_v15 {
     }
 
     @Deprecated
-    public void WriteI2C(StateMachine_v8 object, I2cDevice device, I2cAddr address, int register, int value){
-        if(next_state_to_execute()){
+    public void WriteI2C(StateMachine_v8 object, I2cDevice device, I2cAddr address, int register, int value) {
+        if (next_state_to_execute()) {
 
-            device.enableI2cWriteMode(address,register,value);
-            if(device.isI2cPortInWriteMode()){
+            device.enableI2cWriteMode(address, register, value);
+            if (device.isI2cPortInWriteMode()) {
                 incrementState();
             }
 
@@ -479,8 +482,8 @@ class StateMachine_v8 extends Subroutines_v15 {
     }
 
 
-    public void WriteColorValues(ColorSensor colorSensor){
-        if(next_state_to_execute()){
+    public void WriteColorValues(ColorSensor colorSensor) {
+        if (next_state_to_execute()) {
             String colorVal = getColorVal(colorSensor, "red") + ", " + getColorVal(colorSensor, "blue")
                     + ", " + getColorVal(colorSensor, "green");
             writeToFile(colorVal);
@@ -488,13 +491,13 @@ class StateMachine_v8 extends Subroutines_v15 {
         }
     }
 
-    public void RelativeMotorMove(DcMotor motor, long encCount, double power){
-        if(next_state_to_execute()) {
+    public void RelativeMotorMove(DcMotor motor, long encCount, double power) {
+        if (next_state_to_execute()) {
             DcMotor.RunMode r = motor.getMode();
             run_to_position(motor);
             set_encoder_target(motor, (int) encCount);
             set_power(motor, power);
-            if(has_encoder_reached(motor, encCount)) {
+            if (has_encoder_reached(motor, encCount)) {
                 set_power(motor, 0);
                 reset_encoders(motor);
                 motor.setMode(r);
@@ -503,9 +506,9 @@ class StateMachine_v8 extends Subroutines_v15 {
         }
     }
 
-    void Shimmy(double distance, double speed,int period) {
-        if(next_state_to_execute()) {
-            if(timeoutOS){
+    void Shimmy(double distance, double speed, int period) {
+        if (next_state_to_execute()) {
+            if (timeoutOS) {
                 timeOut.reset();
                 timeoutOS = false;
             }
@@ -519,11 +522,11 @@ class StateMachine_v8 extends Subroutines_v15 {
             double theta = timer.getElapsedTime();//(get_encoder_count(mtrLeftDrive) + get_encoder_count(mtrRightDrive))/2;
 //            double lSpeed = ((speed/2)*Math.sin(Math.PI*theta/period))+(speed/2 +0.05);
 //            double rSpeed = ((speed/2)*Math.sin(((Math.PI/period)*(theta+period)))+(speed/2));
-            double lSpeed = ((speed)*Math.sin(2*Math.PI*theta/period));
-            double rSpeed = ((speed)*Math.sin(((2*Math.PI/period)*(theta+period))));
-            double sSpeed = (Math.sin(((3*Math.PI/period)*(theta+period))));
-            lSpeed=(lSpeed<0)?lSpeed:0.7*lSpeed;
-            rSpeed=(rSpeed<0)?rSpeed:0.7*rSpeed;
+            double lSpeed = ((speed) * Math.sin(2 * Math.PI * theta / period));
+            double rSpeed = ((speed) * Math.sin(((2 * Math.PI / period) * (theta + period))));
+            double sSpeed = (Math.sin(((3 * Math.PI / period) * (theta + period))));
+            lSpeed = (lSpeed < 0) ? lSpeed : 0.7 * lSpeed;
+            rSpeed = (rSpeed < 0) ? rSpeed : 0.7 * rSpeed;
             srvGr1.setPosition(Math.abs(sSpeed));
 
 
@@ -535,7 +538,7 @@ class StateMachine_v8 extends Subroutines_v15 {
             }
 
 
-            if (have_drive_encoders_reached(targetDegrees, targetDegrees) || driveFinished || getBatteryVoltage() <10 || timeOut.getElapsedTime() > 4000) { //if move is finished
+            if (have_drive_encoders_reached(targetDegrees, targetDegrees) || driveFinished || getBatteryVoltage() < 10 || timeOut.getElapsedTime() > 4000) { //if move is finished
                 if (!driveFinished) reset_drive_encoders(); //if encoders have not been reset,
                 driveFinished = true;                       //reset encoders
                 timeoutOS = true;
@@ -563,7 +566,7 @@ class StateMachine_v8 extends Subroutines_v15 {
                     clearEncoderDelta();
                     set_drive_power(0, 0);
                 }
-            } else{
+            } else {
                 driveFinished = true;                       //reset encoders
                 set_drive_power(-0.0f, -0.0f);//stop robot
                 if (have_drive_encoders_reset()) {//if encoders have actually reset,
@@ -575,34 +578,34 @@ class StateMachine_v8 extends Subroutines_v15 {
         }
     }
 
-    public void AbsoluteMotorMove(DcMotor m,long encCount, double power){
-        if(next_state_to_execute()) {
+    public void AbsoluteMotorMove(DcMotor m, long encCount, double power) {
+        if (next_state_to_execute()) {
             run_to_position(m);
             set_encoder_target(m, (int) encCount);
-            Log.println(Log.ASSERT, get_encoder_count(m)+" "+(encCount+100)+" "+" "+(encCount-100), isWithin(get_encoder_count(m), encCount+100, encCount-100)+"");
+            Log.println(Log.ASSERT, get_encoder_count(m) + " " + (encCount + 100) + " " + " " + (encCount - 100), isWithin(get_encoder_count(m), encCount + 100, encCount - 100) + "");
             if (isWithin(get_encoder_count(m), encCount + 100, encCount - 100)) {
                 run_using_encoder(m);
-                set_power(m,0);
+                set_power(m, 0);
                 incrementState();
             } else {
-                if(Math.abs(encCount) > Math.abs(get_encoder_count(m)))
-                    set_power(m, power*Math.signum(encCount-get_encoder_count(m)));
+                if (Math.abs(encCount) > Math.abs(get_encoder_count(m)))
+                    set_power(m, power * Math.signum(encCount - get_encoder_count(m)));
                 else
-                    set_power(m, -power*Math.signum(encCount-get_encoder_count(m)));
+                    set_power(m, -power * Math.signum(encCount - get_encoder_count(m)));
             }
         }
     }
 
-    public void ServoIncrementalMove(Servo srv, double pos, double inc){
-        if(next_state_to_execute()) {
+    public void ServoIncrementalMove(Servo srv, double pos, double inc) {
+        if (next_state_to_execute()) {
             inc = Math.abs(inc);
             inc = get_servo_position(srv) < pos ? inc : -inc;
 
-            if(waitHasFinished(3)) {
+            if (waitHasFinished(3)) {
                 set_position(srv, get_servo_position(srv) + inc);
             }
 
-            if(get_servo_position(srv) <= pos+inc && get_servo_position(srv) >= pos-inc){
+            if (get_servo_position(srv) <= pos + inc && get_servo_position(srv) >= pos - inc) {
                 incrementState();
             }
         }
@@ -620,19 +623,28 @@ class StateMachine_v8 extends Subroutines_v15 {
     private int wave = 0;
 
     @Deprecated
-    void resetVariables(StateMachine_v8 object){
-        object.x = 0; object.y = 0; object.X = 0; object.Y = 0; object.counter = 0; object.OS = false;
-        object.x_tol = 0; object.y_tol = 0; object.broken = false;
+    void resetVariables(StateMachine_v8 object) {
+        object.x = 0;
+        object.y = 0;
+        object.X = 0;
+        object.Y = 0;
+        object.counter = 0;
+        object.OS = false;
+        object.x_tol = 0;
+        object.y_tol = 0;
+        object.broken = false;
     }
 
     @Deprecated
-    void resetMachine(StateMachine_v8 object){
-        resetVariables(object); object.wave = 0;
-        object.current_number = 0; object.state_in_progress = 1;
+    void resetMachine(StateMachine_v8 object) {
+        resetVariables(object);
+        object.wave = 0;
+        object.current_number = 0;
+        object.state_in_progress = 1;
     }
 
     @Deprecated
-    int stringVal(String string, int val){
+    int stringVal(String string, int val) {
         char stringVal = string.charAt(val);
         String brokenString = "" + stringVal;
         return Integer.parseInt(brokenString);
@@ -640,11 +652,11 @@ class StateMachine_v8 extends Subroutines_v15 {
 
     void ProcessRelic() {
         if (next_state_to_execute()) {
-            if(++count <= 5) {
+            if (++count <= 5) {
                 vuMark = RelicRecoveryVuMark.from(relicTemplate);
                 telemetry.addData("vuMark", vuMark);
                 if (vuMark != RelicRecoveryVuMark.UNKNOWN) incrementState();
-            }else{
+            } else {
                 vuMark = RelicRecoveryVuMark.UNKNOWN;
                 incrementState();
             }
@@ -676,7 +688,7 @@ class StateMachine_v8 extends Subroutines_v15 {
 
             mRgba = new Mat(height, width, CvType.CV_8UC4);
 
-            rROI = new Rect((int) width / 3, 2*(int)height / 3, (int) width / 3, (int) height / 3);
+            rROI = new Rect((int) width / 3, 2 * (int) height / 3, (int) width / 3, (int) height / 3);
             centerROI = new Point(rROI.width / 2, rROI.height / 2);
             mROI = new Mat(mRgba, rROI);
 
@@ -825,70 +837,33 @@ class StateMachine_v8 extends Subroutines_v15 {
         }
     }
 
-    public void centerOnTriangle(Mat inputFrame, int alliance) {
-        if(next_state_to_execute()) {
-            String ret = "";
+    public void runVisionStuff() {
+        Log.println(Log.ASSERT, "Entered runVisionStuff", "");
+        if (next_state_to_execute()) {
+            //Log.println(Log.ASSERT,"")
             try {
-                if (alliance == RED) {
-                    Mat mRed = inputFrame;
-                    ColorLineDetector lDetectorRed = new ColorLineDetector();
-                    lDetectorRed.setColorRange(new Scalar(217, 150, 150, 0), new Scalar(45, 255, 255, 255));
-                    lDetectorRed.processLines(mRed);
-                    lDetectorRed.showLines(mRed);
-                    Point intersect = lDetectorRed.pointIntersect(
-                            lDetectorRed.clusters.clusterGroups.get(0).angle,
-                            lDetectorRed.clusters.clusterGroups.get(0).center(),
-                            lDetectorRed.clusters.clusterGroups.get(1).angle,
-                            lDetectorRed.clusters.clusterGroups.get(1).center()
-                    );
-                    if (lDetectorRed.clusters.clusterGroups.size() > 1 && !isWithin(lDetectorRed.clusters.clusterGroups.get(0).angle,lDetectorRed.clusters.clusterGroups.get(1).angle + 30,lDetectorRed.clusters.clusterGroups.get(1).angle -30)) {
-                        double pow = isWithin(intersect.x,mRed.cols()*3/8,mRed.cols()*5/8)?0.05:0.08;
-                        if (intersect.x > (mRed.cols() / 2) + 20) {
-                            set_drive_power(pow, pow);
-                            countA = 0;
-                        } else if (intersect.x < (mRed.cols() / 2) - 20) {
-                            set_drive_power(-pow, -pow);
-                            countA = 0;
-                        } else {
-                            countA++;
-                        }
+                ColorLineDetector detector = getBlobbyFinder();
 
-                        if (countA > 0) {
-                            countA = 0;
-                            set_drive_power(0, 0);
-                            reset_drive_encoders();
-                            lDetectorRed.logToFile("done");
-                            incrementState();
-                        }
-                    } else if (lDetectorRed.clusters.clusterGroups.get(0).center().x > mRed.cols() / 2) {
-                        set_drive_power(0.06, 0.06);
-                    } else if (lDetectorRed.clusters.clusterGroups.get(0).center().x < mRed.cols() / 2) {
-                        set_drive_power(-0.06, -0.06);
-                    }
-                    telemetry.addData("Center X",lDetectorRed.centerP.x);
-                } else if (alliance == BLUE) {
-                    Mat mBlue = inputFrame;
-                    ColorLineDetector lDetectorBlue = new ColorLineDetector();
-                    lDetectorBlue.setColorRange(new Scalar(125, 120, 130, 0), new Scalar(187, 255, 255, 255));
-                    lDetectorBlue.processLines(mBlue);
-                    lDetectorBlue.showLines(mBlue);
-                    Collections.sort(lDetectorBlue.clusters.clusterGroups);
-                    ColorLineDetector.LineCluster l = lDetectorBlue.clusters.clusterGroups.get(0);
+                if (detector!=null&&detector.clusters!=null&&detector.clusters.clusterGroups!=null&&detector.clusters.clusterGroups.size()>0) {
+                    Collections.sort(detector.clusters.clusterGroups);
+                    ColorLineDetector.LineCluster l = detector.clusters.clusterGroups.get(0);
+                    Log.println(Log.ASSERT, "LineCluster0 null ", "" + (l == null));
                     int side1 = l.angle < 90 ? -1 : 1;
                     int indexOpp = -1;
-                    for(int i = 1; i < lDetectorBlue.clusters.clusterGroups.size(); i++){
-                        int currSide = lDetectorBlue.clusters.clusterGroups.get(i).angle < 90 ? -1 : 1;
+                    for (int i = 1; i < detector.clusters.clusterGroups.size(); i++) {
+                        int currSide = detector.clusters.clusterGroups.get(i).angle < 90 ? -1 : 1;
                         indexOpp = currSide != side1 ? i : -1;
-                        if(indexOpp != -1) break;
+                        if (indexOpp != -1) break;
                     }
-                    ColorLineDetector.LineCluster lc = lDetectorBlue.clusters.clusterGroups.get(indexOpp);
-                    Point intersect = lDetectorBlue.calculateIntersect(l.angle, l.center(), lc.angle, lc.center());
-                    if(indexOpp != -1){
-                        double pow = isWithin(intersect.x, mBlue.cols() * 3 / 8, mBlue.cols() * 5 / 8) ? 0.05 : 0.08;
-                        if (intersect.x > (mBlue.cols() / 2) + 25) {
+                    ColorLineDetector.LineCluster lc = detector.clusters.clusterGroups.get(indexOpp);
+                    Point intersect = detector.calculateIntersect(l.angle, l.center(), lc.angle, lc.center());
+                    Log.println(Log.ASSERT, "Intersect", intersect.toString());
+                    if (indexOpp != -1) {
+                        double pow = isWithin(intersect.x, mRgba.cols() * 3 / 8, mRgba.cols() * 5 / 8) ? 0.05 : 0.08;
+                        if (intersect.x > (mRgba.cols() / 2) + 25) {
                             set_drive_power(pow, pow);
                             countA = 0;
-                        } else if (intersect.x < (mBlue.cols() / 2) - 25) {
+                        } else if (intersect.x < (mRgba.cols() / 2) - 25) {
                             set_drive_power(-pow, -pow);
                             countA = 0;
                         } else {
@@ -899,26 +874,119 @@ class StateMachine_v8 extends Subroutines_v15 {
                             countA = 0;
                             set_drive_power(0, 0);
                             reset_drive_encoders();
-                            //lDetectorBlue.logToFile("done");
                             incrementState();
                         }
-                        ret = String.valueOf(intersect.x);
+                        String ret = String.valueOf(intersect.x);
                         telemetry.addData("Center X", ret);
-                        lDetectorBlue.logToFile(lDetectorBlue.clusters.clusterGroups.get(0).angle + "\t" + lDetectorBlue.clusters.clusterGroups.get(0).center().x + "\t" + lDetectorBlue.clusters.clusterGroups.get(0).center().y + "\t" + lDetectorBlue.clusters.clusterGroups.get(indexOpp).angle + "\t" + lDetectorBlue.clusters.clusterGroups.get(indexOpp).center().x + "\t" + lDetectorBlue.clusters.clusterGroups.get(indexOpp).center().y + "\t" + intersect.x + "\t" + intersect.y + "\t" + System.currentTimeMillis());
+                        detector.logToFile(detector.clusters.clusterGroups.get(0).angle + "\t" + detector.clusters.clusterGroups.get(0).center().x + "\t" +
+                                detector.clusters.clusterGroups.get(0).center().y + "\t" + detector.clusters.clusterGroups.get(indexOpp).angle + "\t" +
+                                detector.clusters.clusterGroups.get(indexOpp).center().x + "\t" + detector.clusters.clusterGroups.get(indexOpp).center().y +
+                                "\t" + intersect.x + "\t" + intersect.y + "\t" + System.currentTimeMillis());
 
-                    } else if (lDetectorBlue.clusters.clusterGroups.get(0).center().x > mBlue.cols() / 2) {
+                    } else if (detector.clusters.clusterGroups.get(0).center().x > mRgba.cols() / 2) {
                         set_drive_power(0.06, 0.06);
-                    } else if (lDetectorBlue.clusters.clusterGroups.get(0).center().x < mBlue.cols() / 2) {
+                    } else if (detector.clusters.clusterGroups.get(0).center().x < mRgba.cols() / 2) {
                         set_drive_power(-0.06, -0.06);
                     }
                 }
 
-            }catch(Exception e) {
+
+            } catch (Exception e) {
                 e.printStackTrace();
             }
-
         }
     }
+
+//    public void centerOnTriangle(ColorBlobDetector blobDetector, int alliance) {
+//        if(next_state_to_execute()) {
+//            String ret = "";
+//            try {
+//                if (alliance == RED) {
+//                    ColorLineDetector lDetectorRed = new ColorLineDetector();
+//                    Point intersect = lDetectorRed.pointIntersect(
+//                            lDetectorRed.clusters.clusterGroups.get(0).angle,
+//                            lDetectorRed.clusters.clusterGroups.get(0).center(),
+//                            lDetectorRed.clusters.clusterGroups.get(1).angle,
+//                            lDetectorRed.clusters.clusterGroups.get(1).center()
+//                    );
+//                    if (lDetectorRed.clusters.clusterGroups.size() > 1 && !isWithin(lDetectorRed.clusters.clusterGroups.get(0).angle,lDetectorRed.clusters.clusterGroups.get(1).angle + 30,lDetectorRed.clusters.clusterGroups.get(1).angle -30)) {
+//                        double pow = isWithin(intersect.x,mRed.cols()*3/8,mRed.cols()*5/8)?0.05:0.08;
+//                        if (intersect.x > (mRed.cols() / 2) + 20) {
+//                            set_drive_power(pow, pow);
+//                            countA = 0;
+//                        } else if (intersect.x < (mRed.cols() / 2) - 20) {
+//                            set_drive_power(-pow, -pow);
+//                            countA = 0;
+//                        } else {
+//                            countA++;
+//                        }
+//
+//                        if (countA > 0) {
+//                            countA = 0;
+//                            set_drive_power(0, 0);
+//                            reset_drive_encoders();
+//                            lDetectorRed.logToFile("done");
+//                            incrementState();
+//                        }
+//                    } else if (lDetectorRed.clusters.clusterGroups.get(0).center().x > mRed.cols() / 2) {
+//                        set_drive_power(0.06, 0.06);
+//                    } else if (lDetectorRed.clusters.clusterGroups.get(0).center().x < mRed.cols() / 2) {
+//                        set_drive_power(-0.06, -0.06);
+//                    }
+//                    telemetry.addData("Center X",lDetectorRed.centerP.x);
+//                } else if (alliance == BLUE) {
+//                    Mat mBlue = inputFrame;
+//                    ColorLineDetector lDetectorBlue = new ColorLineDetector();
+//                    lDetectorBlue.setColorRange(new Scalar(125, 120, 130, 0), new Scalar(187, 255, 255, 255));
+//                    lDetectorBlue.processLines(mBlue);
+//                    lDetectorBlue.showLines(mBlue);
+//                    Collections.sort(lDetectorBlue.clusters.clusterGroups);
+//                    ColorLineDetector.LineCluster l = lDetectorBlue.clusters.clusterGroups.get(0);
+//                    int side1 = l.angle < 90 ? -1 : 1;
+//                    int indexOpp = -1;
+//                    for(int i = 1; i < lDetectorBlue.clusters.clusterGroups.size(); i++){
+//                        int currSide = lDetectorBlue.clusters.clusterGroups.get(i).angle < 90 ? -1 : 1;
+//                        indexOpp = currSide != side1 ? i : -1;
+//                        if(indexOpp != -1) break;
+//                    }
+//                    ColorLineDetector.LineCluster lc = lDetectorBlue.clusters.clusterGroups.get(indexOpp);
+//                    Point intersect = lDetectorBlue.calculateIntersect(l.angle, l.center(), lc.angle, lc.center());
+//                    if(indexOpp != -1){
+//                        double pow = isWithin(intersect.x, mBlue.cols() * 3 / 8, mBlue.cols() * 5 / 8) ? 0.05 : 0.08;
+//                        if (intersect.x > (mBlue.cols() / 2) + 25) {
+//                            set_drive_power(pow, pow);
+//                            countA = 0;
+//                        } else if (intersect.x < (mBlue.cols() / 2) - 25) {
+//                            set_drive_power(-pow, -pow);
+//                            countA = 0;
+//                        } else {
+//                            countA++;
+//                        }
+//
+//                        if (countA > 0) {
+//                            countA = 0;
+//                            set_drive_power(0, 0);
+//                            reset_drive_encoders();
+//                            //lDetectorBlue.logToFile("done");
+//                            incrementState();
+//                        }
+//                        ret = String.valueOf(intersect.x);
+//                        telemetry.addData("Center X", ret);
+//                        lDetectorBlue.logToFile(lDetectorBlue.clusters.clusterGroups.get(0).angle + "\t" + lDetectorBlue.clusters.clusterGroups.get(0).center().x + "\t" + lDetectorBlue.clusters.clusterGroups.get(0).center().y + "\t" + lDetectorBlue.clusters.clusterGroups.get(indexOpp).angle + "\t" + lDetectorBlue.clusters.clusterGroups.get(indexOpp).center().x + "\t" + lDetectorBlue.clusters.clusterGroups.get(indexOpp).center().y + "\t" + intersect.x + "\t" + intersect.y + "\t" + System.currentTimeMillis());
+//
+//                    } else if (lDetectorBlue.clusters.clusterGroups.get(0).center().x > mBlue.cols() / 2) {
+//                        set_drive_power(0.06, 0.06);
+//                    } else if (lDetectorBlue.clusters.clusterGroups.get(0).center().x < mBlue.cols() / 2) {
+//                        set_drive_power(-0.06, -0.06);
+//                    }
+//                }
+//
+//            }catch(Exception e) {
+//                e.printStackTrace();
+//            }
+//
+//        }
+//    }
 
     enum BallColor {
         BLUE, RED

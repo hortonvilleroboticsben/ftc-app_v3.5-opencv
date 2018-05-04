@@ -72,7 +72,7 @@ import static org.firstinspires.ftc.robotcontroller.external.samples.ConceptVuMa
 import static org.opencv.imgproc.Imgproc.HoughLinesP;
 import static org.opencv.imgproc.Imgproc.minAreaRect;
 
-
+@Deprecated
 class Subroutines_v14 extends OpMode implements CameraBridgeViewBase.CvCameraViewListener2{
     //Variable initialization//
     long systemTime = 0;             //System time used to determine how much time has passed for waitHasFinished()//
